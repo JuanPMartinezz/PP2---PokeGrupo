@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="PP2.MainPage">
+
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="30,0"
+            Spacing="25">
+
+            <Entry
+                x:Name="NombreEstudiante"
+                Placeholder=" Nombre del estudiante " />
+
+            <Entry
+                    x:Name="ApellidoEstudiante"
+                    Placeholder="Apellido del estudiante"/>
+            <Entry
+                x:Name="DniEstudiante"
+                Placeholder="Dni del estudiante"/>
+            
+            <Entry
+                x:Name="ComisionEstudiante"
+                Placeholder="Comisión del estudiante"/>
+            
+            <Entry
+                x:Name="AsistenciaEstudiante"
+                Placeholder="Porcentaje de Asistencia"/>
+            
+            <Entry
+                x:Name="RiesgoEstudiante"
+                Placeholder="Porcentaje de riesgo del estudiante"/>
+            
+
+
+
+
+            <Button
+                x:Name="CargarEstudiante"
+                Text="CargarEstudiante" 
+                SemanticProperties.Hint="Carga un estudiante con los datos ingresados"
+                Clicked="CargarEstudiante_Clicked"
+                HorizontalOptions="Fill" />
+
+            <CollectionView
+                x:Name="ListaEstudiantes"
+                 ItemsSource="{Binding}">
+               
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout>
+                            <Label Text="{Binding nombre, StringFormat='Nombre: {0}'}"/>
+                            <Label Text="{Binding apellido, StringFormat='Apellido: {0}'}"/>
+                            <Label Text="{Binding dni, StringFormat='DNI: {0}'}"/>
+                            <Label Text="{Binding comision, StringFormat='Comisión: {0}'}"/>
+                            <Label Text="{Binding asistencia, StringFormat='Asistencia: {0}'}"/>
+                            <Label Text="{Binding riesgo, StringFormat='Riesgo: {0}'}"/>
+
+
+                            <Label Text="---------------------------------------" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>
