@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace PP2
+namespace RegistroAsistencia
 {
     [Application]
     public class MainApplication : MauiApplication

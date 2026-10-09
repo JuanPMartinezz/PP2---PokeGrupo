@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace PP2
+namespace RegistroAsistencia
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

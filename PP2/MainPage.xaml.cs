@@ -1,32 +1,20 @@
-﻿namespace PP2
+﻿using RegistroAsistencia.ViewModels;
+using RegistroAsistencia.Views;
+
+namespace RegistroAsistencia;
+
+public partial class MainPage : ContentPage
 {
-    using System.Collections.ObjectModel;
-
-    public partial class MainPage : ContentPage
+    public MainPage()
     {
-        int count = 0;
+        InitializeComponent();
 
-        ObservableCollection<Estudiante> estudiantes = new ObservableCollection<Estudiante>();
+        BindingContext = new ComisionViewModel();
+    }
 
-        public MainPage()
-        {
-            InitializeComponent();
-            BindingContext = estudiantes;
-            
-        }
-
-        private async void CargarEstudiante_Clicked(object? sender, EventArgs e)
-        {
-            Estudiante est = new Estudiante();
-            est.nombre = NombreEstudiante.Text;
-            est.apellido = ApellidoEstudiante.Text;
-            est.dni = int.Parse(DniEstudiante.Text);
-            est.comision = int.Parse(ComisionEstudiante.Text);
-            est.asistencia = double.Parse(AsistenciaEstudiante.Text);
-            est.riesgo = double.Parse(RiesgoEstudiante.Text);
-            estudiantes.Add(est);
-
-            await DisplayAlertAsync("Prueba", "Alumno Cargado Correctamente", "OK");
-        }
+    private async void IrAH3_Clicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(
+            new AsistenciaPage());
     }
 }

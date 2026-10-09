@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace PP2
+namespace RegistroAsistencia
 {
     public partial class App : Application
     {

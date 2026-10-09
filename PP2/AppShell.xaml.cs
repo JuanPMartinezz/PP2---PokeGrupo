@@ -1,4 +1,4 @@
-﻿namespace PP2
+﻿namespace RegistroAsistencia
 {
     public partial class AppShell : Shell
     {

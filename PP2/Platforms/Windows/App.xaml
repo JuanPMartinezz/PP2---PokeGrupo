@@ -1,8 +1,8 @@
 ﻿<maui:MauiWinUIApplication
-    x:Class="PP2.WinUI.App"
+    x:Class="RegistroAsistencia.WinUI.App"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:maui="using:Microsoft.Maui"
-    xmlns:local="using:PP2.WinUI">
+    xmlns:local="using:RegistroAsistencia.WinUI">
 
 </maui:MauiWinUIApplication>

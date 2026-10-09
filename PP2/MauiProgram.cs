@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace PP2
+namespace RegistroAsistencia
 {
     public static class MauiProgram
     {

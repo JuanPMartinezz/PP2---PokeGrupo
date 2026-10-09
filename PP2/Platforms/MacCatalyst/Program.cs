@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace PP2
+namespace RegistroAsistencia
 {
     public class Program
     {

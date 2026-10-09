@@ -1,70 +1,87 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="PP2.MainPage">
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:viewmodels="clr-namespace:RegistroAsistencia.ViewModels"
+    x:Class="RegistroAsistencia.MainPage"
+    Title="H1 - Nómina de estudiantes">
+    
 
     <ScrollView>
+
         <VerticalStackLayout
-            Padding="30,0"
-            Spacing="25">
+            Padding="20"
+            Spacing="10">
+
+            <Label
+                Text="Registro de alumnos"
+                FontSize="24"
+                FontAttributes="Bold" />
 
             <Entry
-                x:Name="NombreEstudiante"
-                Placeholder=" Nombre del estudiante " />
+                Placeholder="Nombre"
+                Text="{Binding Nombre}" />
 
             <Entry
-                    x:Name="ApellidoEstudiante"
-                    Placeholder="Apellido del estudiante"/>
-            <Entry
-                x:Name="DniEstudiante"
-                Placeholder="Dni del estudiante"/>
-            
-            <Entry
-                x:Name="ComisionEstudiante"
-                Placeholder="Comisión del estudiante"/>
-            
-            <Entry
-                x:Name="AsistenciaEstudiante"
-                Placeholder="Porcentaje de Asistencia"/>
-            
-            <Entry
-                x:Name="RiesgoEstudiante"
-                Placeholder="Porcentaje de riesgo del estudiante"/>
-            
+                Placeholder="Apellido"
+                Text="{Binding Apellido}" />
 
-
-
+            <Entry
+                Placeholder="Legajo"
+                Text="{Binding Legajo}" />
 
             <Button
-                x:Name="CargarEstudiante"
-                Text="CargarEstudiante" 
-                SemanticProperties.Hint="Carga un estudiante con los datos ingresados"
-                Clicked="CargarEstudiante_Clicked"
-                HorizontalOptions="Fill" />
+                Text="Agregar alumno"
+                Command="{Binding AgregarAlumnoCommand}" />
+
+            <Label
+                Text="{Binding Mensaje}"
+                TextColor="Red" />
+
+            <Label
+                Text="{Binding CantidadAlumnos, StringFormat='Cantidad de alumnos: {0}'}" />
 
             <CollectionView
-                x:Name="ListaEstudiantes"
-                 ItemsSource="{Binding}">
-               
+                ItemsSource="{Binding Estudiantes}">
+
                 <CollectionView.ItemTemplate>
+
                     <DataTemplate>
-                        <VerticalStackLayout>
-                            <Label Text="{Binding nombre, StringFormat='Nombre: {0}'}"/>
-                            <Label Text="{Binding apellido, StringFormat='Apellido: {0}'}"/>
-                            <Label Text="{Binding dni, StringFormat='DNI: {0}'}"/>
-                            <Label Text="{Binding comision, StringFormat='Comisión: {0}'}"/>
-                            <Label Text="{Binding asistencia, StringFormat='Asistencia: {0}'}"/>
-                            <Label Text="{Binding riesgo, StringFormat='Riesgo: {0}'}"/>
 
+                        <Frame
+                            Margin="0,5"
+                            Padding="10"
+                            BorderColor="LightGray">
 
-                            <Label Text="---------------------------------------" />
-                        </VerticalStackLayout>
+                            <VerticalStackLayout>
+
+                                <Label
+                                    Text="{Binding Apellido}"
+                                    FontAttributes="Bold"
+                                    FontSize="18" />
+
+                                <Label
+                                    Text="{Binding Nombre}" />
+
+                                <Label
+                                    Text="{Binding Legajo}" />
+
+                            </VerticalStackLayout>
+
+                        </Frame>
+
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
 
-            
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+            <Button
+    Text="Ir a H3 - Registro de asistencia"
+    Clicked="IrAH3_Clicked"/>
+
         </VerticalStackLayout>
+
     </ScrollView>
 
 </ContentPage>
