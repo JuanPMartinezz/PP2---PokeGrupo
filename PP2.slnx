@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="PP2.Tests/PP2.Tests.csproj" Id="2743d536-f8c5-4dfe-a4b3-d46d713f5b86" />
   <Project Path="PP2/PP2.csproj" />
 </Solution>

@@ -19,7 +19,8 @@ public class RiesgoService
             asistencias.Count(a =>
                 a.Estado == EstadoAsistencia.Ausente);
 
-        return (decimal)ausencias /
-               asistencias.Count * 100;
+        return Math.Round(
+     (decimal)ausencias / asistencias.Count * 100,
+     2);
     }
 }
