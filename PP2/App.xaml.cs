@@ -1,5 +1,3 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-
 namespace RegistroAsistencia
 {
     public partial class App : Application
@@ -11,7 +9,7 @@ namespace RegistroAsistencia
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(new AppShell());
+            return new Window(new StartupPage());
         }
     }
 }

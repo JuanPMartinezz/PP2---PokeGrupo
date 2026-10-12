@@ -26,20 +26,15 @@ public class RiesgoViewModel : ObservableObject
         foreach (Estudiante estudiante in DatosSistema.Estudiantes)
         {
             var asistenciasAlumno =
-     DatosSistema.Asistencias
-         .Where(a => a.Estudiante == estudiante)
-         .ToList();
+     DatosSistema.Asistencias.Where(a => a.Estudiante == estudiante).ToList();
 
             int totalClases = asistenciasAlumno.Count;
 
-            int ausencias = asistenciasAlumno.Count(a =>
-                a.Estado == EstadoAsistencia.Ausente);
+            int ausencias = asistenciasAlumno.Count(a => a.Estado == EstadoAsistencia.Ausente);
 
-            int presentes = asistenciasAlumno.Count(a =>
-                a.Estado == EstadoAsistencia.Presente);
+            int presentes = asistenciasAlumno.Count(a => a.Estado == EstadoAsistencia.Presente);
 
-            decimal porcentaje =
-                _riesgoService.CalcularPorcentajeAusencias(estudiante);
+            decimal porcentaje = _riesgoService.CalcularPorcentajeAusencias(estudiante);
 
             Resultados.Add(new ResultadoRiesgo
             {
@@ -51,9 +46,7 @@ public class RiesgoViewModel : ObservableObject
             });
         }
 
-        var ordenados = Resultados
-            .OrderByDescending(r => r.PorcentajeAusencias)
-            .ToList();
+        var ordenados = Resultados.OrderByDescending(r => r.PorcentajeAusencias).ToList();
 
         Resultados.Clear();
 

@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
@@ -8,86 +8,54 @@ namespace RegistroAsistencia.ViewModels;
 
 public partial class AsistenciaViewModel : ObservableObject
 {
-    public ObservableCollection<Asistencia> Asistencias
-        => DatosSistema.Asistencias;
+    public ObservableCollection<Asistencia> Asistencias => DatosSistema.Asistencias;
+    public ObservableCollection<Estudiante> Estudiantes => DatosSistema.Estudiantes;
 
-    public ObservableCollection<Estudiante> Estudiantes
-        => DatosSistema.Estudiantes;
-
-    public Estudiante AlumnoSeleccionado { get; set; }
-
-    public DateTime FechaClase { get; set; }
-        = DateTime.Today;
-
+    public Estudiante? AlumnoSeleccionado { get; set; }
+    public DateTime FechaClase { get; set; } = DateTime.Today;
     public string Mensaje { get; set; } = "";
 
     [RelayCommand]
-    private void RegistrarPresente()
-    {
-        if (AlumnoSeleccionado == null)
-        {
-            Mensaje = "Seleccione un alumno";
-            OnPropertyChanged(nameof(Mensaje));
-            return;
-        }
-
-        bool yaExiste = Asistencias.Any(a =>
-            a.Estudiante == AlumnoSeleccionado &&
-            a.Clase.Fecha.Date == FechaClase.Date);
-
-        if (yaExiste)
-        {
-            Mensaje = "La asistencia ya fue registrada";
-            OnPropertyChanged(nameof(Mensaje));
-            return;
-        }
-
-        Asistencias.Add(new Asistencia
-        {
-            Estudiante = AlumnoSeleccionado,
-            Clase = new Clase
-            {
-                Fecha = FechaClase
-            },
-            Estado = EstadoAsistencia.Presente
-        });
-
-        Mensaje = "Presente registrado";
-        OnPropertyChanged(nameof(Mensaje));
-    }
+    private void RegistrarPresente() => RegistrarAsistencia(EstadoAsistencia.Presente);
 
     [RelayCommand]
-    private void RegistrarAusente()
+    private void RegistrarAusente() => RegistrarAsistencia(EstadoAsistencia.Ausente);
+
+    private void RegistrarAsistencia(EstadoAsistencia estado)
     {
-        if (AlumnoSeleccionado == null)
+        if (AlumnoSeleccionado is null)
         {
             Mensaje = "Seleccione un alumno";
             OnPropertyChanged(nameof(Mensaje));
             return;
         }
 
-        bool yaExiste = Asistencias.Any(a =>
-            a.Estudiante == AlumnoSeleccionado &&
-            a.Clase.Fecha.Date == FechaClase.Date);
-
-        if (yaExiste)
+        if (DatosSistema.ExisteAsistencia(AlumnoSeleccionado.Legajo, FechaClase))
         {
-            Mensaje = "La asistencia ya fue registrada";
+            Mensaje = "La asistencia ya fue registrada para ese alumno y fecha";
             OnPropertyChanged(nameof(Mensaje));
             return;
         }
 
-        Asistencias.Add(new Asistencia
+        var asistencia = new Asistencia
         {
             Estudiante = AlumnoSeleccionado,
-            Clase = new Clase
-            {
-                Fecha = FechaClase
-            },
-            Estado = EstadoAsistencia.Ausente
-        });
+            Clase = new Clase { Fecha = FechaClase.Date },
+            Estado = estado
+        };
 
-        Mensaje = "Ausencia registrada";
+        try
+        {
+            DatosSistema.AgregarAsistencia(asistencia);
+            Mensaje = estado == EstadoAsistencia.Presente
+                ? "Presente registrado"
+                : "Ausencia registrada";
+        }
+        catch (Exception ex)
+        {
+            Mensaje = $"No se pudo guardar la asistencia: {ex.Message}";
+        }
+
         OnPropertyChanged(nameof(Mensaje));
     }
 }

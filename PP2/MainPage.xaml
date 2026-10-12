@@ -80,6 +80,13 @@
     Text="Ir a H3 - Registro de asistencia"
     Clicked="IrAH3_Clicked"/>
 
+            <Button
+    Text="Borrar todos los datos"
+    BackgroundColor="Red"
+    TextColor="White"
+    Clicked="BorrarTodo_Clicked" />
+
+
         </VerticalStackLayout>
 
     </ScrollView>

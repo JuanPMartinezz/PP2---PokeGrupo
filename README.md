@@ -98,7 +98,6 @@ Resultado
 ✅ Compilación sin errores
 ✅ Integración con GitHub realizada
 📌 Mejoras futuras
-Persistencia con SQLite.
 Entity Framework.
 Repositorios.
 Reportes y estadísticas avanzadas.
