@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.FichaEstudiantePage"
+    Title="H9 - Ficha del estudiante">
+
+    <Grid
+        Padding="20"
+        RowDefinitions="Auto,Auto,Auto,*"
+        RowSpacing="15">
+
+        <!-- Título y selección -->
+
+        <VerticalStackLayout
+            Grid.Row="0"
+            Spacing="8">
+
+            <Label
+                Text="H9 - Ficha del estudiante"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="Seleccioná un estudiante para consultar su información e historial."
+                TextColor="Gray" />
+
+            <Picker
+                Title="Seleccionar estudiante"
+                ItemsSource="{Binding Estudiantes}"
+                SelectedItem="{Binding EstudianteSeleccionado, Mode=TwoWay}" />
+
+            <Label
+                Text="{Binding Mensaje}"
+                FontAttributes="Bold"
+                TextColor="DarkRed" />
+
+        </VerticalStackLayout>
+
+        <!-- Datos personales -->
+
+        <Border
+            Grid.Row="1"
+            Padding="15"
+            Stroke="LightGray"
+            StrokeThickness="1">
+
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="6">
+
+                <Label
+                    Text="Datos del estudiante"
+                    FontSize="19"
+                    FontAttributes="Bold" />
+
+                <Label
+                    Text="{Binding EstudianteSeleccionado.Apellido,
+                    StringFormat='Apellido: {0}'}" />
+
+                <Label
+                    Text="{Binding EstudianteSeleccionado.Nombre,
+                    StringFormat='Nombre: {0}'}" />
+
+                <Label
+                    Text="{Binding EstudianteSeleccionado.Legajo,
+                    StringFormat='Legajo: {0}'}" />
+
+            </VerticalStackLayout>
+
+        </Border>
+
+        <!-- Estadísticas -->
+
+        <Border
+            Grid.Row="2"
+            Padding="15"
+            Stroke="LightGray"
+            StrokeThickness="1">
+
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="10" />
+            </Border.StrokeShape>
+
+            <VerticalStackLayout Spacing="10">
+
+                <Label
+                    Text="Resumen de asistencia"
+                    FontSize="19"
+                    FontAttributes="Bold" />
+
+                <Grid
+                    ColumnDefinitions="*,*,*"
+                    ColumnSpacing="10">
+
+                    <VerticalStackLayout
+                        Grid.Column="0"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="{Binding Presentes}"
+                            FontSize="22"
+                            FontAttributes="Bold"
+                            TextColor="Green"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Presentes"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Column="1"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="{Binding Ausencias}"
+                            FontSize="22"
+                            FontAttributes="Bold"
+                            TextColor="Red"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Ausencias"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout
+                        Grid.Column="2"
+                        HorizontalOptions="Center">
+
+                        <Label
+                            Text="{Binding TotalClases}"
+                            FontSize="22"
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Total clases"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </Grid>
+
+                <Label
+                    Text="{Binding PorcentajeAusencias,
+                    StringFormat='Riesgo por ausencias: {0:F2}%'}"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center" />
+
+            </VerticalStackLayout>
+
+        </Border>
+
+        <!-- Historial -->
+
+        <Grid
+            Grid.Row="3"
+            RowDefinitions="Auto,*"
+            RowSpacing="8">
+
+            <Label
+                Grid.Row="0"
+                Text="Historial de asistencias"
+                FontSize="19"
+                FontAttributes="Bold" />
+
+            <CollectionView
+                Grid.Row="1"
+                ItemsSource="{Binding Historial}">
+
+                <CollectionView.EmptyView>
+
+                    <Label
+                        Text="El estudiante no tiene asistencias registradas."
+                        TextColor="Gray"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center"
+                        HorizontalTextAlignment="Center" />
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,4"
+                            Padding="12"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                ColumnSpacing="15">
+
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Clase.Fecha,
+                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
+                                    VerticalOptions="Center" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding Estado}"
+                                    FontAttributes="Bold"
+                                    VerticalOptions="Center" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </Grid>
+
+    </Grid>
+
+</ContentPage>

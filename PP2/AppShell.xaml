@@ -16,10 +16,10 @@
 
     </FlyoutItem>
 
-    <FlyoutItem Title="H3 - Asistencia">
+    <FlyoutItem Title="H3 y H4 - Asistencia">
 
         <ShellContent
-            Title="Registro"
+            Title="Registro y corrección"
             ContentTemplate="{DataTemplate views:AsistenciaPage}" />
 
     </FlyoutItem>
@@ -29,6 +29,14 @@
         <ShellContent
             Title="Ranking"
             ContentTemplate="{DataTemplate views:RiesgoPage}" />
+
+    </FlyoutItem>
+
+    <FlyoutItem Title="H9 - Ficha del estudiante">
+
+        <ShellContent
+            Title="Ficha"
+            ContentTemplate="{DataTemplate views:FichaEstudiantePage}" />
 
     </FlyoutItem>
 

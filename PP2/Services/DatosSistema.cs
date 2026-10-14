@@ -56,7 +56,43 @@ public static class DatosSistema
         Asistencias.Add(asistencia);
     }
 
+    public static Asistencia ActualizarEstadoAsistencia(
+    Asistencia asistencia,
+    EstadoAsistencia nuevoEstado)
+    {
+        int indice = Asistencias.IndexOf(asistencia);
 
+        if (indice < 0)
+        {
+            throw new InvalidOperationException(
+                "No se encontró la asistencia seleccionada.");
+        }
+
+        if (_baseDatos is not null)
+        {
+            _baseDatos.ActualizarAsistencia(
+                asistencia.Estudiante.Legajo,
+                asistencia.Clase.Fecha,
+                nuevoEstado);
+        }
+
+        var asistenciaActualizada = new Asistencia
+        {
+            Estudiante = asistencia.Estudiante,
+
+            Clase = asistencia.Clase,
+
+            Estado = nuevoEstado
+        };
+
+        /*
+         * Reemplazamos el registro en la misma posición.
+         * Esto actualiza la interfaz sin agregar otra asistencia.
+         */
+        Asistencias[indice] = asistenciaActualizada;
+
+        return asistenciaActualizada;
+    }
     public static void BorrarTodosLosRegistros()
     {
         _baseDatos!.BorrarTodosLosRegistros();

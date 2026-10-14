@@ -218,7 +218,7 @@ public class UnitTest1
             DatosSistema.Asistencias[0].Estado);
 
         Assert.Equal(
-            "La asistencia ya fue registrada",
+            "La asistencia ya fue registrada para ese alumno y fecha",
             viewModel.Mensaje);
     }
     //Prueba H8
@@ -369,6 +369,260 @@ public class UnitTest1
         Assert.Equal(2, resultado.Ausencias);
         Assert.Equal(3, resultado.TotalClases);
         Assert.Equal(66.67m, resultado.PorcentajeAusencias);
+    }
+    //Prueba H4
+    [Fact]
+    public void CorregirAsistencia_Ausente_DeberiaCambiarAPresente()
+    {
+        // Arrange
+        DatosSistema.Asistencias.Clear();
+
+        var estudiante = new Estudiante
+        {
+            Nombre = "Agustina",
+            Apellido = "Gómez",
+            Legajo = "500"
+        };
+
+        var asistencia = new Asistencia
+        {
+            Estudiante = estudiante,
+
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 14)
+            },
+
+            Estado = EstadoAsistencia.Ausente
+        };
+
+        DatosSistema.Asistencias.Add(asistencia);
+
+        var viewModel = new AsistenciaViewModel
+        {
+            AsistenciaSeleccionada = asistencia
+        };
+
+        // Act
+        viewModel.CorregirAsistenciaCommand.Execute(null);
+
+        // Assert
+        Assert.Single(DatosSistema.Asistencias);
+
+        Assert.Equal(
+            EstadoAsistencia.Presente,
+            DatosSistema.Asistencias[0].Estado);
+
+        Assert.Equal(
+            "Asistencia corregida a Presente",
+            viewModel.Mensaje);
+    }
+    //Prueba H4
+    [Fact]
+    public void CorregirAsistencia_DeberiaMantenerAlumnoFechaYCantidad()
+    {
+        // Arrange
+        DatosSistema.Asistencias.Clear();
+
+        var estudiante = new Estudiante
+        {
+            Nombre = "Juan",
+            Apellido = "Pérez",
+            Legajo = "501"
+        };
+
+        DateTime fechaOriginal =
+            new DateTime(2026, 10, 15);
+
+        var asistencia = new Asistencia
+        {
+            Estudiante = estudiante,
+
+            Clase = new Clase
+            {
+                Fecha = fechaOriginal
+            },
+
+            Estado = EstadoAsistencia.Presente
+        };
+
+        DatosSistema.Asistencias.Add(asistencia);
+
+        int cantidadAntes =
+            DatosSistema.Asistencias.Count;
+
+        var viewModel = new AsistenciaViewModel
+        {
+            AsistenciaSeleccionada = asistencia
+        };
+
+        // Act
+        viewModel.CorregirAsistenciaCommand.Execute(null);
+
+        // Assert
+        Assert.Equal(
+            cantidadAntes,
+            DatosSistema.Asistencias.Count);
+
+        Asistencia resultado =
+            Assert.Single(DatosSistema.Asistencias);
+
+        Assert.Equal(
+            EstadoAsistencia.Ausente,
+            resultado.Estado);
+
+        Assert.Equal(
+            estudiante.Legajo,
+            resultado.Estudiante.Legajo);
+
+        Assert.Equal(
+            fechaOriginal.Date,
+            resultado.Clase.Fecha.Date);
+    }
+    //Prueba H9
+    [Fact]
+    public void CargarFicha_DeberiaMostrarSoloHistorialDelEstudianteSeleccionado()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Asistencias.Clear();
+
+        var agustina = new Estudiante
+        {
+            Nombre = "Agustina",
+            Apellido = "Gomez",
+            Legajo = "600"
+        };
+
+        var juan = new Estudiante
+        {
+            Nombre = "Juan",
+            Apellido = "Perez",
+            Legajo = "601"
+        };
+
+        DatosSistema.Estudiantes.Add(agustina);
+        DatosSistema.Estudiantes.Add(juan);
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = agustina,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 10)
+            },
+            Estado = EstadoAsistencia.Presente
+        });
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = agustina,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 11)
+            },
+            Estado = EstadoAsistencia.Ausente
+        });
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = juan,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 12)
+            },
+            Estado = EstadoAsistencia.Presente
+        });
+
+        var viewModel = new FichaEstudianteViewModel();
+
+        // Act
+        viewModel.EstudianteSeleccionado = agustina;
+
+        // Assert
+        Assert.Equal(2, viewModel.Historial.Count);
+
+        Assert.All(
+            viewModel.Historial,
+            asistencia =>
+                Assert.Equal(
+                    agustina.Legajo,
+                    asistencia.Estudiante.Legajo));
+
+        Assert.Equal(
+            new DateTime(2026, 10, 10),
+            viewModel.Historial[0].Clase.Fecha);
+
+        Assert.Equal(
+            new DateTime(2026, 10, 11),
+            viewModel.Historial[1].Clase.Fecha);
+    }
+    //Prueba H9
+    [Fact]
+    public void CargarFicha_DeberiaCalcularEstadisticasCorrectamente()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Asistencias.Clear();
+
+        var estudiante = new Estudiante
+        {
+            Nombre = "Paola",
+            Apellido = "Clemente",
+            Legajo = "602"
+        };
+
+        DatosSistema.Estudiantes.Add(estudiante);
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = estudiante,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 10)
+            },
+            Estado = EstadoAsistencia.Presente
+        });
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = estudiante,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 11)
+            },
+            Estado = EstadoAsistencia.Ausente
+        });
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = estudiante,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 12)
+            },
+            Estado = EstadoAsistencia.Ausente
+        });
+
+        var viewModel = new FichaEstudianteViewModel();
+
+        // Act
+        viewModel.EstudianteSeleccionado = estudiante;
+
+        // Assert
+        Assert.Equal(1, viewModel.Presentes);
+
+        Assert.Equal(2, viewModel.Ausencias);
+
+        Assert.Equal(3, viewModel.TotalClases);
+
+        Assert.Equal(
+            66.67m,
+            viewModel.PorcentajeAusencias);
+
+        Assert.Equal(
+            3,
+            viewModel.Historial.Count);
     }
 }
 

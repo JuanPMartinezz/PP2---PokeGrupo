@@ -75,7 +75,30 @@ public sealed class BaseDatosService
             Estado = (int)asistencia.Estado
         });
     }
+    public void ActualizarAsistencia(
+    string legajo,
+    DateTime fecha,
+    EstadoAsistencia nuevoEstado)
+    {
+        string fechaGuardada =
+            fecha.Date.ToString("yyyy-MM-dd");
 
+        AsistenciaDb? registro =
+            _conexion.Table<AsistenciaDb>()
+                .FirstOrDefault(a =>
+                    a.LegajoEstudiante == legajo &&
+                    a.Fecha == fechaGuardada);
+
+        if (registro is null)
+        {
+            throw new InvalidOperationException(
+                "No se encontró la asistencia en la base de datos.");
+        }
+
+        registro.Estado = (int)nuevoEstado;
+
+        _conexion.Update(registro);
+    }
     public void BorrarTodosLosRegistros()
     {
         _conexion.DeleteAll<AsistenciaDb>();
