@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace RegistroAsistencia.Models
+﻿namespace RegistroAsistencia.Models
 {
     public class Estudiante
     {
@@ -11,6 +7,8 @@ namespace RegistroAsistencia.Models
         public string Nombre { get; set; } = string.Empty;
 
         public string Apellido { get; set; } = string.Empty;
+
+        public string Comision { get; set; } = string.Empty;
 
         public override string ToString()
         {

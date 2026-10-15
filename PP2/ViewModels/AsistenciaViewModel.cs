@@ -8,11 +8,33 @@ namespace RegistroAsistencia.ViewModels;
 
 public partial class AsistenciaViewModel : ObservableObject
 {
-    public ObservableCollection<Asistencia> Asistencias
-        => DatosSistema.Asistencias;
+    public ObservableCollection<string> Comisiones { get; } = new()
+    {
+        "Comisión A",
+        "Comisión B"
+    };
 
-    public ObservableCollection<Estudiante> Estudiantes
-        => DatosSistema.Estudiantes;
+    public ObservableCollection<Estudiante> Estudiantes { get; } = new();
+
+    public ObservableCollection<Asistencia> Asistencias { get; } = new();
+
+    private string comisionSeleccionada = "Comisión A";
+
+    public string ComisionSeleccionada
+    {
+        get => comisionSeleccionada;
+
+        set
+        {
+            if (SetProperty(ref comisionSeleccionada, value))
+            {
+                AlumnoSeleccionado = null;
+
+                CargarEstudiantesComision();
+                ConsultarAsistencias();
+            }
+        }
+    }
 
     private Estudiante? alumnoSeleccionado;
 
@@ -42,9 +64,13 @@ public partial class AsistenciaViewModel : ObservableObject
     {
         get => fechaClase;
 
-        set => SetProperty(
-            ref fechaClase,
-            value);
+        set
+        {
+            if (SetProperty(ref fechaClase, value))
+            {
+                ConsultarAsistencias();
+            }
+        }
     }
 
     private string mensaje = "";
@@ -56,6 +82,47 @@ public partial class AsistenciaViewModel : ObservableObject
         set => SetProperty(
             ref mensaje,
             value);
+    }
+
+    public AsistenciaViewModel()
+    {
+        CargarEstudiantesComision();
+        ConsultarAsistencias();
+    }
+
+    private void CargarEstudiantesComision()
+    {
+        Estudiantes.Clear();
+
+        var estudiantes = DatosSistema.Estudiantes
+            .Where(e => e.Comision == ComisionSeleccionada)
+            .OrderBy(e => e.Apellido)
+            .ThenBy(e => e.Nombre)
+            .ToList();
+
+        foreach (var estudiante in estudiantes)
+        {
+            Estudiantes.Add(estudiante);
+        }
+    }
+
+    [RelayCommand]
+    private void ConsultarAsistencias()
+    {
+        Asistencias.Clear();
+
+        var asistencias = DatosSistema.Asistencias
+            .Where(a =>
+                a.Clase.Fecha.Date == FechaClase.Date &&
+                a.Estudiante.Comision == ComisionSeleccionada)
+            .OrderBy(a => a.Estudiante.Apellido)
+            .ThenBy(a => a.Estudiante.Nombre)
+            .ToList();
+
+        foreach (var asistencia in asistencias)
+        {
+            Asistencias.Add(asistencia);
+        }
     }
 
     [RelayCommand]
@@ -105,13 +172,14 @@ public partial class AsistenciaViewModel : ObservableObject
 
         try
         {
-            DatosSistema.AgregarAsistencia(
-                asistencia);
+            DatosSistema.AgregarAsistencia(asistencia);
 
-            Mensaje = estado ==
-                      EstadoAsistencia.Presente
-                ? "Presente registrado"
-                : "Ausencia registrada";
+            Mensaje =
+                estado == EstadoAsistencia.Presente
+                    ? "Presente registrado"
+                    : "Ausencia registrada";
+
+            ConsultarAsistencias();
         }
         catch (Exception ex)
         {
@@ -146,6 +214,8 @@ public partial class AsistenciaViewModel : ObservableObject
 
             Mensaje =
                 $"Asistencia corregida a {nuevoEstado}";
+
+            ConsultarAsistencias();
         }
         catch (Exception ex)
         {

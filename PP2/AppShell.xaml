@@ -24,6 +24,16 @@
 
     </FlyoutItem>
 
+    <!-- H5 -->
+
+    <FlyoutItem Title="H5 - Entregas">
+
+        <ShellContent
+            Title="Trabajos y entregas"
+            ContentTemplate="{DataTemplate views:TrabajoPage}" />
+
+    </FlyoutItem>
+
     <FlyoutItem Title="H8 - Riesgo">
 
         <ShellContent

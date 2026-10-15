@@ -76,10 +76,16 @@
 	  <Compile Update="Views\FichaEstudiantePage.xaml.cs">
 	    <DependentUpon>FichaEstudiantePage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\TrabajoPage.xaml.cs">
+	    <DependentUpon>TrabajoPage.xaml</DependentUpon>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
 	  <MauiXaml Update="Views\FichaEstudiantePage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\TrabajoPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

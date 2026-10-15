@@ -6,16 +6,13 @@
     x:Class="RegistroAsistencia.Views.FichaEstudiantePage"
     Title="H9 - Ficha del estudiante">
 
-    <Grid
-        Padding="20"
-        RowDefinitions="Auto,Auto,Auto,*"
-        RowSpacing="15">
-
-        <!-- Título y selección -->
+    <ScrollView>
 
         <VerticalStackLayout
-            Grid.Row="0"
-            Spacing="8">
+            Padding="20"
+            Spacing="15">
+
+            <!-- TÍTULO -->
 
             <Label
                 Text="H9 - Ficha del estudiante"
@@ -23,8 +20,25 @@
                 FontAttributes="Bold" />
 
             <Label
-                Text="Seleccioná un estudiante para consultar su información e historial."
+                Text="Consultá la información académica, asistencias, entregas y riesgo del estudiante."
                 TextColor="Gray" />
+
+            <!-- COMISIÓN -->
+
+            <Label
+                Text="Comisión"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
+
+            <!-- ESTUDIANTE -->
+
+            <Label
+                Text="Estudiante"
+                FontAttributes="Bold" />
 
             <Picker
                 Title="Seleccionar estudiante"
@@ -36,153 +50,173 @@
                 FontAttributes="Bold"
                 TextColor="DarkRed" />
 
-        </VerticalStackLayout>
+            <!-- DATOS DEL ESTUDIANTE -->
 
-        <!-- Datos personales -->
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
 
-        <Border
-            Grid.Row="1"
-            Padding="15"
-            Stroke="LightGray"
-            StrokeThickness="1">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
 
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="10" />
-            </Border.StrokeShape>
+                <VerticalStackLayout Spacing="6">
 
-            <VerticalStackLayout Spacing="6">
+                    <Label
+                        Text="Datos del estudiante"
+                        FontSize="19"
+                        FontAttributes="Bold" />
 
-                <Label
-                    Text="Datos del estudiante"
-                    FontSize="19"
-                    FontAttributes="Bold" />
+                    <Label
+                        Text="{Binding EstudianteSeleccionado.Apellido,
+                        StringFormat='Apellido: {0}'}" />
 
-                <Label
-                    Text="{Binding EstudianteSeleccionado.Apellido,
-                    StringFormat='Apellido: {0}'}" />
+                    <Label
+                        Text="{Binding EstudianteSeleccionado.Nombre,
+                        StringFormat='Nombre: {0}'}" />
 
-                <Label
-                    Text="{Binding EstudianteSeleccionado.Nombre,
-                    StringFormat='Nombre: {0}'}" />
+                    <Label
+                        Text="{Binding EstudianteSeleccionado.Legajo,
+                        StringFormat='Legajo: {0}'}" />
 
-                <Label
-                    Text="{Binding EstudianteSeleccionado.Legajo,
-                    StringFormat='Legajo: {0}'}" />
+                    <Label
+                        Text="{Binding EstudianteSeleccionado.Comision,
+                        StringFormat='Comisión: {0}'}" />
 
-            </VerticalStackLayout>
+                </VerticalStackLayout>
 
-        </Border>
+            </Border>
 
-        <!-- Estadísticas -->
+            <!-- RIESGO ACADÉMICO -->
 
-        <Border
-            Grid.Row="2"
-            Padding="15"
-            Stroke="LightGray"
-            StrokeThickness="1">
+            <Border
+                Padding="15"
+                Stroke="DarkRed"
+                StrokeThickness="1">
 
-            <Border.StrokeShape>
-                <RoundRectangle CornerRadius="10" />
-            </Border.StrokeShape>
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
 
-            <VerticalStackLayout Spacing="10">
+                <VerticalStackLayout Spacing="6">
 
-                <Label
-                    Text="Resumen de asistencia"
-                    FontSize="19"
-                    FontAttributes="Bold" />
+                    <Label
+                        Text="Riesgo académico"
+                        FontSize="19"
+                        FontAttributes="Bold" />
 
-                <Grid
-                    ColumnDefinitions="*,*,*"
-                    ColumnSpacing="10">
+                    <Label
+                        Text="{Binding PorcentajeRiesgo,
+                        StringFormat='{0:F2}%'}"
+                        FontSize="26"
+                        FontAttributes="Bold"
+                        TextColor="DarkRed"
+                        HorizontalTextAlignment="Center" />
 
-                    <VerticalStackLayout
-                        Grid.Column="0"
-                        HorizontalOptions="Center">
+                    <Label
+                        Text="Calculado según asistencias y entregas."
+                        TextColor="Gray"
+                        HorizontalTextAlignment="Center" />
 
-                        <Label
-                            Text="{Binding Presentes}"
-                            FontSize="22"
-                            FontAttributes="Bold"
-                            TextColor="Green"
-                            HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
-                        <Label
-                            Text="Presentes"
-                            HorizontalTextAlignment="Center" />
+            </Border>
 
-                    </VerticalStackLayout>
+            <!-- RESUMEN ASISTENCIA -->
 
-                    <VerticalStackLayout
-                        Grid.Column="1"
-                        HorizontalOptions="Center">
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
 
-                        <Label
-                            Text="{Binding Ausencias}"
-                            FontSize="22"
-                            FontAttributes="Bold"
-                            TextColor="Red"
-                            HorizontalTextAlignment="Center" />
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
 
-                        <Label
-                            Text="Ausencias"
-                            HorizontalTextAlignment="Center" />
+                <VerticalStackLayout Spacing="10">
 
-                    </VerticalStackLayout>
+                    <Label
+                        Text="Resumen de asistencia"
+                        FontSize="19"
+                        FontAttributes="Bold" />
 
-                    <VerticalStackLayout
-                        Grid.Column="2"
-                        HorizontalOptions="Center">
+                    <Grid
+                        ColumnDefinitions="*,*,*"
+                        ColumnSpacing="10">
 
-                        <Label
-                            Text="{Binding TotalClases}"
-                            FontSize="22"
-                            FontAttributes="Bold"
-                            HorizontalTextAlignment="Center" />
+                        <VerticalStackLayout
+                            Grid.Column="0"
+                            HorizontalOptions="Center">
 
-                        <Label
-                            Text="Total clases"
-                            HorizontalTextAlignment="Center" />
+                            <Label
+                                Text="{Binding Presentes}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="Green"
+                                HorizontalTextAlignment="Center" />
 
-                    </VerticalStackLayout>
+                            <Label
+                                Text="Presentes"
+                                HorizontalTextAlignment="Center" />
 
-                </Grid>
+                        </VerticalStackLayout>
 
-                <Label
-                    Text="{Binding PorcentajeAusencias,
-                    StringFormat='Riesgo por ausencias: {0:F2}%'}"
-                    FontSize="18"
-                    FontAttributes="Bold"
-                    HorizontalTextAlignment="Center" />
+                        <VerticalStackLayout
+                            Grid.Column="1"
+                            HorizontalOptions="Center">
 
-            </VerticalStackLayout>
+                            <Label
+                                Text="{Binding Ausencias}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="Red"
+                                HorizontalTextAlignment="Center" />
 
-        </Border>
+                            <Label
+                                Text="Ausencias"
+                                HorizontalTextAlignment="Center" />
 
-        <!-- Historial -->
+                        </VerticalStackLayout>
 
-        <Grid
-            Grid.Row="3"
-            RowDefinitions="Auto,*"
-            RowSpacing="8">
+                        <VerticalStackLayout
+                            Grid.Column="2"
+                            HorizontalOptions="Center">
+
+                            <Label
+                                Text="{Binding TotalClases}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                HorizontalTextAlignment="Center" />
+
+                            <Label
+                                Text="Total"
+                                HorizontalTextAlignment="Center" />
+
+                        </VerticalStackLayout>
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- HISTORIAL DE ASISTENCIAS -->
 
             <Label
-                Grid.Row="0"
                 Text="Historial de asistencias"
                 FontSize="19"
                 FontAttributes="Bold" />
 
             <CollectionView
-                Grid.Row="1"
-                ItemsSource="{Binding Historial}">
+                ItemsSource="{Binding Historial}"
+                HeightRequest="250">
 
                 <CollectionView.EmptyView>
 
                     <Label
                         Text="El estudiante no tiene asistencias registradas."
                         TextColor="Gray"
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center"
                         HorizontalTextAlignment="Center" />
 
                 </CollectionView.EmptyView>
@@ -208,7 +242,173 @@
                                 <Label
                                     Grid.Column="0"
                                     Text="{Binding Clase.Fecha,
-                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
+                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}" />
+
+                                <Label
+                                    Grid.Column="1"
+                                    Text="{Binding Estado}"
+                                    FontAttributes="Bold" />
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+            <!-- RESUMEN DE ENTREGAS -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Resumen de entregas"
+                        FontSize="19"
+                        FontAttributes="Bold" />
+
+                    <Grid
+                        ColumnDefinitions="*,*"
+                        RowDefinitions="Auto,Auto"
+                        ColumnSpacing="10"
+                        RowSpacing="10">
+
+                        <!-- ENTREGADOS -->
+
+                        <VerticalStackLayout
+                            Grid.Row="0"
+                            Grid.Column="0"
+                            HorizontalOptions="Center">
+
+                            <Label
+                                Text="{Binding Entregados}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="Green"
+                                HorizontalTextAlignment="Center" />
+
+                            <Label
+                                Text="Entregados"
+                                HorizontalTextAlignment="Center" />
+
+                        </VerticalStackLayout>
+
+                        <!-- NO ENTREGADOS -->
+
+                        <VerticalStackLayout
+                            Grid.Row="0"
+                            Grid.Column="1"
+                            HorizontalOptions="Center">
+
+                            <Label
+                                Text="{Binding NoEntregados}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="Red"
+                                HorizontalTextAlignment="Center" />
+
+                            <Label
+                                Text="No entregados"
+                                HorizontalTextAlignment="Center" />
+
+                        </VerticalStackLayout>
+
+                        <!-- FUERA DE TÉRMINO -->
+
+                        <VerticalStackLayout
+                            Grid.Row="1"
+                            Grid.Column="0"
+                            HorizontalOptions="Center">
+
+                            <Label
+                                Text="{Binding EntregadosFueraDeTermino}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                TextColor="Orange"
+                                HorizontalTextAlignment="Center" />
+
+                            <Label
+                                Text="Fuera de término"
+                                HorizontalTextAlignment="Center" />
+
+                        </VerticalStackLayout>
+
+                        <!-- TOTAL -->
+
+                        <VerticalStackLayout
+                            Grid.Row="1"
+                            Grid.Column="1"
+                            HorizontalOptions="Center">
+
+                            <Label
+                                Text="{Binding TotalEntregas}"
+                                FontSize="22"
+                                FontAttributes="Bold"
+                                HorizontalTextAlignment="Center" />
+
+                            <Label
+                                Text="Total"
+                                HorizontalTextAlignment="Center" />
+
+                        </VerticalStackLayout>
+
+                    </Grid>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- HISTORIAL DE ENTREGAS -->
+
+            <Label
+                Text="Historial de entregas"
+                FontSize="19"
+                FontAttributes="Bold" />
+
+            <CollectionView
+                ItemsSource="{Binding HistorialEntregas}"
+                HeightRequest="250">
+
+                <CollectionView.EmptyView>
+
+                    <Label
+                        Text="El estudiante no tiene entregas registradas."
+                        TextColor="Gray"
+                        HorizontalTextAlignment="Center" />
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,4"
+                            Padding="12"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                ColumnSpacing="15">
+
+                                <Label
+                                    Grid.Column="0"
+                                    Text="{Binding Trabajo.Nombre}"
+                                    FontAttributes="Bold"
                                     VerticalOptions="Center" />
 
                                 <Label
@@ -227,8 +427,8 @@
 
             </CollectionView>
 
-        </Grid>
+        </VerticalStackLayout>
 
-    </Grid>
+    </ScrollView>
 
 </ContentPage>

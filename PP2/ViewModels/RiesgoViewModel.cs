@@ -9,8 +9,29 @@ public class RiesgoViewModel : ObservableObject
 {
     private readonly RiesgoService _riesgoService;
 
+    public ObservableCollection<string> Comisiones { get; } = new()
+    {
+        "Comisión A",
+        "Comisión B"
+    };
+
     public ObservableCollection<ResultadoRiesgo> Resultados { get; }
         = new();
+
+    private string comisionSeleccionada = "Comisión A";
+
+    public string ComisionSeleccionada
+    {
+        get => comisionSeleccionada;
+
+        set
+        {
+            if (SetProperty(ref comisionSeleccionada, value))
+            {
+                CargarRiesgos();
+            }
+        }
+    }
 
     public RiesgoViewModel()
     {
@@ -23,30 +44,79 @@ public class RiesgoViewModel : ObservableObject
     {
         Resultados.Clear();
 
-        foreach (Estudiante estudiante in DatosSistema.Estudiantes)
+        var estudiantesComision = DatosSistema.Estudiantes
+            .Where(e => e.Comision == ComisionSeleccionada)
+            .ToList();
+
+        foreach (Estudiante estudiante in estudiantesComision)
         {
-            var asistenciasAlumno =
-     DatosSistema.Asistencias.Where(a => a.Estudiante == estudiante).ToList();
+            // Asistencias del estudiante
+            var asistenciasAlumno = DatosSistema.Asistencias
+                .Where(a =>
+                    a.Estudiante.Legajo == estudiante.Legajo)
+                .ToList();
 
-            int totalClases = asistenciasAlumno.Count;
+            int totalClases =
+                asistenciasAlumno.Count;
 
-            int ausencias = asistenciasAlumno.Count(a => a.Estado == EstadoAsistencia.Ausente);
+            int ausencias =
+                asistenciasAlumno.Count(a =>
+                    a.Estado == EstadoAsistencia.Ausente);
 
-            int presentes = asistenciasAlumno.Count(a => a.Estado == EstadoAsistencia.Presente);
+            int presentes =
+                asistenciasAlumno.Count(a =>
+                    a.Estado == EstadoAsistencia.Presente);
 
-            decimal porcentaje = _riesgoService.CalcularPorcentajeAusencias(estudiante);
+            // Entregas del estudiante
+            var entregasAlumno = DatosSistema.Entregas
+                .Where(e =>
+                    e.Estudiante.Legajo == estudiante.Legajo)
+                .ToList();
+
+            int totalEntregas =
+                entregasAlumno.Count;
+
+            int entregados =
+                entregasAlumno.Count(e =>
+                    e.Estado == EstadoEntrega.Entregado);
+
+            int noEntregados =
+                entregasAlumno.Count(e =>
+                    e.Estado == EstadoEntrega.NoEntregado);
+
+            int entregadosFueraDeTermino =
+                entregasAlumno.Count(e =>
+                    e.Estado ==
+                    EstadoEntrega.EntregadoFueraDeTermino);
+
+            // Riesgo combinado de H6
+            decimal porcentajeRiesgo =
+                _riesgoService.CalcularRiesgo(estudiante);
 
             Resultados.Add(new ResultadoRiesgo
             {
                 Estudiante = estudiante,
+
                 TotalClases = totalClases,
                 Ausencias = ausencias,
                 Presentes = presentes,
-                PorcentajeAusencias = porcentaje
+
+                TotalEntregas = totalEntregas,
+                Entregados = entregados,
+                NoEntregados = noEntregados,
+                EntregadosFueraDeTermino =
+                    entregadosFueraDeTermino,
+
+                PorcentajeRiesgo =
+                    porcentajeRiesgo
             });
         }
 
-        var ordenados = Resultados.OrderByDescending(r => r.PorcentajeAusencias).ToList();
+        // Mayor riesgo primero
+        var ordenados = Resultados
+            .OrderByDescending(r =>
+                r.PorcentajeRiesgo)
+            .ToList();
 
         Resultados.Clear();
 
