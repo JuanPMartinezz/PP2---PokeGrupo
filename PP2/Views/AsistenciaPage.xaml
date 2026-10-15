@@ -6,15 +6,13 @@
     x:Class="RegistroAsistencia.Views.AsistenciaPage"
     Title="H3 y H4 - Asistencias">
 
-    <Grid
-        Padding="20"
-        RowDefinitions="Auto,Auto,*"
-        RowSpacing="12">
+    <ScrollView>
 
-        <!-- H3 - Registro de asistencia -->
         <VerticalStackLayout
-            Grid.Row="0"
-            Spacing="10">
+            Padding="20"
+            Spacing="12">
+
+            <!-- H3 - Registro de asistencia -->
 
             <Label
                 Text="H3 - Registro de asistencia"
@@ -22,16 +20,41 @@
                 FontAttributes="Bold" />
 
             <Label
-                Text="Seleccioná un alumno y una fecha para registrar su asistencia."
+                Text="Seleccioná una comisión, un alumno y una fecha."
                 TextColor="Gray" />
+
+            <!-- Comisión -->
+
+            <Label
+                Text="Comisión"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
+
+            <!-- Estudiante -->
+
+            <Label
+                Text="Estudiante"
+                FontAttributes="Bold" />
 
             <Picker
                 Title="Seleccionar alumno"
                 ItemsSource="{Binding Estudiantes}"
                 SelectedItem="{Binding AlumnoSeleccionado, Mode=TwoWay}" />
 
+            <!-- Fecha -->
+
+            <Label
+                Text="Fecha de la clase"
+                FontAttributes="Bold" />
+
             <DatePicker
                 Date="{Binding FechaClase, Mode=TwoWay}" />
+
+            <!-- Registro -->
 
             <Grid
                 ColumnDefinitions="*,*"
@@ -53,61 +76,59 @@
 
             </Grid>
 
+            <!-- Mensaje -->
+
             <Label
                 Text="{Binding Mensaje}"
                 FontAttributes="Bold"
                 TextColor="DarkRed" />
 
-        </VerticalStackLayout>
-
-        <!-- H4 - Corrección de asistencia -->
-        <VerticalStackLayout
-            Grid.Row="1"
-            Spacing="5"
-            Margin="0,10,0,0">
+            <!-- Consulta por fecha -->
 
             <Label
-                Text="H4 - Corregir asistencia"
-                FontSize="22"
-                FontAttributes="Bold" />
+                Text="Asistencias de la fecha seleccionada"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
 
             <Label
-                Text="Seleccioná una asistencia del historial y pulsá el botón para cambiar su estado."
+                Text="{Binding FechaClase,
+                StringFormat='Fecha consultada: {0:dd/MM/yyyy}'}"
                 TextColor="Gray" />
 
             <Label
-                Text="Presente cambia a Ausente y Ausente cambia a Presente."
+                Text="{Binding ComisionSeleccionada,
+                StringFormat='Comisión: {0}'}"
+                TextColor="Gray" />
+
+            <Label
+                Text="A continuación se muestran las asistencias registradas para la fecha y comisión seleccionadas."
                 FontSize="13"
                 TextColor="Gray" />
 
-        </VerticalStackLayout>
-
-        <!-- Historial de asistencias -->
-        <Grid
-            Grid.Row="2"
-            RowDefinitions="*,Auto"
-            RowSpacing="10">
+            <!-- Lista de asistencias -->
 
             <CollectionView
-                Grid.Row="0"
                 ItemsSource="{Binding Asistencias}"
                 SelectedItem="{Binding AsistenciaSeleccionada, Mode=TwoWay}"
-                SelectionMode="Single">
+                SelectionMode="Single"
+                HeightRequest="300">
 
                 <CollectionView.EmptyView>
 
                     <VerticalStackLayout
                         HorizontalOptions="Center"
                         VerticalOptions="Center"
-                        Spacing="5">
+                        Spacing="5"
+                        Padding="20">
 
                         <Label
-                            Text="Todavía no hay asistencias registradas."
+                            Text="No hay asistencias registradas para esta fecha."
                             HorizontalTextAlignment="Center"
                             FontAttributes="Bold" />
 
                         <Label
-                            Text="Registrá una asistencia para poder corregirla."
+                            Text="Seleccioná un estudiante y registrá su asistencia."
                             TextColor="Gray"
                             HorizontalTextAlignment="Center" />
 
@@ -131,9 +152,11 @@
 
                             <Grid
                                 ColumnDefinitions="*,Auto"
-                                RowDefinitions="Auto,Auto,Auto"
+                                RowDefinitions="Auto,Auto,Auto,Auto"
                                 ColumnSpacing="15"
                                 RowSpacing="4">
+
+                                <!-- Nombre -->
 
                                 <Label
                                     Grid.Row="0"
@@ -142,24 +165,41 @@
                                     FontSize="17"
                                     FontAttributes="Bold" />
 
+                                <!-- Legajo -->
+
                                 <Label
                                     Grid.Row="1"
                                     Grid.Column="0"
                                     Text="{Binding Estudiante.Legajo,
                                     StringFormat='Legajo: {0}'}" />
 
+                                <!-- Comisión -->
+
                                 <Label
                                     Grid.Row="2"
                                     Grid.Column="0"
+                                    Text="{Binding Estudiante.Comision,
+                                    StringFormat='Comisión: {0}'}"
+                                    TextColor="Gray" />
+
+                                <!-- Fecha -->
+
+                                <Label
+                                    Grid.Row="3"
+                                    Grid.Column="0"
                                     Text="{Binding Clase.Fecha,
-                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}" />
+                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
+                                    TextColor="Gray" />
+
+                                <!-- Estado -->
 
                                 <VerticalStackLayout
                                     Grid.Row="0"
-                                    Grid.RowSpan="3"
+                                    Grid.RowSpan="4"
                                     Grid.Column="1"
                                     VerticalOptions="Center"
-                                    HorizontalOptions="Center">
+                                    HorizontalOptions="Center"
+                                    Spacing="3">
 
                                     <Label
                                         Text="Estado"
@@ -169,7 +209,7 @@
 
                                     <Label
                                         Text="{Binding Estado}"
-                                        FontSize="16"
+                                        FontSize="17"
                                         FontAttributes="Bold"
                                         HorizontalTextAlignment="Center" />
 
@@ -185,16 +225,33 @@
 
             </CollectionView>
 
+            <!-- H4 -->
+
+            <Label
+                Text="H4 - Corregir asistencia"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <Label
+                Text="Seleccioná una asistencia de la lista para modificar su estado."
+                TextColor="Gray" />
+
+            <Label
+                Text="Presente cambia a Ausente y Ausente cambia a Presente."
+                FontSize="13"
+                TextColor="Gray" />
+
             <Button
-                Grid.Row="1"
                 Text="Corregir estado de la asistencia seleccionada"
                 Command="{Binding CorregirAsistenciaCommand}"
                 BackgroundColor="Orange"
                 TextColor="Black"
-                FontAttributes="Bold" />
+                FontAttributes="Bold"
+                Margin="0,0,0,20" />
 
-        </Grid>
+        </VerticalStackLayout>
 
-    </Grid>
+    </ScrollView>
 
 </ContentPage>

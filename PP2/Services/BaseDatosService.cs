@@ -16,17 +16,26 @@ public sealed class BaseDatosService
         _conexion = new SQLiteConnection(ruta);
         _conexion.CreateTable<EstudianteDb>();
         _conexion.CreateTable<AsistenciaDb>();
+        _conexion.CreateTable<TrabajoDb>();
+        _conexion.CreateTable<EntregaDb>();
     }
 
     public List<Estudiante> ObtenerEstudiantes()
     {
-        return _conexion.Table<EstudianteDb>().OrderBy(e => e.Apellido).ThenBy(e => e.Nombre).Select(e => new Estudiante
-            {
-                Legajo = e.Legajo,
-                Nombre = e.Nombre,
-                Apellido = e.Apellido
-            })
-            .ToList();
+        return _conexion.Table<EstudianteDb>()
+     .OrderBy(e => e.Apellido)
+     .ThenBy(e => e.Nombre)
+     .Select(e => new Estudiante
+     {
+         Legajo = e.Legajo,
+         Nombre = e.Nombre,
+         Apellido = e.Apellido,
+
+         Comision = string.IsNullOrWhiteSpace(e.Comision)
+             ? "Comisión A"
+             : e.Comision
+     })
+     .ToList();
     }
 
     public List<Asistencia> ObtenerAsistencias(IReadOnlyCollection<Estudiante> estudiantes)
@@ -59,7 +68,11 @@ public sealed class BaseDatosService
         {
             Legajo = estudiante.Legajo.Trim(),
             Nombre = estudiante.Nombre.Trim(),
-            Apellido = estudiante.Apellido.Trim()
+            Apellido = estudiante.Apellido.Trim(),
+
+            Comision = string.IsNullOrWhiteSpace(estudiante.Comision)
+                ? "Comisión A"
+                : estudiante.Comision.Trim()
         });
     }
 
@@ -99,9 +112,127 @@ public sealed class BaseDatosService
 
         _conexion.Update(registro);
     }
+    // Métodos para gestionar trabajos
+
+    public List<Trabajo> ObtenerTrabajos()
+    {
+        return _conexion.Table<TrabajoDb>()
+            .OrderBy(t => t.Nombre)
+            .Select(t => new Trabajo
+            {
+                Id = t.Id,
+                Nombre = t.Nombre
+            })
+            .ToList();
+    }
+
+    public void GuardarTrabajo(Trabajo trabajo)
+    {
+        var trabajoDb = new TrabajoDb
+        {
+            Nombre = trabajo.Nombre.Trim()
+        };
+
+        _conexion.Insert(trabajoDb);
+
+        trabajo.Id = trabajoDb.Id;
+    }
+    public List<Entrega> ObtenerEntregas(
+    IReadOnlyCollection<Estudiante> estudiantes,
+    IReadOnlyCollection<Trabajo> trabajos)
+    {
+        var estudiantesPorLegajo =
+            estudiantes.ToDictionary(e => e.Legajo);
+
+        var trabajosPorId =
+            trabajos.ToDictionary(t => t.Id);
+
+        var resultado = new List<Entrega>();
+
+        var filas = _conexion
+            .Table<EntregaDb>()
+            .ToList();
+
+        foreach (var fila in filas)
+        {
+            if (!estudiantesPorLegajo.TryGetValue(
+                    fila.LegajoEstudiante,
+                    out var estudiante))
+            {
+                continue;
+            }
+
+            if (!trabajosPorId.TryGetValue(
+                    fila.TrabajoId,
+                    out var trabajo))
+            {
+                continue;
+            }
+
+            resultado.Add(new Entrega
+            {
+                Estudiante = estudiante,
+                Trabajo = trabajo,
+                Estado = (EstadoEntrega)fila.Estado
+            });
+        }
+
+        return resultado;
+    }
+
+    public bool ExisteEntrega(
+        string legajo,
+        int trabajoId)
+    {
+        return _conexion
+            .Table<EntregaDb>()
+            .Any(e =>
+                e.LegajoEstudiante == legajo &&
+                e.TrabajoId == trabajoId);
+    }
+
+    public void GuardarEntrega(Entrega entrega)
+    {
+        _conexion.Insert(new EntregaDb
+        {
+            LegajoEstudiante =
+                entrega.Estudiante.Legajo,
+
+            TrabajoId =
+                entrega.Trabajo.Id,
+
+            Estado =
+                (int)entrega.Estado
+        });
+    }
+
+    public void ActualizarEntrega(
+        string legajo,
+        int trabajoId,
+        EstadoEntrega nuevoEstado)
+    {
+        EntregaDb? registro =
+            _conexion.Table<EntregaDb>()
+                .FirstOrDefault(e =>
+                    e.LegajoEstudiante == legajo &&
+                    e.TrabajoId == trabajoId);
+
+        if (registro is null)
+        {
+            throw new InvalidOperationException(
+                "No se encontró la entrega en la base de datos.");
+        }
+
+        registro.Estado = (int)nuevoEstado;
+
+        _conexion.Update(registro);
+    }
+
     public void BorrarTodosLosRegistros()
     {
+        _conexion.DeleteAll<EntregaDb>();
         _conexion.DeleteAll<AsistenciaDb>();
+        _conexion.DeleteAll<TrabajoDb>();
         _conexion.DeleteAll<EstudianteDb>();
     }
 
@@ -117,8 +248,12 @@ public sealed class BaseDatosService
     {
         [PrimaryKey]
         public string Legajo { get; set; } = string.Empty;
+
         public string Nombre { get; set; } = string.Empty;
+
         public string Apellido { get; set; } = string.Empty;
+
+        public string Comision { get; set; } = "Comisión A";
     }
 
     [Table("Asistencias")]
@@ -130,4 +265,28 @@ public sealed class BaseDatosService
         public string Fecha { get; set; } = string.Empty;
         public int Estado { get; set; }
     }
+    [Table("Trabajos")]
+    public class TrabajoDb
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        public string Nombre { get; set; }
+            = string.Empty;
+    }
+
+    [Table("Entregas")]
+    public class EntregaDb
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        public string LegajoEstudiante { get; set; }
+            = string.Empty;
+
+        public int TrabajoId { get; set; }
+
+        public int Estado { get; set; }
+    }
+
 }

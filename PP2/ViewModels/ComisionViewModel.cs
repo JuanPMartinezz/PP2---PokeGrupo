@@ -13,8 +13,53 @@ public partial class ComisionViewModel : ObservableObject
     public string Legajo { get; set; } = "";
     public string Mensaje { get; set; } = "";
 
-    public ObservableCollection<Estudiante> Estudiantes => DatosSistema.Estudiantes;
+    public ObservableCollection<string> Comisiones { get; } = new()
+    {
+        "Comisión A",
+        "Comisión B"
+    };
+
+    private string comisionSeleccionada = "Comisión A";
+
+    public string ComisionSeleccionada
+    {
+        get => comisionSeleccionada;
+
+        set
+        {
+            if (SetProperty(ref comisionSeleccionada, value))
+            {
+                CargarEstudiantesComision();
+            }
+        }
+    }
+
+    public ObservableCollection<Estudiante> Estudiantes { get; } = new();
+
     public int CantidadAlumnos => Estudiantes.Count;
+
+    public ComisionViewModel()
+    {
+        CargarEstudiantesComision();
+    }
+
+    private void CargarEstudiantesComision()
+    {
+        Estudiantes.Clear();
+
+        var estudiantesComision = DatosSistema.Estudiantes
+            .Where(e => e.Comision == ComisionSeleccionada)
+            .OrderBy(e => e.Apellido)
+            .ThenBy(e => e.Nombre)
+            .ToList();
+
+        foreach (var estudiante in estudiantesComision)
+        {
+            Estudiantes.Add(estudiante);
+        }
+
+        OnPropertyChanged(nameof(CantidadAlumnos));
+    }
 
     [RelayCommand]
     private void AgregarAlumno()
@@ -23,45 +68,59 @@ public partial class ComisionViewModel : ObservableObject
         Apellido = Apellido.Trim();
         Legajo = Legajo.Trim();
 
-        if (string.IsNullOrWhiteSpace(Nombre) || string.IsNullOrWhiteSpace(Apellido) || string.IsNullOrWhiteSpace(Legajo))
+        if (string.IsNullOrWhiteSpace(Nombre) ||
+            string.IsNullOrWhiteSpace(Apellido) ||
+            string.IsNullOrWhiteSpace(Legajo))
         {
             Mensaje = "Complete nombre, apellido y legajo";
+
             OnPropertyChanged(nameof(Mensaje));
+
             return;
         }
 
         if (DatosSistema.ExisteEstudiante(Legajo))
         {
             Mensaje = "Ya existe un alumno con ese legajo";
+
             OnPropertyChanged(nameof(Mensaje));
+
             return;
         }
 
-        var nuevo = new Estudiante { Nombre = Nombre, Apellido = Apellido, Legajo = Legajo };
+        var nuevo = new Estudiante
+        {
+            Nombre = Nombre,
+            Apellido = Apellido,
+            Legajo = Legajo,
+            Comision = ComisionSeleccionada
+        };
+
         try
         {
             DatosSistema.AgregarEstudiante(nuevo);
-            var ordenados = Estudiantes.OrderBy(e => e.Apellido).ThenBy(e => e.Nombre).ToList();
-            Estudiantes.Clear();
-            foreach (var estudiante in ordenados) Estudiantes.Add(estudiante);
+
+            CargarEstudiantesComision();
 
             Nombre = "";
             Apellido = "";
             Legajo = "";
-            Mensaje = "Alumno agregado";
+
+            Mensaje =
+                $"Alumno agregado a {ComisionSeleccionada}";
         }
         catch (Exception ex)
         {
-            Mensaje = $"No se pudo guardar el alumno: {ex.Message}";
+            Mensaje =
+                $"No se pudo guardar el alumno: {ex.Message}";
         }
 
-        OnPropertyChanged(nameof(CantidadAlumnos));
         OnPropertyChanged(nameof(Nombre));
         OnPropertyChanged(nameof(Apellido));
         OnPropertyChanged(nameof(Legajo));
         OnPropertyChanged(nameof(Mensaje));
+        OnPropertyChanged(nameof(CantidadAlumnos));
     }
-
 
     [RelayCommand]
     private void BorrarTodosLosRegistros()
@@ -69,15 +128,19 @@ public partial class ComisionViewModel : ObservableObject
         try
         {
             DatosSistema.BorrarTodosLosRegistros();
-            Mensaje = "Se eliminaron todos los alumnos y asistencias.";
+
+            CargarEstudiantesComision();
+
+            Mensaje =
+                "Se eliminaron todos los alumnos y asistencias.";
         }
         catch (Exception ex)
         {
-            Mensaje = $"Error al borrar los registros: {ex.Message}";
+            Mensaje =
+                $"Error al borrar los registros: {ex.Message}";
         }
 
         OnPropertyChanged(nameof(CantidadAlumnos));
         OnPropertyChanged(nameof(Mensaje));
     }
-
 }

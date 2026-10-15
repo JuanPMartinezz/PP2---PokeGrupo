@@ -3,56 +3,242 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="RegistroAsistencia.Views.RiesgoPage">
+    x:Class="RegistroAsistencia.Views.RiesgoPage"
+    Title="H8 - Panel de riesgo">
 
     <ScrollView>
 
         <VerticalStackLayout
             Padding="20"
-            Spacing="10">
+            Spacing="12">
+
+            <!-- Título -->
 
             <Label
                 Text="H8 - Panel de riesgo"
                 FontSize="24"
                 FontAttributes="Bold" />
 
+            <Label
+                Text="Ranking de estudiantes según su riesgo académico."
+                TextColor="Gray" />
+
+            <!-- Comisión -->
+
+            <Label
+                Text="Comisión"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
+
+            <Label
+                Text="{Binding ComisionSeleccionada,
+                StringFormat='Ranking - {0}'}"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <!-- Ranking -->
+
             <CollectionView
-                ItemsSource="{Binding Resultados}">
+                ItemsSource="{Binding Resultados}"
+                SelectionMode="None"
+                HeightRequest="600">
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="5">
+
+                        <Label
+                            Text="No hay estudiantes en esta comisión."
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Registrá estudiantes para poder calcular su riesgo."
+                            TextColor="Gray"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
 
                 <CollectionView.ItemTemplate>
 
                     <DataTemplate>
 
-                        <Frame
-                            Padding="10"
-                            Margin="0,5">
+                        <Border
+                            Padding="15"
+                            Margin="0,6"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
 
-                            <VerticalStackLayout>
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="10" />
+                            </Border.StrokeShape>
+
+                            <VerticalStackLayout
+                                Spacing="8">
+
+                                <!-- Estudiante -->
 
                                 <Label
                                     Text="{Binding Estudiante}"
+                                    FontSize="18"
                                     FontAttributes="Bold" />
 
                                 <Label
-    Text="{Binding Ausencias,
-    StringFormat='Ausencias: {0}'}" />
+                                    Text="{Binding Estudiante.Legajo,
+                                    StringFormat='Legajo: {0}'}"
+                                    TextColor="Gray" />
 
-                                    <Label
-    Text="{Binding Presentes,
-    StringFormat='Presentes: {0}'}" />
+                                <!-- Riesgo combinado -->
 
-                                    <Label
-    Text="{Binding TotalClases,
-    StringFormat='Total clases: {0}'}" />
+                                <Label
+                                    Text="{Binding PorcentajeRiesgo,
+                                    StringFormat='Riesgo académico: {0:F2}%'}"
+                                    FontSize="18"
+                                    FontAttributes="Bold"
+                                    TextColor="DarkRed" />
 
-                                    <Label
-    Text="{Binding PorcentajeAusencias,
-    StringFormat='Riesgo: {0:F0}%'}"
-    FontAttributes="Bold" />
+                                <!-- Asistencias -->
+
+                                <Label
+                                    Text="Asistencias"
+                                    FontAttributes="Bold"
+                                    Margin="0,5,0,0" />
+
+                                <Grid
+                                    ColumnDefinitions="*,*,*"
+                                    ColumnSpacing="10">
+
+                                    <VerticalStackLayout
+                                        Grid.Column="0">
+
+                                        <Label
+                                            Text="Presentes"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding Presentes}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Column="1">
+
+                                        <Label
+                                            Text="Ausencias"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding Ausencias}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Column="2">
+
+                                        <Label
+                                            Text="Total"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding TotalClases}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                </Grid>
+
+                                <!-- Entregas -->
+
+                                <Label
+                                    Text="Entregas"
+                                    FontAttributes="Bold"
+                                    Margin="0,5,0,0" />
+
+                                <Grid
+                                    ColumnDefinitions="*,*"
+                                    RowDefinitions="Auto,Auto"
+                                    ColumnSpacing="10"
+                                    RowSpacing="8">
+
+                                    <VerticalStackLayout
+                                        Grid.Row="0"
+                                        Grid.Column="0">
+
+                                        <Label
+                                            Text="Entregados"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding Entregados}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Row="0"
+                                        Grid.Column="1">
+
+                                        <Label
+                                            Text="No entregados"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding NoEntregados}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Row="1"
+                                        Grid.Column="0">
+
+                                        <Label
+                                            Text="Fuera de término"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding EntregadosFueraDeTermino}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                    <VerticalStackLayout
+                                        Grid.Row="1"
+                                        Grid.Column="1">
+
+                                        <Label
+                                            Text="Total"
+                                            FontSize="12"
+                                            TextColor="Gray" />
+
+                                        <Label
+                                            Text="{Binding TotalEntregas}"
+                                            FontAttributes="Bold" />
+
+                                    </VerticalStackLayout>
+
+                                </Grid>
 
                             </VerticalStackLayout>
 
-                        </Frame>
+                        </Border>
 
                     </DataTemplate>
 

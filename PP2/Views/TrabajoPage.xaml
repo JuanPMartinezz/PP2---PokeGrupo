@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.TrabajoPage"
+    Title="H5 - Entregas de trabajos">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="12">
+
+            <Label
+                Text="H5 - Entregas de trabajos"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="Registrá los trabajos y el estado de entrega de cada estudiante."
+                TextColor="Gray" />
+
+            <!-- COMISIÓN -->
+
+            <Label
+                Text="Comisión"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
+
+            <!-- CREAR TRABAJO -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Crear trabajo"
+                        FontSize="20"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Nombre del trabajo"
+                        Text="{Binding NombreTrabajo, Mode=TwoWay}" />
+
+                    <Button
+                        Text="Agregar trabajo"
+                        Command="{Binding AgregarTrabajoCommand}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- REGISTRAR ENTREGA -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Registrar entrega"
+                        FontSize="20"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="Trabajo"
+                        FontAttributes="Bold" />
+
+                    <Picker
+                        Title="Seleccionar trabajo"
+                        ItemsSource="{Binding Trabajos}"
+                        SelectedItem="{Binding TrabajoSeleccionado, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Estudiante"
+                        FontAttributes="Bold" />
+
+                    <Picker
+                        Title="Seleccionar estudiante"
+                        ItemsSource="{Binding Estudiantes}"
+                        SelectedItem="{Binding EstudianteSeleccionado, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Estado de entrega"
+                        FontAttributes="Bold" />
+
+                    <Picker
+                        Title="Seleccionar estado"
+                        ItemsSource="{Binding EstadosEntrega}"
+                        SelectedItem="{Binding EstadoSeleccionado, Mode=TwoWay}" />
+
+                    <Button
+                        Text="Registrar entrega"
+                        Command="{Binding RegistrarEntregaCommand}"
+                        BackgroundColor="LightGreen"
+                        TextColor="Black" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- MENSAJE -->
+
+            <Label
+                Text="{Binding Mensaje}"
+                FontAttributes="Bold"
+                TextColor="DarkRed" />
+
+            <!-- ENTREGAS REGISTRADAS -->
+
+            <Label
+                Text="Entregas registradas"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <Label
+                Text="La lista corresponde al trabajo y a la comisión seleccionados."
+                TextColor="Gray" />
+
+            <CollectionView
+                ItemsSource="{Binding Entregas}"
+                SelectedItem="{Binding EntregaSeleccionada, Mode=TwoWay}"
+                SelectionMode="Single"
+                HeightRequest="320">
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="5">
+
+                        <Label
+                            Text="No hay entregas registradas."
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Seleccioná un trabajo y registrá la entrega de un estudiante."
+                            TextColor="Gray"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,5"
+                            Padding="12"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                RowDefinitions="Auto,Auto,Auto"
+                                ColumnSpacing="15"
+                                RowSpacing="4">
+
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="{Binding Estudiante}"
+                                    FontSize="17"
+                                    FontAttributes="Bold" />
+
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Estudiante.Legajo,
+                                    StringFormat='Legajo: {0}'}" />
+
+                                <Label
+                                    Grid.Row="2"
+                                    Grid.Column="0"
+                                    Text="{Binding Trabajo.Nombre,
+                                    StringFormat='Trabajo: {0}'}"
+                                    TextColor="Gray" />
+
+                                <VerticalStackLayout
+                                    Grid.Row="0"
+                                    Grid.RowSpan="3"
+                                    Grid.Column="1"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="Estado"
+                                        FontSize="12"
+                                        TextColor="Gray"
+                                        HorizontalTextAlignment="Center" />
+
+                                    <Label
+                                        Text="{Binding Estado}"
+                                        FontAttributes="Bold"
+                                        HorizontalTextAlignment="Center" />
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <!-- MODIFICAR ENTREGA -->
+
+            <Label
+                Text="Modificar una entrega"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <Label
+                Text="Seleccioná una entrega de la lista y elegí el nuevo estado."
+                TextColor="Gray" />
+
+            <Picker
+                Title="Nuevo estado"
+                ItemsSource="{Binding EstadosEntrega}"
+                SelectedItem="{Binding EstadoSeleccionado, Mode=TwoWay}" />
+
+            <Button
+                Text="Actualizar entrega seleccionada"
+                Command="{Binding ActualizarEntregaCommand}"
+                BackgroundColor="Orange"
+                TextColor="Black"
+                FontAttributes="Bold"
+                Margin="0,0,0,20" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>
