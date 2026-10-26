@@ -27,6 +27,13 @@ public sealed class NavegacionMaui : INavegacion
         return Shell.Current.Navigation.PopAsync();
     }
 
+    public Task VolverAlInicioAsync()
+    {
+        Shell.Current.FlyoutIsPresented = false;
+
+        return Shell.Current.Navigation.PopToRootAsync();
+    }
+
     // Cuando una pantalla vuelve a aparecer, recarga sus datos
     public static void ActualizarAlAparecer(ContentPage pagina)
     {
@@ -66,10 +73,7 @@ public sealed class NavegacionMaui : INavegacion
         {
             Destino.Calendario => Armar(
                 new CalendarioPage(),
-                new CalendarioViewModel(dato)),
-            Destino.TrabajoNuevo => Armar(
-                new CalendarioPage(),
-                new CalendarioViewModel(dato, true)),
+                new CalendarioViewModel(dato, _registro)),
             Destino.ConfigRiesgo => Armar(
                 new ConfigRiesgoPage(),
                 new ConfigRiesgoViewModel(dato)),

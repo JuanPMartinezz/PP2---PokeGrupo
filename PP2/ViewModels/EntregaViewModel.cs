@@ -219,7 +219,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     [RelayCommand]
     private Task AgregarTrabajo()
     {
-        return _navegacion.IrAAsync(Destino.TrabajoNuevo, _comision);
+        return _navegacion.IrAAsync(Destino.Calendario, _comision);
     }
 
     [RelayCommand]

@@ -7,31 +7,21 @@ using System.Collections.ObjectModel;
 namespace RegistroAsistencia.ViewModels;
 
 /// <summary>
-/// Calendario de la comisión (H2): las clases y los trabajos del
-/// cuatrimestre, cada uno con su fecha.
+/// Calendario de la comisión (H2): los trabajos del cuatrimestre con su
+/// fecha y las clases dictadas. Las clases no se cargan: salen de los
+/// días en que se tomó asistencia y muestran cómo fue cada una.
 /// </summary>
 public partial class CalendarioViewModel : ObservableObject, IActualizable
 {
-    private const string DescripcionClase = "Clase";
-
     private readonly string _comision;
+
+    private readonly RegistroService _registro;
 
     public string Comision => _comision;
 
-    public IReadOnlyList<string> Tipos { get; } = new[]
-    {
-        "Clase",
-        "Trabajo"
-    };
-
     public ObservableCollection<string> Actividades { get; } = new();
 
-    // Para decidir si se pide el nombre: las clases no lo necesitan
-    public bool EsTrabajo => TipoIndice == 1;
-
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(EsTrabajo))]
-    private int tipoIndice;
+    public ObservableCollection<string> Clases { get; } = new();
 
     [ObservableProperty]
     private DateTime fecha = DateTime.Today;
@@ -45,11 +35,10 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     [ObservableProperty]
     private string cuatrimestre = "";
 
-    // Con trabajoInicial el tipo ya viene elegido como "Trabajo"
-    public CalendarioViewModel(string comision, bool trabajoInicial = false)
+    public CalendarioViewModel(string comision, RegistroService registro)
     {
         _comision = comision;
-        tipoIndice = trabajoInicial ? 1 : 0;
+        _registro = registro;
 
         Actualizar();
     }
@@ -63,51 +52,43 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     {
         Cuatrimestre = Cuatrimestres.De(Fecha);
 
+        CargarTrabajos();
+        CargarClases();
+    }
+
+    private void CargarTrabajos()
+    {
         Actividades.Clear();
 
-        foreach (ActividadCalendario a in DatosSistema.Calendario
-                     .Where(a => a.Comision == _comision)
+        foreach (ActividadCalendario a in DatosSistema
+                     .TrabajosDelCalendario(_comision)
                      .OrderByDescending(a => a.Fecha))
         {
-            Actividades.Add(TextoActividad(a));
+            Actividades.Add($"{Formatos.FechaCorta(a.Fecha)} · {a.Descripcion}");
         }
     }
 
-    private static string TextoActividad(ActividadCalendario a)
+    private void CargarClases()
     {
-        string detalle = a.Tipo == TipoActividad.Trabajo
-            ? $"Trabajo: {a.Descripcion}"
-            : "Clase";
+        Clases.Clear();
 
-        return $"{Formatos.FechaCorta(a.Fecha)} · {detalle}";
-    }
-
-    private TipoActividad Tipo =>
-        EsTrabajo ? TipoActividad.Trabajo : TipoActividad.Clase;
-
-    private string? Validar()
-    {
-        if (EsTrabajo)
+        foreach (ResumenClase clase in _registro.ClasesDe(_comision))
         {
-            return Validaciones.Trabajo(Descripcion, _comision, Fecha);
+            Clases.Add(TextoClase(clase));
         }
+    }
 
-        bool repetida = DatosSistema.ExisteActividadCalendario(
-            _comision,
-            Cuatrimestres.De(Fecha),
-            Fecha,
-            TipoActividad.Clase,
-            DescripcionClase);
-
-        return repetida
-            ? "Ya hay una clase cargada para esa fecha"
-            : null;
+    private static string TextoClase(ResumenClase clase)
+    {
+        return $"{Formatos.FechaCorta(clase.Fecha)} · " +
+               $"Presentes: {clase.Presentes} · " +
+               $"Ausentes: {clase.Ausentes} (de {clase.Total})";
     }
 
     [RelayCommand]
     private void Agregar()
     {
-        string? error = Validar();
+        string? error = Validaciones.Trabajo(Descripcion, _comision, Fecha);
 
         if (error is not null)
         {
@@ -127,24 +108,21 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
 
     private void Guardar()
     {
-        string texto = EsTrabajo ? Descripcion.Trim() : DescripcionClase;
+        string nombre = Descripcion.Trim();
 
-        if (EsTrabajo)
-        {
-            DatosSistema.ObtenerOCrearTrabajo(texto);
-        }
+        DatosSistema.ObtenerOCrearTrabajo(nombre);
 
         DatosSistema.AgregarActividadCalendario(new ActividadCalendario
         {
             Comision = _comision,
             Cuatrimestre = Cuatrimestres.De(Fecha),
             Fecha = Fecha.Date,
-            Tipo = Tipo,
-            Descripcion = texto
+            Tipo = TipoActividad.Trabajo,
+            Descripcion = nombre
         });
 
         Descripcion = "";
-        Mensaje = "Agregado al calendario";
+        Mensaje = "Trabajo agregado al calendario";
 
         Actualizar();
     }

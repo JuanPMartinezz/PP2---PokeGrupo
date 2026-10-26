@@ -5,8 +5,31 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:RegistroAsistencia"
-    FlyoutBehavior="Disabled"
+    FlyoutBehavior="Flyout"
     Title="Registro de asistencia">
+
+    <Shell.FlyoutContent>
+        <VerticalStackLayout x:Name="PanelMenu" Padding="20" Spacing="10">
+
+            <Label Text="Menú" Style="{StaticResource TituloPagina}" />
+
+            <Button Text="Inicio" Command="{Binding InicioCommand}" />
+
+            <Label Text="Comisión" Style="{StaticResource TextoSecundario}" />
+
+            <Picker Title="Elegí la comisión"
+                    ItemsSource="{Binding Comisiones}"
+                    SelectedItem="{Binding ComisionSeleccionada}" />
+
+            <Button Text="Calendario" Command="{Binding CalendarioCommand}" />
+            <Button Text="Lista de alumnos" Command="{Binding ListaCommand}" />
+            <Button Text="Tomar asistencia" Command="{Binding AsistenciaCommand}" />
+            <Button Text="Registrar entrega" Command="{Binding EntregaCommand}" />
+
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+
+        </VerticalStackLayout>
+    </Shell.FlyoutContent>
 
     <ShellContent
         Title="Inicio"

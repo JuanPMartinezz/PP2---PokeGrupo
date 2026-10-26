@@ -43,6 +43,14 @@ public class PruebasPP2
             Volvio++;
             return Task.CompletedTask;
         }
+
+        public int VolvioAlInicio { get; private set; }
+
+        public Task VolverAlInicioAsync()
+        {
+            VolvioAlInicio++;
+            return Task.CompletedTask;
+        }
     }
 
     private sealed class DialogosFalsos : IDialogos
@@ -155,23 +163,26 @@ public class PruebasPP2
     // ---------- H2: calendario ----------
 
     [Fact]
-    public void H2_ClaseNuevaSeGuardaSinPedirNombre()
+    public async Task H2_LasClasesSalenDeLaAsistenciaTomada()
     {
-        var calendario = new CalendarioViewModel(ComisionA) { TipoIndice = 0 };
+        Alumno("101", "Gómez");
+        Alumno("102", "Paz");
+        AsistenciaViewModel planilla = NuevaPlanilla();
+        planilla.Filas.First(f => f.Estudiante.Legajo == "101").Presente = true;
+        await planilla.GuardarCommand.ExecuteAsync(null);
 
-        calendario.AgregarCommand.Execute(null);
+        var calendario = new CalendarioViewModel(ComisionA, _registro);
 
-        ActividadCalendario actividad = Assert.Single(DatosSistema.Calendario);
-        Assert.Equal(TipoActividad.Clase, actividad.Tipo);
-        Assert.Equal(Cuatrimestres.De(DateTime.Today), actividad.Cuatrimestre);
+        string clase = Assert.Single(calendario.Clases);
+        Assert.Contains("Presentes: 1", clase);
+        Assert.Contains("Ausentes: 1", clase);
     }
 
     [Fact]
     public void H2_TrabajoRepetidoConLaMismaFecha_SeRechaza()
     {
-        var calendario = new CalendarioViewModel(ComisionA)
+        var calendario = new CalendarioViewModel(ComisionA, _registro)
         {
-            TipoIndice = 1,
             Descripcion = "TP1"
         };
         calendario.AgregarCommand.Execute(null);
@@ -564,5 +575,21 @@ public class PruebasPP2
 
         Assert.Empty(DatosSistema.Estudiantes);
         Assert.Equal(DatosSistema.ComisionesIniciales, DatosSistema.Comisiones.ToArray());
+    }
+
+    // ---------- Menú ----------
+
+    [Fact]
+    public async Task Menu_AbreLaPantallaDeLaComisionElegida()
+    {
+        var menu = new MenuViewModel(_navegacion)
+        {
+            ComisionSeleccionada = ComisionB
+        };
+
+        await menu.AsistenciaCommand.ExecuteAsync(null);
+
+        Assert.Equal(1, _navegacion.VolvioAlInicio);
+        Assert.Equal((Destino.Asistencia, ComisionB), _navegacion.Visitas[^1]);
     }
 }

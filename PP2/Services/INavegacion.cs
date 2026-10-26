@@ -10,7 +10,6 @@ public enum Destino
     Ficha,
     Contacto,
     Calendario,
-    TrabajoNuevo,
     ConfigRiesgo,
     NuevaComision,
     AlumnoNuevo,
@@ -29,4 +28,7 @@ public interface INavegacion
     Task IrAAsync(Destino destino, string? dato = null);
 
     Task VolverAsync();
+
+    // Cierra el menú y vuelve a la pantalla de inicio
+    Task VolverAlInicioAsync();
 }

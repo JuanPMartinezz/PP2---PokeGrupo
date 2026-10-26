@@ -12,6 +12,12 @@ public record MarcaEntrega(Estudiante Estudiante, EstadoEntrega? Estado);
 // Cuántos registros se crearon y cuántos se modificaron
 public record ResultadoGuardado(int Nuevos, int Modificados);
 
+// Una clase dictada: el día en que se tomó asistencia y cómo fue
+public record ResumenClase(DateTime Fecha, int Presentes, int Ausentes)
+{
+    public int Total => Presentes + Ausentes;
+}
+
 /// <summary>
 /// Guarda las planillas de asistencia (H3 y H4) y de entregas (H5).
 /// Cada alumno tiene a lo sumo un registro por fecha o por trabajo:
@@ -19,6 +25,21 @@ public record ResultadoGuardado(int Nuevos, int Modificados);
 /// </summary>
 public class RegistroService
 {
+    // Las clases dictadas de la comisión son los días en que se tomó
+    // asistencia. De la más reciente a la más vieja.
+    public List<ResumenClase> ClasesDe(string comision)
+    {
+        return DatosSistema.Asistencias
+            .Where(a => a.Estudiante.Comision == comision)
+            .GroupBy(a => a.Clase.Fecha.Date)
+            .Select(dia => new ResumenClase(
+                dia.Key,
+                dia.Count(a => a.Estado == EstadoAsistencia.Presente),
+                dia.Count(a => a.Estado != EstadoAsistencia.Presente)))
+            .OrderByDescending(c => c.Fecha)
+            .ToList();
+    }
+
     public ResultadoGuardado GuardarAsistencia(
         DateTime fecha,
         IEnumerable<MarcaAsistencia> marcas)
