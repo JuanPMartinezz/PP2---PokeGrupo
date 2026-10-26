@@ -24,7 +24,7 @@ Registrar entrega
 Se elige el trabajo del calendario (figura como Abierto o Vencido según su fecha) y se marca a cada alumno como Entregado, Fuera de término o No entregado. "Cerrar entrega" deja como No entregado a quienes no tienen ningún registro.
 
 Lista de alumnos
-Cambio de comisión, orden (apellido A-Z, Z-A o mayor riesgo), filtro por contacto (todos, sin contactar, sin contacto hace más de 7 días) y filtro por nivel de riesgo. Cada fila muestra "Apellido, Nombre" y el riesgo; al tocarla se abre la ficha completa.
+Cambio de comisión, orden (apellido A-Z, Z-A o mayor riesgo), filtro por contacto (todos, sin contactar, sin contacto hace más de 7 días, para llamar) y filtro por nivel de riesgo. Cada fila muestra "Apellido, Nombre" y el riesgo, con la marca "Llamar" si corresponde; al tocarla se abre la ficha completa.
 
 Ficha del alumno
 Datos, riesgo, asistencia, entregas y contactos. Desde ahí se registra un contacto (fecha, si atendió o no y qué pasó), se editan los datos o se elimina al alumno.
@@ -47,10 +47,23 @@ H11 - Contactos en la lista: filtros "Sin contactar" y "Sin contacto hace más d
 
 📁 Estructura
 PP2
-├── Models      datos del dominio y textos de los estados
-├── Services    reglas del negocio (riesgo, listado, registro, validaciones), DatosSistema y SQLite
-├── ViewModels  una clase por pantalla, sin tipos de MAUI
-├── Views       páginas XAML con código mínimo; NavegacionMaui y DialogosMaui
-└── PP2.Tests   pruebas xUnit por historia (PruebasPP2)
+├── Models         datos del dominio y textos de los estados
+├── Repositorios   interfaces para guardar y leer datos (sin SQLite)
+├── Services       reglas del negocio: riesgo, listado, registro, nómina, comisiones, calendario, contactos
+├── Datos          SQLite: conexión y un repositorio por tema
+├── ViewModels     una clase por pantalla, sin tipos de MAUI
+├── Views          páginas XAML con código mínimo; NavegacionMaui y DialogosMaui
+└── PP2.Tests      pruebas xUnit por historia (PruebasPP2) con repositorios en memoria
 
-Los ViewModels piden ir a otra pantalla o confirmar algo a través de INavegacion e IDialogos, por eso se pueden probar sin abrir ninguna página.
+Cómo se conectan las capas
+- Los servicios reciben las interfaces de los repositorios por constructor y no conocen SQLite ni MAUI.
+- Los ViewModels reciben los servicios por constructor y piden ir a otra pantalla o confirmar algo a través de INavegacion e IDialogos.
+- MauiProgram arma todo con el contenedor de dependencias.
+- Por eso las pruebas usan repositorios en memoria y no necesitan base de datos ni pantallas.
+
+Reglas que conviene saber
+- Una clase dictada es una fecha en la que se tomó asistencia en la comisión. El porcentaje de ausencias se calcula sobre esas clases, no sobre los registros de cada alumno.
+- Un alumno sin ningún registro figura como "Sin datos", no como riesgo bajo.
+- "Para llamar" es un alumno de riesgo alto (según los umbrales de su comisión) sin contacto en los últimos 7 días.
+- El legajo son solo números, de 3 a 8 dígitos. No se puede tomar asistencia ni registrar un contacto en una fecha futura.
+- Los mensajes de las pantallas son verdes si salió bien y rojos si es un error.

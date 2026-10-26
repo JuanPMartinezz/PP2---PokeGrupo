@@ -37,10 +37,16 @@
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding Abrir}" />
                         </Border.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,Auto">
+                        <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
                             <Label Text="{Binding Nombre}"
                                    VerticalOptions="Center" />
                             <Label Grid.Column="1"
+                                   Text="Llamar"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   TextColor="{StaticResource RiesgoAlto}"
+                                   IsVisible="{Binding Llamar}" />
+                            <Label Grid.Column="2"
                                    Text="{Binding Riesgo}"
                                    FontAttributes="Bold"
                                    VerticalOptions="Center"

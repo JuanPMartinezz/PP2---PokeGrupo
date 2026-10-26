@@ -10,21 +10,23 @@ namespace RegistroAsistencia.ViewModels;
 /// calendario, la lista de alumnos, la asistencia o las entregas de esa
 /// comisión.
 /// </summary>
-public partial class MenuViewModel : ObservableObject
+public partial class MenuViewModel : PantallaBase
 {
     private readonly INavegacion _navegacion;
+
+    private readonly ComisionService _comisiones;
 
     public ObservableCollection<string> Comisiones { get; } = new();
 
     [ObservableProperty]
     private string? comisionSeleccionada;
 
-    [ObservableProperty]
-    private string mensaje = "";
-
-    public MenuViewModel(INavegacion navegacion)
+    public MenuViewModel(
+        INavegacion navegacion,
+        ComisionService comisiones)
     {
         _navegacion = navegacion;
+        _comisiones = comisiones;
 
         Actualizar();
     }
@@ -36,7 +38,7 @@ public partial class MenuViewModel : ObservableObject
 
         Comisiones.Clear();
 
-        foreach (string nombre in DatosSistema.Comisiones)
+        foreach (string nombre in _comisiones.Todas())
         {
             Comisiones.Add(nombre);
         }
@@ -46,7 +48,7 @@ public partial class MenuViewModel : ObservableObject
             ? elegida
             : Comisiones.FirstOrDefault();
 
-        Mensaje = "";
+        LimpiarMensaje();
     }
 
     [RelayCommand]
@@ -71,7 +73,7 @@ public partial class MenuViewModel : ObservableObject
     {
         if (ComisionSeleccionada is null)
         {
-            Mensaje = "Elegí una comisión";
+            Rechazar("Elegí una comisión");
             return;
         }
 

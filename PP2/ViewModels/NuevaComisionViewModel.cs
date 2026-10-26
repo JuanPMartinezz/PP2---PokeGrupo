@@ -7,33 +7,33 @@ namespace RegistroAsistencia.ViewModels;
 /// <summary>
 /// Pantalla para agregar otra comisión además de las que ya hay.
 /// </summary>
-public partial class NuevaComisionViewModel : ObservableObject
+public partial class NuevaComisionViewModel : PantallaBase
 {
     private readonly INavegacion _navegacion;
+
+    private readonly ComisionService _comisiones;
 
     [ObservableProperty]
     private string nombre = "";
 
-    [ObservableProperty]
-    private string mensaje = "";
-
-    public NuevaComisionViewModel(INavegacion navegacion)
+    public NuevaComisionViewModel(
+        INavegacion navegacion,
+        ComisionService comisiones)
     {
         _navegacion = navegacion;
+        _comisiones = comisiones;
     }
 
     [RelayCommand]
     private async Task Guardar()
     {
-        string? error = Validaciones.NombreComision(Nombre);
+        string? error = _comisiones.Agregar(Nombre);
 
         if (error is not null)
         {
-            Mensaje = error;
+            Rechazar(error);
             return;
         }
-
-        DatosSistema.AgregarComision(Nombre);
 
         await _navegacion.VolverAsync();
     }

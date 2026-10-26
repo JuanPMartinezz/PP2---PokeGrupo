@@ -33,14 +33,23 @@ public partial class InicioViewModel : ObservableObject, IActualizable
 {
     private readonly INavegacion _navegacion;
 
+    private readonly ComisionService _comisiones;
+
+    private readonly NominaService _nomina;
+
     public ObservableCollection<ItemComision> Comisiones { get; } = new();
 
     [ObservableProperty]
     private bool sinComisiones;
 
-    public InicioViewModel(INavegacion navegacion)
+    public InicioViewModel(
+        INavegacion navegacion,
+        ComisionService comisiones,
+        NominaService nomina)
     {
         _navegacion = navegacion;
+        _comisiones = comisiones;
+        _nomina = nomina;
 
         Actualizar();
     }
@@ -49,7 +58,7 @@ public partial class InicioViewModel : ObservableObject, IActualizable
     {
         Comisiones.Clear();
 
-        foreach (string nombre in DatosSistema.Comisiones)
+        foreach (string nombre in _comisiones.Todas())
         {
             Comisiones.Add(CrearItem(nombre));
         }
@@ -59,8 +68,7 @@ public partial class InicioViewModel : ObservableObject, IActualizable
 
     private ItemComision CrearItem(string nombre)
     {
-        int cantidad = DatosSistema.Estudiantes
-            .Count(e => e.Comision == nombre);
+        int cantidad = _nomina.DeComision(nombre).Count;
 
         var abrir = new AsyncRelayCommand(() =>
             _navegacion.IrAAsync(Destino.Comision, nombre));

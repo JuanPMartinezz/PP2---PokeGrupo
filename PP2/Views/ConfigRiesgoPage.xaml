@@ -26,7 +26,7 @@
             <Label Text="Desde qué porcentaje el riesgo es alto" />
             <Entry Text="{Binding RiesgoAlto}" Keyboard="Numeric" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
             <Button Text="Guardar configuración" Command="{Binding GuardarCommand}" />
             <Button Text="Volver a los valores por defecto" Command="{Binding RestablecerCommand}" />

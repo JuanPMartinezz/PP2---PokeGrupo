@@ -21,7 +21,7 @@
             <Picker ItemsSource="{Binding Comisiones}"
                     SelectedItem="{Binding ComisionSeleccionada}" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
             <Button Text="{Binding TextoBoton}" Command="{Binding GuardarCommand}" />
 

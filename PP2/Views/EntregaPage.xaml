@@ -47,7 +47,7 @@
 
         <Label Grid.Row="5"
                Text="{Binding Mensaje}"
-               Style="{StaticResource Aviso}" />
+               Style="{StaticResource Mensaje}" />
 
         <Button Grid.Row="6"
                 Text="Guardar entregas"

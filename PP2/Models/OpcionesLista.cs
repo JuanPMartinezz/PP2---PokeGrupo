@@ -13,7 +13,8 @@ public enum FiltroContacto
 {
     Todos,
     SinContactar,
-    SinContactoReciente
+    SinContactoReciente,
+    ParaLlamar
 }
 
 // Filtro por nivel de riesgo

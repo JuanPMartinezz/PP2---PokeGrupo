@@ -24,7 +24,7 @@
                     AutoSize="TextChanges"
                     MinimumHeightRequest="100" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
             <Button Text="Guardar contacto" Command="{Binding GuardarCommand}" />
 

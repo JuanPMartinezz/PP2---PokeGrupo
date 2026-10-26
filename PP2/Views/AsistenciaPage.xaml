@@ -37,7 +37,7 @@
 
         <Label Grid.Row="4"
                Text="{Binding Mensaje}"
-               Style="{StaticResource Aviso}" />
+               Style="{StaticResource Mensaje}" />
 
         <Button Grid.Row="5"
                 Text="Guardar asistencia"

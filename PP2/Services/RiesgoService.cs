@@ -1,10 +1,11 @@
 using RegistroAsistencia.Models;
+using RegistroAsistencia.Repositorios;
 
 namespace RegistroAsistencia.Services;
 
 /// <summary>
-/// Cálculo del riesgo académico (H6). Cada comisión usa sus propios
-/// umbrales (H7).
+/// Riesgo académico de los alumnos (H6, H8, H9 y H11). No conoce la base
+/// de datos ni ninguna pantalla: recibe los repositorios por constructor.
 /// </summary>
 public class RiesgoService
 {
@@ -13,66 +14,79 @@ public class RiesgoService
     public const string NivelBajo = NivelesRiesgo.Bajo;
     public const string NivelSinDatos = NivelesRiesgo.SinDatos;
 
-    // Riesgo según asistencias: porcentaje de ausencias
-    public decimal CalcularPorcentajeAusencias(
-        Estudiante estudiante)
+    private readonly IEstudianteRepositorio _estudiantes;
+
+    private readonly IAsistenciaRepositorio _asistencias;
+
+    private readonly IEntregaRepositorio _entregas;
+
+    private readonly IContactoRepositorio _contactos;
+
+    private readonly UmbralesService _umbrales;
+
+    public RiesgoService(
+        IEstudianteRepositorio estudiantes,
+        IAsistenciaRepositorio asistencias,
+        IEntregaRepositorio entregas,
+        IContactoRepositorio contactos,
+        UmbralesService umbrales)
     {
-        return PorcentajeAusencias(AsistenciasDe(estudiante));
+        _estudiantes = estudiantes;
+        _asistencias = asistencias;
+        _entregas = entregas;
+        _contactos = contactos;
+        _umbrales = umbrales;
     }
 
-    // Riesgo según entregas: promedio del riesgo de cada entrega
-    public decimal CalcularPorcentajeEntregas(
-        Estudiante estudiante)
+    // Todo lo registrado en una comisión, leído una sola vez
+    private sealed record DatosComision(
+        List<Asistencia> Asistencias,
+        List<Entrega> Entregas,
+        List<ContactoEstudiante> Contactos,
+        int ClasesDictadas,
+        UmbralesRiesgo Umbrales);
+
+    // Resultado de todos los alumnos de la comisión
+    public List<ResultadoRiesgo> ObtenerResultados(string comision)
     {
-        return PorcentajeEntregas(
-            EntregasDe(estudiante),
-            DatosSistema.ObtenerUmbrales(estudiante.Comision));
+        DatosComision datos = Cargar(comision);
+
+        return _estudiantes.ObtenerDeComision(comision)
+            .Select(e => Armar(e, datos))
+            .ToList();
+    }
+
+    // Resultado completo de un estudiante: riesgo, nivel, estadísticas
+    // y contactos (H8, H9 y H11)
+    public ResultadoRiesgo ObtenerResultado(Estudiante estudiante)
+    {
+        return Armar(estudiante, Cargar(estudiante.Comision));
     }
 
     // Riesgo académico combinado
-    public decimal CalcularRiesgo(
-        Estudiante estudiante)
+    public decimal CalcularRiesgo(Estudiante estudiante)
     {
-        var asistencias = AsistenciasDe(estudiante);
-        var entregas = EntregasDe(estudiante);
-
-        UmbralesRiesgo umbrales =
-            DatosSistema.ObtenerUmbrales(estudiante.Comision);
-
-        return Combinar(
-            asistencias.Count > 0,
-            PorcentajeAusencias(asistencias),
-            entregas.Count > 0,
-            PorcentajeEntregas(entregas, umbrales),
-            umbrales);
+        return ObtenerResultado(estudiante).PorcentajeRiesgo;
     }
 
-    /*
-     * Con los dos tipos de registro se combinan según los pesos de la
-     * comisión (por defecto 50 % y 50 %). Con uno solo, vale ese. Sin
-     * registros no se penaliza a nadie: el riesgo es 0.
-     */
-    private static decimal Combinar(
-        bool hayAsistencias,
-        decimal riesgoAsistencia,
-        bool hayEntregas,
-        decimal riesgoEntregas,
-        UmbralesRiesgo umbrales)
+    // Porcentaje de las clases dictadas a las que faltó
+    public decimal CalcularPorcentajeAusencias(Estudiante estudiante)
     {
-        if (hayAsistencias && hayEntregas)
-        {
-            return Math.Round(
-                (riesgoAsistencia * umbrales.PesoAsistencia +
-                 riesgoEntregas * umbrales.PesoEntregas) / 100,
-                2);
-        }
+        DatosComision datos = Cargar(estudiante.Comision);
 
-        if (hayAsistencias)
-        {
-            return riesgoAsistencia;
-        }
+        return PorcentajeAusencias(
+            AsistenciasDe(estudiante, datos),
+            datos.ClasesDictadas);
+    }
 
-        return hayEntregas ? riesgoEntregas : 0;
+    // Promedio del riesgo de cada entrega del estudiante
+    public decimal CalcularPorcentajeEntregas(Estudiante estudiante)
+    {
+        DatosComision datos = Cargar(estudiante.Comision);
+
+        return PorcentajeEntregas(
+            EntregasDe(estudiante, datos),
+            datos.Umbrales);
     }
 
     // Nivel de riesgo según los umbrales de la comisión (H7).
@@ -83,38 +97,70 @@ public class RiesgoService
         decimal porcentajeRiesgo,
         int totalRegistros)
     {
-        if (totalRegistros == 0)
-        {
-            return NivelSinDatos;
-        }
-
-        UmbralesRiesgo umbrales =
-            DatosSistema.ObtenerUmbrales(comision);
-
-        if (porcentajeRiesgo >= umbrales.RiesgoAlto)
-        {
-            return NivelAlto;
-        }
-
-        return porcentajeRiesgo >= umbrales.RiesgoMedio
-            ? NivelMedio
-            : NivelBajo;
+        return Nivel(
+            _umbrales.Obtener(comision),
+            porcentajeRiesgo,
+            totalRegistros);
     }
 
-    // Resultado completo de un estudiante: riesgo, nivel, estadísticas
-    // y contactos (H8, H9 y H11)
-    public ResultadoRiesgo ObtenerResultado(
-        Estudiante estudiante)
+    private DatosComision Cargar(string comision)
     {
-        var asistencias = AsistenciasDe(estudiante);
-        var entregas = EntregasDe(estudiante);
+        List<Asistencia> asistencias =
+            _asistencias.ObtenerDeComision(comision);
 
-        decimal riesgo = CalcularRiesgo(estudiante);
+        // Una clase dictada es una fecha en la que se tomó asistencia
+        int clases = asistencias
+            .Select(a => a.Clase.Fecha.Date)
+            .Distinct()
+            .Count();
 
+        return new DatosComision(
+            asistencias,
+            _entregas.ObtenerDeComision(comision),
+            _contactos.ObtenerDeComision(comision),
+            clases,
+            _umbrales.Obtener(comision));
+    }
+
+    private static ResultadoRiesgo Armar(
+        Estudiante estudiante,
+        DatosComision datos)
+    {
+        var asistencias = AsistenciasDe(estudiante, datos);
+        var entregas = EntregasDe(estudiante, datos);
+
+        decimal riesgo = Combinar(
+            asistencias.Count > 0,
+            PorcentajeAusencias(asistencias, datos.ClasesDictadas),
+            entregas.Count > 0,
+            PorcentajeEntregas(entregas, datos.Umbrales),
+            datos.Umbrales);
+
+        ResultadoRiesgo resultado = Estadisticas(
+            estudiante,
+            asistencias,
+            entregas,
+            datos);
+
+        resultado.PorcentajeRiesgo = riesgo;
+        resultado.NivelRiesgo = Nivel(
+            datos.Umbrales,
+            riesgo,
+            asistencias.Count + entregas.Count);
+
+        return resultado;
+    }
+
+    private static ResultadoRiesgo Estadisticas(
+        Estudiante estudiante,
+        List<Asistencia> asistencias,
+        List<Entrega> entregas,
+        DatosComision datos)
+    {
         return new ResultadoRiesgo
         {
             Estudiante = estudiante,
-            TotalClases = asistencias.Count,
+            TotalClases = datos.ClasesDictadas,
             Ausencias = Contar(asistencias, EstadoAsistencia.Ausente),
             Presentes = Contar(asistencias, EstadoAsistencia.Presente),
             TotalEntregas = entregas.Count,
@@ -123,41 +169,33 @@ public class RiesgoService
             EntregadosFueraDeTermino = Contar(
                 entregas,
                 EstadoEntrega.EntregadoFueraDeTermino),
-            PorcentajeRiesgo = riesgo,
-            NivelRiesgo = ObtenerNivel(
-                estudiante.Comision,
-                riesgo,
-                asistencias.Count + entregas.Count),
-            Contactos = ContactosDe(estudiante)
+            Contactos = ContactosDe(estudiante, datos)
         };
     }
 
-    public List<ResultadoRiesgo> ObtenerResultados(string comision)
+    private static List<Asistencia> AsistenciasDe(
+        Estudiante estudiante,
+        DatosComision datos)
     {
-        return DatosSistema.Estudiantes
-            .Where(e => e.Comision == comision)
-            .Select(ObtenerResultado)
-            .ToList();
-    }
-
-    private static List<Asistencia> AsistenciasDe(Estudiante estudiante)
-    {
-        return DatosSistema.Asistencias
+        return datos.Asistencias
             .Where(a => a.Estudiante.Legajo == estudiante.Legajo)
             .ToList();
     }
 
-    private static List<Entrega> EntregasDe(Estudiante estudiante)
+    private static List<Entrega> EntregasDe(
+        Estudiante estudiante,
+        DatosComision datos)
     {
-        return DatosSistema.Entregas
+        return datos.Entregas
             .Where(e => e.Estudiante.Legajo == estudiante.Legajo)
             .ToList();
     }
 
     private static List<ContactoEstudiante> ContactosDe(
-        Estudiante estudiante)
+        Estudiante estudiante,
+        DatosComision datos)
     {
-        return DatosSistema.Contactos
+        return datos.Contactos
             .Where(c => c.Estudiante.Legajo == estudiante.Legajo)
             .OrderByDescending(c => c.Fecha)
             .ToList();
@@ -177,17 +215,23 @@ public class RiesgoService
         return entregas.Count(e => e.Estado == estado);
     }
 
+    /*
+     * El porcentaje se calcula sobre las clases dictadas en la comisión,
+     * no sobre los registros del alumno: una falta entre diez clases es
+     * 10 %, no 100 %.
+     */
     private static decimal PorcentajeAusencias(
-        List<Asistencia> asistencias)
+        List<Asistencia> asistencias,
+        int clasesDictadas)
     {
-        if (asistencias.Count == 0)
+        if (clasesDictadas == 0)
         {
             return 0;
         }
 
         return Math.Round(
             (decimal)Contar(asistencias, EstadoAsistencia.Ausente) /
-            asistencias.Count * 100,
+            clasesDictadas * 100,
             2);
     }
 
@@ -218,5 +262,53 @@ public class RiesgoService
                 umbrales.RiesgoNoEntregado,
             _ => 0
         };
+    }
+
+    /*
+     * Con los dos tipos de registro se combinan según los pesos de la
+     * comisión (por defecto 50 % y 50 %). Con uno solo, vale ese. Sin
+     * registros no se penaliza a nadie: el riesgo es 0.
+     */
+    private static decimal Combinar(
+        bool hayAsistencias,
+        decimal riesgoAsistencia,
+        bool hayEntregas,
+        decimal riesgoEntregas,
+        UmbralesRiesgo umbrales)
+    {
+        if (hayAsistencias && hayEntregas)
+        {
+            return Math.Round(
+                (riesgoAsistencia * umbrales.PesoAsistencia +
+                 riesgoEntregas * umbrales.PesoEntregas) / 100,
+                2);
+        }
+
+        if (hayAsistencias)
+        {
+            return riesgoAsistencia;
+        }
+
+        return hayEntregas ? riesgoEntregas : 0;
+    }
+
+    private static string Nivel(
+        UmbralesRiesgo umbrales,
+        decimal porcentajeRiesgo,
+        int totalRegistros)
+    {
+        if (totalRegistros == 0)
+        {
+            return NivelSinDatos;
+        }
+
+        if (porcentajeRiesgo >= umbrales.RiesgoAlto)
+        {
+            return NivelAlto;
+        }
+
+        return porcentajeRiesgo >= umbrales.RiesgoMedio
+            ? NivelMedio
+            : NivelBajo;
     }
 }

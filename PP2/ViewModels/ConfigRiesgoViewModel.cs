@@ -11,9 +11,11 @@ namespace RegistroAsistencia.ViewModels;
 /// la asistencia contra las entregas, cuánto riesgo suma cada estado de
 /// entrega y desde qué porcentaje el riesgo es medio o alto.
 /// </summary>
-public partial class ConfigRiesgoViewModel : ObservableObject
+public partial class ConfigRiesgoViewModel : PantallaBase
 {
     private readonly string _comision;
+
+    private readonly UmbralesService _umbrales;
 
     public string Comision => _comision;
 
@@ -33,14 +35,12 @@ public partial class ConfigRiesgoViewModel : ObservableObject
     [ObservableProperty]
     private string riesgoAlto = "";
 
-    [ObservableProperty]
-    private string mensaje = "";
-
-    public ConfigRiesgoViewModel(string comision)
+    public ConfigRiesgoViewModel(string comision, UmbralesService umbrales)
     {
         _comision = comision;
+        _umbrales = umbrales;
 
-        Mostrar(DatosSistema.ObtenerUmbrales(comision));
+        Mostrar(umbrales.Obtener(comision));
     }
 
     private void Mostrar(UmbralesRiesgo u)
@@ -95,29 +95,28 @@ public partial class ConfigRiesgoViewModel : ObservableObject
 
         if (umbrales is null)
         {
-            Mensaje = "Completá todos los campos con números";
+            Rechazar("Completá todos los campos con números");
             return;
         }
 
-        try
-        {
-            DatosSistema.GuardarUmbrales(_comision, umbrales);
+        string? error = _umbrales.Guardar(_comision, umbrales);
 
-            Mensaje = $"Configuración guardada para {_comision}";
-        }
-        catch (InvalidOperationException ex)
+        if (error is not null)
         {
-            Mensaje = ex.Message;
+            Rechazar(error);
+            return;
         }
+
+        Informar($"Configuración guardada para {_comision}");
     }
 
     [RelayCommand]
     private void Restablecer()
     {
-        DatosSistema.RestablecerUmbrales(_comision);
+        _umbrales.Restablecer(_comision);
 
-        Mostrar(DatosSistema.ObtenerUmbrales(_comision));
+        Mostrar(_umbrales.Obtener(_comision));
 
-        Mensaje = "Se volvió a los valores por defecto";
+        Informar("Se volvió a los valores por defecto");
     }
 }

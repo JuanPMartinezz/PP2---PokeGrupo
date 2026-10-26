@@ -9,24 +9,42 @@ namespace RegistroAsistencia.ViewModels;
 /// Administración de datos: renombrar, vaciar o eliminar una comisión y
 /// borrar todo. Las acciones que borran piden confirmación.
 /// </summary>
-public partial class AdministrarViewModel : ObservableObject
+public partial class AdministrarViewModel : PantallaBase
 {
     private readonly IDialogos _dialogos;
 
-    public ObservableCollection<string> Comisiones =>
-        DatosSistema.Comisiones;
+    private readonly ComisionService _comisiones;
+
+    public ObservableCollection<string> Comisiones { get; } = new();
 
     [ObservableProperty]
     private string? comisionSeleccionada;
 
-    [ObservableProperty]
-    private string mensaje = "";
-
-    public AdministrarViewModel(IDialogos dialogos)
+    public AdministrarViewModel(
+        IDialogos dialogos,
+        ComisionService comisiones)
     {
         _dialogos = dialogos;
+        _comisiones = comisiones;
 
-        comisionSeleccionada = Comisiones.FirstOrDefault();
+        Recargar(null);
+    }
+
+    // Vuelve a leer las comisiones y deja elegida la indicada
+    // (o la primera si ya no existe)
+    private void Recargar(string? elegida)
+    {
+        Comisiones.Clear();
+
+        foreach (string nombre in _comisiones.Todas())
+        {
+            Comisiones.Add(nombre);
+        }
+
+        ComisionSeleccionada = elegida is not null &&
+                               Comisiones.Contains(elegida)
+            ? elegida
+            : Comisiones.FirstOrDefault();
     }
 
     private bool HayComision()
@@ -36,7 +54,7 @@ public partial class AdministrarViewModel : ObservableObject
             return true;
         }
 
-        Mensaje = "Elegí una comisión";
+        Rechazar("Elegí una comisión");
 
         return false;
     }
@@ -54,28 +72,25 @@ public partial class AdministrarViewModel : ObservableObject
             $"Nuevo nombre para {ComisionSeleccionada}",
             "Comisión C");
 
-        if (nuevo is null)
+        if (nuevo is not null)
         {
-            return;
+            AplicarRenombre(ComisionSeleccionada!, nuevo);
         }
-
-        AplicarRenombre(ComisionSeleccionada!, nuevo);
     }
 
     private void AplicarRenombre(string actual, string nuevo)
     {
-        try
-        {
-            DatosSistema.RenombrarComision(actual, nuevo);
+        string? error = _comisiones.Renombrar(actual, nuevo);
 
-            ComisionSeleccionada = nuevo.Trim();
-
-            Mensaje = $"{actual} ahora se llama {nuevo.Trim()}";
-        }
-        catch (InvalidOperationException ex)
+        if (error is not null)
         {
-            Mensaje = ex.Message;
+            Rechazar(error);
+            return;
         }
+
+        Recargar(nuevo.Trim());
+
+        Informar($"{actual} ahora se llama {nuevo.Trim()}");
     }
 
     [RelayCommand]
@@ -94,9 +109,9 @@ public partial class AdministrarViewModel : ObservableObject
 
         if (acepta)
         {
-            DatosSistema.VaciarComision(ComisionSeleccionada!);
+            _comisiones.Vaciar(ComisionSeleccionada!);
 
-            Mensaje = $"{ComisionSeleccionada} quedó sin alumnos";
+            Informar($"{ComisionSeleccionada} quedó sin alumnos");
         }
     }
 
@@ -118,11 +133,11 @@ public partial class AdministrarViewModel : ObservableObject
         {
             string eliminada = ComisionSeleccionada!;
 
-            DatosSistema.EliminarComision(eliminada);
+            _comisiones.Eliminar(eliminada);
 
-            ComisionSeleccionada = Comisiones.FirstOrDefault();
+            Recargar(null);
 
-            Mensaje = $"Se eliminó {eliminada}";
+            Informar($"Se eliminó {eliminada}");
         }
     }
 
@@ -137,11 +152,11 @@ public partial class AdministrarViewModel : ObservableObject
 
         if (acepta)
         {
-            DatosSistema.BorrarTodosLosRegistros();
+            _comisiones.BorrarTodo();
 
-            ComisionSeleccionada = Comisiones.FirstOrDefault();
+            Recargar(null);
 
-            Mensaje = "Se borraron todos los datos";
+            Informar("Se borraron todos los datos");
         }
     }
 }

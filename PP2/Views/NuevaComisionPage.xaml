@@ -9,7 +9,7 @@
         <Label Text="Nombre de la comisión" />
         <Entry Text="{Binding Nombre}" Placeholder="Ej.: Comisión C" />
 
-        <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+        <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
         <Button Text="Guardar comisión" Command="{Binding GuardarCommand}" />
 

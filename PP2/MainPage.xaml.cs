@@ -4,16 +4,16 @@ using RegistroAsistencia.Views;
 namespace RegistroAsistencia;
 
 /// <summary>
-/// Pantalla de inicio. Es la primera de la aplicación: arma su ViewModel
-/// con la navegación y no tiene más lógica que esa.
+/// Pantalla de inicio, la primera de la aplicación. Recibe su ViewModel
+/// ya armado y no tiene más lógica que esa.
 /// </summary>
 public partial class MainPage : ContentPage
 {
-    public MainPage()
+    public MainPage(InicioViewModel viewModel)
     {
         InitializeComponent();
 
-        BindingContext = new InicioViewModel(new NavegacionMaui());
+        BindingContext = viewModel;
 
         NavegacionMaui.ActualizarAlAparecer(this);
     }

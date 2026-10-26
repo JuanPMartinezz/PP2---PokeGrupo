@@ -8,10 +8,6 @@ namespace RegistroAsistencia.Services;
 /// </summary>
 public static class ListadoAlumnos
 {
-    // Un alumno cuyo último contacto es más viejo que esto
-    // vuelve a figurar como pendiente
-    public const int DiasSinContactoReciente = 7;
-
     public static List<ResultadoRiesgo> Aplicar(
         IEnumerable<ResultadoRiesgo> resultados,
         OrdenLista orden,
@@ -36,7 +32,10 @@ public static class ListadoAlumnos
             FiltroContacto.SinContactar => !resultado.Contactado,
             FiltroContacto.SinContactoReciente =>
                 resultado.SinContactoDesde(
-                    hoy.AddDays(-DiasSinContactoReciente)),
+                    hoy.AddDays(
+                        -ResultadoRiesgo.DiasSinContactoReciente)),
+            FiltroContacto.ParaLlamar =>
+                resultado.ParaLlamar(hoy),
             _ => true
         };
     }

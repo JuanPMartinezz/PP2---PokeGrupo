@@ -1,5 +1,5 @@
+using Microsoft.Extensions.DependencyInjection;
 using RegistroAsistencia.ViewModels;
-using RegistroAsistencia.Views;
 using System.ComponentModel;
 
 namespace RegistroAsistencia
@@ -8,11 +8,11 @@ namespace RegistroAsistencia
     {
         private readonly MenuViewModel _menu;
 
-        public AppShell()
+        public AppShell(IServiceProvider servicios)
         {
             InitializeComponent();
 
-            _menu = new MenuViewModel(new NavegacionMaui());
+            _menu = servicios.GetRequiredService<MenuViewModel>();
             PanelMenu.BindingContext = _menu;
 
             PropertyChanged += AlCambiarElMenu;

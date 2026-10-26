@@ -47,11 +47,11 @@ public partial class FilaAsistencia : ObservableObject
 /// La primera vez se guarda sin preguntar; si se corrige algo que ya
 /// estaba guardado, se pide confirmación.
 /// </summary>
-public partial class AsistenciaViewModel : ObservableObject
+public partial class AsistenciaViewModel : PantallaBase
 {
     private readonly string _comision;
 
-    private readonly INavegacion _navegacion;
+    private readonly NominaService _nomina;
 
     private readonly IDialogos _dialogos;
 
@@ -67,19 +67,16 @@ public partial class AsistenciaViewModel : ObservableObject
     private DateTime fecha = DateTime.Today;
 
     [ObservableProperty]
-    private string mensaje = "";
-
-    [ObservableProperty]
     private string resumen = "";
 
     public AsistenciaViewModel(
         string comision,
-        INavegacion navegacion,
+        NominaService nomina,
         IDialogos dialogos,
         RegistroService registro)
     {
         _comision = comision;
-        _navegacion = navegacion;
+        _nomina = nomina;
         _dialogos = dialogos;
         _registro = registro;
 
@@ -94,9 +91,9 @@ public partial class AsistenciaViewModel : ObservableObject
     private void CargarFilas()
     {
         Filas.Clear();
-        Mensaje = "";
+        LimpiarMensaje();
 
-        foreach (Estudiante e in DatosSistema.EstudiantesDe(_comision))
+        foreach (Estudiante e in _nomina.DeComision(_comision))
         {
             Filas.Add(CrearFila(e));
         }
@@ -106,13 +103,13 @@ public partial class AsistenciaViewModel : ObservableObject
 
     private FilaAsistencia CrearFila(Estudiante estudiante)
     {
-        Asistencia? guardada = DatosSistema.BuscarAsistencia(
+        EstadoAsistencia? guardada = _registro.AsistenciaDe(
             estudiante.Legajo,
             Fecha);
 
         bool? presente = guardada is null
             ? null
-            : guardada.Estado == EstadoAsistencia.Presente;
+            : guardada == EstadoAsistencia.Presente;
 
         var fila = new FilaAsistencia(estudiante, presente);
 
@@ -144,7 +141,7 @@ public partial class AsistenciaViewModel : ObservableObject
 
         if (error is not null)
         {
-            Mensaje = error;
+            Rechazar(error);
             return;
         }
 
@@ -155,7 +152,7 @@ public partial class AsistenciaViewModel : ObservableObject
 
         ResultadoGuardado resultado = GuardarMarcas();
 
-        Mensaje = TextoResultado(resultado);
+        Informar(TextoResultado(resultado));
     }
 
     // Pregunta solo si se está cambiando algo que ya estaba guardado

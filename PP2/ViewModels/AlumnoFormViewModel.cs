@@ -10,14 +10,15 @@ namespace RegistroAsistencia.ViewModels;
 /// Formulario para cargar un alumno nuevo (H1) o para corregir los datos
 /// de uno que ya existe. El legajo no se puede cambiar.
 /// </summary>
-public partial class AlumnoFormViewModel : ObservableObject
+public partial class AlumnoFormViewModel : PantallaBase
 {
     private readonly INavegacion _navegacion;
 
+    private readonly NominaService _nomina;
+
     private readonly Estudiante? _original;
 
-    public ObservableCollection<string> Comisiones =>
-        DatosSistema.Comisiones;
+    public ObservableCollection<string> Comisiones { get; }
 
     public bool EsEdicion => _original is not null;
 
@@ -41,18 +42,19 @@ public partial class AlumnoFormViewModel : ObservableObject
     [ObservableProperty]
     private string? comisionSeleccionada;
 
-    [ObservableProperty]
-    private string mensaje = "";
-
     public AlumnoFormViewModel(
         INavegacion navegacion,
+        NominaService nomina,
+        ComisionService comisiones,
         string? legajoAEditar = null)
     {
         _navegacion = navegacion;
+        _nomina = nomina;
+        Comisiones = new ObservableCollection<string>(comisiones.Todas());
 
         if (legajoAEditar is not null)
         {
-            _original = DatosSistema.BuscarEstudiante(legajoAEditar);
+            _original = nomina.Buscar(legajoAEditar);
         }
 
         CargarDatosIniciales();
@@ -71,93 +73,35 @@ public partial class AlumnoFormViewModel : ObservableObject
         }
     }
 
-    private string? Validar()
-    {
-        string? error = Validaciones.Alumno(
-            Nombre,
-            Apellido,
-            Legajo,
-            ComisionSeleccionada);
-
-        if (error is null && !EsEdicion)
-        {
-            error = Validaciones.LegajoNuevo(Legajo);
-        }
-
-        return error;
-    }
-
     [RelayCommand]
     private async Task Guardar()
     {
-        string? error = Validar();
+        string? error = EsEdicion
+            ? _nomina.Actualizar(Legajo, Nombre, Apellido, ComisionSeleccionada)
+            : _nomina.Agregar(Nombre, Apellido, Legajo, ComisionSeleccionada);
 
         if (error is not null)
         {
-            Mensaje = error;
-            return;
-        }
-
-        if (!Aplicar())
-        {
+            Rechazar(error);
             return;
         }
 
         if (EsEdicion)
         {
             await _navegacion.VolverAsync();
+            return;
         }
+
+        AvisarAltaYLimpiar();
     }
 
-    // Guarda el alumno. Devuelve falso si no se pudo y deja el motivo en Mensaje
-    private bool Aplicar()
+    private void AvisarAltaYLimpiar()
     {
-        try
-        {
-            if (_original is null)
-            {
-                AgregarNuevo();
-            }
-            else
-            {
-                ActualizarExistente(_original);
-            }
-
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Mensaje = $"No se pudo guardar el alumno: {ex.Message}";
-
-            return false;
-        }
-    }
-
-    private void AgregarNuevo()
-    {
-        var nuevo = new Estudiante
-        {
-            Nombre = Nombre.Trim(),
-            Apellido = Apellido.Trim(),
-            Legajo = Legajo.Trim(),
-            Comision = ComisionSeleccionada!
-        };
-
-        DatosSistema.AgregarEstudiante(nuevo);
-
-        Mensaje = $"{nuevo} agregado a {nuevo.Comision}";
+        Informar($"{Apellido.Trim()}, {Nombre.Trim()} agregado a " +
+                 $"{ComisionSeleccionada}");
 
         Nombre = "";
         Apellido = "";
         Legajo = "";
-    }
-
-    private void ActualizarExistente(Estudiante estudiante)
-    {
-        estudiante.Nombre = Nombre.Trim();
-        estudiante.Apellido = Apellido.Trim();
-        estudiante.Comision = ComisionSeleccionada!;
-
-        DatosSistema.ActualizarEstudiante(estudiante);
     }
 }

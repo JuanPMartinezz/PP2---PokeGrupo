@@ -17,6 +17,9 @@ public sealed class ItemAlumno
 
     public ResultadoRiesgo Resultado { get; }
 
+    // Riesgo alto y sin contacto reciente: hay que llamarlo
+    public bool Llamar => Resultado.ParaLlamar(DateTime.Today);
+
     public string Nombre =>
         $"{Resultado.Estudiante.Apellido}, {Resultado.Estudiante.Nombre}";
 
@@ -38,8 +41,7 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
 
     private readonly RiesgoService _riesgo;
 
-    public ObservableCollection<string> Comisiones =>
-        DatosSistema.Comisiones;
+    public ObservableCollection<string> Comisiones { get; }
 
     public IReadOnlyList<string> Ordenes { get; } = new[]
     {
@@ -52,7 +54,8 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
     {
         "Todos",
         "Sin contactar",
-        $"Sin contacto hace más de {ListadoAlumnos.DiasSinContactoReciente} días"
+        $"Sin contacto hace más de {ResultadoRiesgo.DiasSinContactoReciente} días",
+        "Para llamar (riesgo alto, sin contacto reciente)"
     };
 
     public IReadOnlyList<string> FiltrosNivel { get; } = new[]
@@ -83,10 +86,12 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
     public ListaAlumnosViewModel(
         string comision,
         INavegacion navegacion,
-        RiesgoService riesgo)
+        RiesgoService riesgo,
+        ComisionService comisiones)
     {
         _navegacion = navegacion;
         _riesgo = riesgo;
+        Comisiones = new ObservableCollection<string>(comisiones.Todas());
         comisionSeleccionada = comision;
 
         Actualizar();

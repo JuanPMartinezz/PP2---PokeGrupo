@@ -11,9 +11,11 @@ namespace RegistroAsistencia.ViewModels;
 /// fecha y las clases dictadas. Las clases no se cargan: salen de los
 /// días en que se tomó asistencia y muestran cómo fue cada una.
 /// </summary>
-public partial class CalendarioViewModel : ObservableObject, IActualizable
+public partial class CalendarioViewModel : PantallaBase, IActualizable
 {
     private readonly string _comision;
+
+    private readonly CalendarioService _calendario;
 
     private readonly RegistroService _registro;
 
@@ -30,14 +32,15 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     private string descripcion = "";
 
     [ObservableProperty]
-    private string mensaje = "";
-
-    [ObservableProperty]
     private string cuatrimestre = "";
 
-    public CalendarioViewModel(string comision, RegistroService registro)
+    public CalendarioViewModel(
+        string comision,
+        CalendarioService calendario,
+        RegistroService registro)
     {
         _comision = comision;
+        _calendario = calendario;
         _registro = registro;
 
         Actualizar();
@@ -60,9 +63,7 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     {
         Actividades.Clear();
 
-        foreach (ActividadCalendario a in DatosSistema
-                     .TrabajosDelCalendario(_comision)
-                     .OrderByDescending(a => a.Fecha))
+        foreach (ActividadCalendario a in _calendario.TrabajosDe(_comision))
         {
             Actividades.Add($"{Formatos.FechaCorta(a.Fecha)} · {a.Descripcion}");
         }
@@ -88,41 +89,20 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     [RelayCommand]
     private void Agregar()
     {
-        string? error = Validaciones.Trabajo(Descripcion, _comision, Fecha);
+        string? error = _calendario.Agregar(
+            _comision,
+            TipoActividad.Trabajo,
+            Fecha,
+            Descripcion);
 
         if (error is not null)
         {
-            Mensaje = error;
+            Rechazar(error);
             return;
         }
 
-        try
-        {
-            Guardar();
-        }
-        catch (InvalidOperationException ex)
-        {
-            Mensaje = ex.Message;
-        }
-    }
-
-    private void Guardar()
-    {
-        string nombre = Descripcion.Trim();
-
-        DatosSistema.ObtenerOCrearTrabajo(nombre);
-
-        DatosSistema.AgregarActividadCalendario(new ActividadCalendario
-        {
-            Comision = _comision,
-            Cuatrimestre = Cuatrimestres.De(Fecha),
-            Fecha = Fecha.Date,
-            Tipo = TipoActividad.Trabajo,
-            Descripcion = nombre
-        });
-
         Descripcion = "";
-        Mensaje = "Trabajo agregado al calendario";
+        Informar("Trabajo agregado al calendario");
 
         Actualizar();
     }

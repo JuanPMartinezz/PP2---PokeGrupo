@@ -26,7 +26,7 @@
             <Button Text="Tomar asistencia" Command="{Binding AsistenciaCommand}" />
             <Button Text="Registrar entrega" Command="{Binding EntregaCommand}" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
         </VerticalStackLayout>
     </Shell.FlyoutContent>

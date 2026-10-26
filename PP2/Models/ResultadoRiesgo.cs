@@ -2,9 +2,14 @@
 
 public class ResultadoRiesgo
 {
+    // Un alumno cuyo último contacto es más viejo que esto
+    // vuelve a figurar como pendiente
+    public const int DiasSinContactoReciente = 7;
+
     public Estudiante Estudiante { get; set; } = new();
 
-    // Asistencias
+    // Asistencias. TotalClases son las clases dictadas en la comisión
+    // (fechas en las que se tomó asistencia), no solo las del alumno
     public int TotalClases { get; set; }
 
     public int Ausencias { get; set; }
@@ -57,5 +62,13 @@ public class ResultadoRiesgo
     {
         return UltimoContacto is not DateTime ultimo ||
                ultimo.Date < limite.Date;
+    }
+
+    // Hay que llamarlo: riesgo alto (según los umbrales de su comisión)
+    // y sin contacto reciente
+    public bool ParaLlamar(DateTime hoy)
+    {
+        return NivelRiesgo == NivelesRiesgo.Alto &&
+               SinContactoDesde(hoy.AddDays(-DiasSinContactoReciente));
     }
 }

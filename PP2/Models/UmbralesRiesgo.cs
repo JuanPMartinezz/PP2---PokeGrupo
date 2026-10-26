@@ -42,42 +42,31 @@ public class UmbralesRiesgo
     /// </summary>
     public string? Validar()
     {
-        if (!EsPorcentaje(PesoAsistencia))
-        {
-            return "El peso de la asistencia no es válido: debe estar entre 0 y 100";
-        }
+        return Porcentaje(PesoAsistencia, "El peso de la asistencia")
+               ?? Porcentaje(RiesgoFueraDeTermino, "El riesgo por entrega fuera de término")
+               ?? Porcentaje(RiesgoNoEntregado, "El riesgo por entrega no entregada")
+               ?? Orden(
+                   RiesgoFueraDeTermino,
+                   RiesgoNoEntregado,
+                   "El riesgo por entrega fuera de término no es válido: no puede ser mayor que el de una entrega no entregada")
+               ?? Porcentaje(RiesgoMedio, "El umbral de riesgo medio")
+               ?? Porcentaje(RiesgoAlto, "El umbral de riesgo alto")
+               ?? Orden(
+                   RiesgoMedio,
+                   RiesgoAlto,
+                   "El umbral de riesgo medio no es válido: no puede ser mayor que el de riesgo alto");
+    }
 
-        if (!EsPorcentaje(RiesgoFueraDeTermino))
-        {
-            return "El riesgo por entrega fuera de término no es válido: debe estar entre 0 y 100";
-        }
+    private static string? Porcentaje(decimal valor, string nombre)
+    {
+        return EsPorcentaje(valor)
+            ? null
+            : $"{nombre} no es válido: debe estar entre 0 y 100";
+    }
 
-        if (!EsPorcentaje(RiesgoNoEntregado))
-        {
-            return "El riesgo por entrega no entregada no es válido: debe estar entre 0 y 100";
-        }
-
-        if (RiesgoFueraDeTermino > RiesgoNoEntregado)
-        {
-            return "El riesgo por entrega fuera de término no es válido: no puede ser mayor que el de una entrega no entregada";
-        }
-
-        if (!EsPorcentaje(RiesgoMedio))
-        {
-            return "El umbral de riesgo medio no es válido: debe estar entre 0 y 100";
-        }
-
-        if (!EsPorcentaje(RiesgoAlto))
-        {
-            return "El umbral de riesgo alto no es válido: debe estar entre 0 y 100";
-        }
-
-        if (RiesgoMedio > RiesgoAlto)
-        {
-            return "El umbral de riesgo medio no es válido: no puede ser mayor que el de riesgo alto";
-        }
-
-        return null;
+    private static string? Orden(decimal menor, decimal mayor, string mensaje)
+    {
+        return menor > mayor ? mensaje : null;
     }
 
     private static bool EsPorcentaje(decimal valor)

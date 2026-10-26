@@ -94,11 +94,15 @@ public partial class FilaEntrega : ObservableObject
 /// entregado. Al cerrar la entrega, los que no tienen nada quedan como
 /// "No entregado".
 /// </summary>
-public partial class EntregaViewModel : ObservableObject, IActualizable
+public partial class EntregaViewModel : PantallaBase, IActualizable
 {
     private readonly string _comision;
 
     private readonly INavegacion _navegacion;
+
+    private readonly NominaService _nomina;
+
+    private readonly CalendarioService _calendario;
 
     private readonly IDialogos _dialogos;
 
@@ -116,9 +120,6 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     private ItemTrabajo? trabajoSeleccionado;
 
     [ObservableProperty]
-    private string mensaje = "";
-
-    [ObservableProperty]
     private string resumen = "";
 
     public bool HayTrabajos => Trabajos.Count > 0;
@@ -130,11 +131,15 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     public EntregaViewModel(
         string comision,
         INavegacion navegacion,
+        NominaService nomina,
+        CalendarioService calendario,
         IDialogos dialogos,
         RegistroService registro)
     {
         _comision = comision;
         _navegacion = navegacion;
+        _nomina = nomina;
+        _calendario = calendario;
         _dialogos = dialogos;
         _registro = registro;
 
@@ -148,8 +153,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
 
         Trabajos.Clear();
 
-        foreach (ActividadCalendario a in
-                 DatosSistema.TrabajosDelCalendario(_comision))
+        foreach (ActividadCalendario a in _calendario.TrabajosDe(_comision))
         {
             Trabajos.Add(new ItemTrabajo(a.Descripcion, a.Fecha));
         }
@@ -172,7 +176,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     private void CargarFilas()
     {
         Filas.Clear();
-        Mensaje = "";
+        LimpiarMensaje();
 
         if (TrabajoSeleccionado is null)
         {
@@ -180,7 +184,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
             return;
         }
 
-        foreach (Estudiante e in DatosSistema.EstudiantesDe(_comision))
+        foreach (Estudiante e in _nomina.DeComision(_comision))
         {
             Filas.Add(CrearFila(e));
         }
@@ -192,11 +196,11 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     {
         Trabajo trabajo = TrabajoActual();
 
-        Entrega? guardada = DatosSistema.BuscarEntrega(
+        EstadoEntrega? guardada = _registro.EntregaDe(
             estudiante.Legajo,
             trabajo.Id);
 
-        var fila = new FilaEntrega(estudiante, guardada?.Estado);
+        var fila = new FilaEntrega(estudiante, guardada);
 
         fila.PropertyChanged += (_, _) => ActualizarResumen();
 
@@ -205,7 +209,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
 
     private Trabajo TrabajoActual()
     {
-        return DatosSistema.ObtenerOCrearTrabajo(
+        return _calendario.ObtenerTrabajo(
             TrabajoSeleccionado!.Descripcion);
     }
 
@@ -227,7 +231,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     {
         if (!HayTrabajoElegido)
         {
-            Mensaje = "Elegí un trabajo o agregá uno nuevo";
+            Rechazar("Elegí un trabajo o agregá uno nuevo");
             return;
         }
 
@@ -246,8 +250,8 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
 
         ConfirmarFilas();
 
-        Mensaje = $"Entregas guardadas: {resultado.Nuevos} nuevas, " +
-                  $"{resultado.Modificados} corregidas";
+        Informar($"Entregas guardadas: {resultado.Nuevos} nuevas, " +
+                 $"{resultado.Modificados} corregidas");
     }
 
     [RelayCommand]
@@ -255,7 +259,7 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
     {
         if (!HayTrabajoElegido)
         {
-            Mensaje = "Elegí un trabajo o agregá uno nuevo";
+            Rechazar("Elegí un trabajo o agregá uno nuevo");
             return;
         }
 
@@ -276,7 +280,8 @@ public partial class EntregaViewModel : ObservableObject, IActualizable
 
         CargarFilas();
 
-        Mensaje = $"Entrega cerrada: {cerrados} alumnos quedaron como \"No entregado\"";
+        Informar($"Entrega cerrada: {cerrados} alumnos quedaron como " +
+                 "\"No entregado\"");
     }
 
     // Pregunta solo si se está cambiando algo que ya estaba guardado

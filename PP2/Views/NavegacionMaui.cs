@@ -1,19 +1,22 @@
+using Microsoft.Extensions.DependencyInjection;
 using RegistroAsistencia.Services;
 using RegistroAsistencia.ViewModels;
 
 namespace RegistroAsistencia.Views;
 
 /// <summary>
-/// Abre cada pantalla con su ViewModel. Es el único lugar que conoce
-/// qué página va con qué ViewModel.
+/// Abre cada pantalla con su ViewModel. Los ViewModels se crean con el
+/// contenedor de dependencias, que les pasa los servicios que piden; el
+/// dato del destino (comisión o legajo) se entrega como argumento.
 /// </summary>
 public sealed class NavegacionMaui : INavegacion
 {
-    private readonly IDialogos _dialogos = new DialogosMaui();
+    private readonly IServiceProvider _servicios;
 
-    private readonly RiesgoService _riesgo = new();
-
-    private readonly RegistroService _registro = new();
+    public NavegacionMaui(IServiceProvider servicios)
+    {
+        _servicios = servicios;
+    }
 
     public async Task IrAAsync(Destino destino, string? dato = null)
     {
@@ -45,24 +48,12 @@ public sealed class NavegacionMaui : INavegacion
     {
         return destino switch
         {
-            Destino.Comision => Armar(
-                new ComisionPage(),
-                new ComisionDetalleViewModel(dato, this)),
-            Destino.Asistencia => Armar(
-                new AsistenciaPage(),
-                new AsistenciaViewModel(dato, this, _dialogos, _registro)),
-            Destino.Entrega => Armar(
-                new EntregaPage(),
-                new EntregaViewModel(dato, this, _dialogos, _registro)),
-            Destino.Lista => Armar(
-                new ListaAlumnosPage(),
-                new ListaAlumnosViewModel(dato, this, _riesgo)),
-            Destino.Ficha => Armar(
-                new FichaAlumnoPage(),
-                new FichaAlumnoViewModel(dato, this, _dialogos, _riesgo)),
-            Destino.Contacto => Armar(
-                new ContactoPage(),
-                new ContactoViewModel(dato, this)),
+            Destino.Comision => Armar<ComisionPage, ComisionDetalleViewModel>(dato),
+            Destino.Asistencia => Armar<AsistenciaPage, AsistenciaViewModel>(dato),
+            Destino.Entrega => Armar<EntregaPage, EntregaViewModel>(dato),
+            Destino.Lista => Armar<ListaAlumnosPage, ListaAlumnosViewModel>(dato),
+            Destino.Ficha => Armar<FichaAlumnoPage, FichaAlumnoViewModel>(dato),
+            Destino.Contacto => Armar<ContactoPage, ContactoViewModel>(dato),
             _ => CrearPaginaAuxiliar(destino, dato)
         };
     }
@@ -71,31 +62,27 @@ public sealed class NavegacionMaui : INavegacion
     {
         return destino switch
         {
-            Destino.Calendario => Armar(
-                new CalendarioPage(),
-                new CalendarioViewModel(dato, _registro)),
-            Destino.ConfigRiesgo => Armar(
-                new ConfigRiesgoPage(),
-                new ConfigRiesgoViewModel(dato)),
-            Destino.NuevaComision => Armar(
-                new NuevaComisionPage(),
-                new NuevaComisionViewModel(this)),
-            Destino.AlumnoNuevo => Armar(
-                new AlumnoFormPage(),
-                new AlumnoFormViewModel(this)),
-            Destino.AlumnoEditar => Armar(
-                new AlumnoFormPage(),
-                new AlumnoFormViewModel(this, dato)),
-            Destino.Administrar => Armar(
-                new AdministrarPage(),
-                new AdministrarViewModel(_dialogos)),
+            Destino.Calendario => Armar<CalendarioPage, CalendarioViewModel>(dato),
+            Destino.ConfigRiesgo => Armar<ConfigRiesgoPage, ConfigRiesgoViewModel>(dato),
+            Destino.NuevaComision => Armar<NuevaComisionPage, NuevaComisionViewModel>(),
+            Destino.AlumnoNuevo => Armar<AlumnoFormPage, AlumnoFormViewModel>(),
+            Destino.AlumnoEditar => Armar<AlumnoFormPage, AlumnoFormViewModel>(dato),
+            Destino.Administrar => Armar<AdministrarPage, AdministrarViewModel>(),
             _ => throw new ArgumentOutOfRangeException(nameof(destino))
         };
     }
 
-    private static ContentPage Armar(ContentPage pagina, object viewModel)
+    // Crea la página y su ViewModel; los argumentos son los datos
+    // que el ViewModel necesita además de los servicios
+    private ContentPage Armar<TPagina, TViewModel>(params object[] argumentos)
+        where TPagina : ContentPage, new()
     {
-        pagina.BindingContext = viewModel;
+        var pagina = new TPagina
+        {
+            BindingContext = ActivatorUtilities.CreateInstance<TViewModel>(
+                _servicios,
+                argumentos)
+        };
 
         ActualizarAlAparecer(pagina);
 

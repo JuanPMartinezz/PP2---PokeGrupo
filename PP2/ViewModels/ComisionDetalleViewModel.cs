@@ -15,6 +15,10 @@ public partial class ComisionDetalleViewModel : ObservableObject, IActualizable
 
     private readonly INavegacion _navegacion;
 
+    private readonly NominaService _nomina;
+
+    private readonly RegistroService _registro;
+
     public string Comision => _comision;
 
     public string FechaHoy => Formatos.FechaLarga(DateTime.Today);
@@ -27,21 +31,25 @@ public partial class ComisionDetalleViewModel : ObservableObject, IActualizable
 
     public ComisionDetalleViewModel(
         string comision,
-        INavegacion navegacion)
+        INavegacion navegacion,
+        NominaService nomina,
+        RegistroService registro)
     {
         _comision = comision;
         _navegacion = navegacion;
+        _nomina = nomina;
+        _registro = registro;
 
         Actualizar();
     }
 
     public void Actualizar()
     {
-        int alumnos = DatosSistema.EstudiantesDe(_comision).Count;
+        int alumnos = _nomina.DeComision(_comision).Count;
 
         ResumenAlumnos = $"{DateTime.Today.Year} · {alumnos} alumnos";
 
-        EstadoAsistencia = DatosSistema.HayAsistencia(_comision, DateTime.Today)
+        EstadoAsistencia = _registro.HayAsistencia(_comision, DateTime.Today)
             ? "Ya se tomó hoy. Podés corregirla"
             : "Todavía no se tomó";
     }

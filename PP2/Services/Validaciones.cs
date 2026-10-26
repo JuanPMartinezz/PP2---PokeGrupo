@@ -1,13 +1,16 @@
-using RegistroAsistencia.Models;
-
 namespace RegistroAsistencia.Services;
 
 /// <summary>
-/// Reglas de validación de los formularios. Devuelven el motivo del
-/// rechazo, escrito para quien usa la aplicación, o null si todo está bien.
+/// Reglas de validación de los formularios que no necesitan consultar
+/// datos. Devuelven el motivo del rechazo, escrito para quien usa la
+/// aplicación, o null si todo está bien.
 /// </summary>
 public static class Validaciones
 {
+    public const int LegajoMinimo = 3;
+
+    public const int LegajoMaximo = 8;
+
     public static string? Alumno(
         string nombre,
         string apellido,
@@ -21,61 +24,30 @@ public static class Validaciones
             return "Completá nombre, apellido y legajo";
         }
 
-        if (string.IsNullOrWhiteSpace(comision))
-        {
-            return "Elegí la comisión del alumno";
-        }
-
-        return null;
+        return string.IsNullOrWhiteSpace(comision)
+            ? "Elegí la comisión del alumno"
+            : null;
     }
 
-    public static string? LegajoNuevo(string legajo)
+    // El legajo son solo números, de 3 a 8 dígitos
+    public static string? Legajo(string legajo)
     {
-        var existente = DatosSistema.BuscarEstudiante(legajo);
+        string limpio = legajo.Trim();
 
-        if (existente is null)
-        {
-            return null;
-        }
+        bool valido = limpio.Length >= LegajoMinimo &&
+                      limpio.Length <= LegajoMaximo &&
+                      limpio.All(c => c is >= '0' and <= '9');
 
-        return $"Ya existe el legajo {existente.Legajo}: " +
-               $"{existente} ({existente.Comision})";
+        return valido
+            ? null
+            : $"El legajo debe tener entre {LegajoMinimo} y {LegajoMaximo} " +
+              "dígitos, solo números";
     }
 
     public static string? NombreComision(string nombre)
     {
-        if (string.IsNullOrWhiteSpace(nombre))
-        {
-            return "Escribí el nombre de la comisión";
-        }
-
-        if (DatosSistema.ExisteComision(nombre))
-        {
-            return "Ya existe una comisión con ese nombre";
-        }
-
-        return null;
-    }
-
-    public static string? Trabajo(
-        string nombre,
-        string comision,
-        DateTime fecha)
-    {
-        if (string.IsNullOrWhiteSpace(nombre))
-        {
-            return "Escribí el nombre del trabajo";
-        }
-
-        bool repetido = DatosSistema.ExisteActividadCalendario(
-            comision,
-            Cuatrimestres.De(fecha),
-            fecha,
-            TipoActividad.Trabajo,
-            nombre);
-
-        return repetido
-            ? "Ese trabajo ya está cargado con esa fecha"
+        return string.IsNullOrWhiteSpace(nombre)
+            ? "Escribí el nombre de la comisión"
             : null;
     }
 

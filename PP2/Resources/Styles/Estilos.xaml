@@ -22,10 +22,16 @@
         <Setter Property="TextColor" Value="{StaticResource Gray500}" />
     </Style>
 
-    <!-- Mensajes de aviso o error de cada pantalla -->
-    <Style x:Key="Aviso" TargetType="Label">
+    <!-- Mensaje de cada pantalla: verde si salió bien, rojo si es un error
+         (el ViewModel indica EsError) -->
+    <Style x:Key="Mensaje" TargetType="Label">
         <Setter Property="FontSize" Value="14" />
-        <Setter Property="TextColor" Value="{StaticResource Magenta}" />
+        <Setter Property="TextColor" Value="{StaticResource RiesgoBajo}" />
+        <Style.Triggers>
+            <DataTrigger TargetType="Label" Binding="{Binding EsError}" Value="True">
+                <Setter Property="TextColor" Value="{StaticResource RiesgoAlto}" />
+            </DataTrigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Fila o tarjeta tocable -->

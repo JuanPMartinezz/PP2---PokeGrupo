@@ -21,6 +21,8 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
 
     private readonly RiesgoService _riesgo;
 
+    private readonly NominaService _nomina;
+
     public ObservableCollection<string> Contactos { get; } = new();
 
     [ObservableProperty]
@@ -48,19 +50,21 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
         string legajo,
         INavegacion navegacion,
         IDialogos dialogos,
-        RiesgoService riesgo)
+        RiesgoService riesgo,
+        NominaService nomina)
     {
         _legajo = legajo;
         _navegacion = navegacion;
         _dialogos = dialogos;
         _riesgo = riesgo;
+        _nomina = nomina;
 
         Actualizar();
     }
 
     public void Actualizar()
     {
-        Estudiante? estudiante = DatosSistema.BuscarEstudiante(_legajo);
+        Estudiante? estudiante = _nomina.Buscar(_legajo);
 
         if (estudiante is null)
         {
@@ -83,9 +87,9 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
     private static string TextoAsistencia(ResultadoRiesgo r)
     {
         return r.TotalClases == 0
-            ? "Asistencia: todavía no hay clases registradas"
+            ? "Asistencia: todavía no se tomó asistencia en la comisión"
             : $"Asistencia: {r.Presentes} presentes y {r.Ausencias} ausencias " +
-              $"de {r.TotalClases} clases";
+              $"en {r.TotalClases} clases dictadas";
     }
 
     private static string TextoEntregas(ResultadoRiesgo r)
@@ -135,7 +139,7 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
             return;
         }
 
-        DatosSistema.EliminarEstudiante(_legajo);
+        _nomina.Eliminar(_legajo);
 
         await _navegacion.VolverAsync();
     }

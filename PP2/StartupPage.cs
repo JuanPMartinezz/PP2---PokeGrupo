@@ -1,14 +1,19 @@
+using Microsoft.Extensions.DependencyInjection;
 using RegistroAsistencia.Services;
 
 namespace RegistroAsistencia;
 
-/// <summary>Inicializa SQLite antes de mostrar las pantallas que consumen sus datos.</summary>
+/// <summary>Abre la base de datos y prepara las comisiones antes de mostrar las pantallas.</summary>
 public sealed class StartupPage : ContentPage
 {
+    private readonly IServiceProvider _servicios;
+
     private bool _iniciado;
 
-    public StartupPage()
+    public StartupPage(IServiceProvider servicios)
     {
+        _servicios = servicios;
+
         Content = new VerticalStackLayout
         {
             Padding = 24,
@@ -24,7 +29,12 @@ public sealed class StartupPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        if (_iniciado) return;
+
+        if (_iniciado)
+        {
+            return;
+        }
+
         _iniciado = true;
         InicializarAsync();
     }
@@ -33,27 +43,39 @@ public sealed class StartupPage : ContentPage
     {
         try
         {
-            await Task.Run(DatosSistema.Inicializar);
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                if (Window is not null)
-                    Window.Page = new AppShell();
-            });
+            await Task.Run(Preparar);
+
+            MainThread.BeginInvokeOnMainThread(AbrirAplicacion);
         }
         catch (Exception ex)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
-            {
-                Content = new VerticalStackLayout
-                {
-                    Padding = 24,
-                    Children =
-                    {
-                        new Label { Text = "No se pudo iniciar la base de datos SQLite.", FontAttributes = FontAttributes.Bold },
-                        new Label { Text = ex.Message }
-                    }
-                };
-            });
+            MainThread.BeginInvokeOnMainThread(() => MostrarError(ex));
         }
+    }
+
+    private void Preparar()
+    {
+        _servicios.GetRequiredService<ComisionService>().Inicializar();
+    }
+
+    private void AbrirAplicacion()
+    {
+        if (Window is not null)
+        {
+            Window.Page = new AppShell(_servicios);
+        }
+    }
+
+    private void MostrarError(Exception ex)
+    {
+        Content = new VerticalStackLayout
+        {
+            Padding = 24,
+            Children =
+            {
+                new Label { Text = "No se pudo iniciar la base de datos SQLite.", FontAttributes = FontAttributes.Bold },
+                new Label { Text = ex.Message }
+            }
+        };
     }
 }

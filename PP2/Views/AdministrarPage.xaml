@@ -31,7 +31,7 @@
                     Style="{StaticResource BotonPeligro}"
                     Command="{Binding BorrarTodoCommand}" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
 
         </VerticalStackLayout>
     </ScrollView>

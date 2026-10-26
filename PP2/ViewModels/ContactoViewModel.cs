@@ -1,6 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
 
 namespace RegistroAsistencia.ViewModels;
@@ -9,11 +8,13 @@ namespace RegistroAsistencia.ViewModels;
 /// Registro de un contacto con un alumno (H10): fecha, si atendió o no
 /// y qué se habló.
 /// </summary>
-public partial class ContactoViewModel : ObservableObject
+public partial class ContactoViewModel : PantallaBase
 {
     private readonly string _legajo;
 
     private readonly INavegacion _navegacion;
+
+    private readonly ContactoService _contactos;
 
     public string Alumno { get; }
 
@@ -28,56 +29,33 @@ public partial class ContactoViewModel : ObservableObject
     [ObservableProperty]
     private string resultado = "";
 
-    [ObservableProperty]
-    private string mensaje = "";
-
-    public ContactoViewModel(string legajo, INavegacion navegacion)
+    public ContactoViewModel(
+        string legajo,
+        INavegacion navegacion,
+        NominaService nomina,
+        ContactoService contactos)
     {
         _legajo = legajo;
         _navegacion = navegacion;
+        _contactos = contactos;
 
-        Alumno = DatosSistema.BuscarEstudiante(legajo)?.ToString() ?? "";
-    }
-
-    private string? Validar()
-    {
-        string? error = Validaciones.FechaContacto(Fecha);
-
-        if (error is null && string.IsNullOrWhiteSpace(Resultado))
-        {
-            error = Atendio
-                ? "Escribí de qué se habló en el contacto"
-                : "Escribí qué pasó (por ejemplo: sonó y no contestó)";
-        }
-
-        return error;
+        Alumno = nomina.Buscar(legajo)?.ToString() ?? "";
     }
 
     [RelayCommand]
     private async Task Guardar()
     {
-        string? error = Validar();
-
-        Estudiante? estudiante = DatosSistema.BuscarEstudiante(_legajo);
-
-        if (error is null && estudiante is null)
-        {
-            error = "No se encontró al alumno";
-        }
+        string? error = _contactos.Registrar(
+            _legajo,
+            Fecha,
+            Atendio,
+            Resultado);
 
         if (error is not null)
         {
-            Mensaje = error;
+            Rechazar(error);
             return;
         }
-
-        DatosSistema.AgregarContacto(new ContactoEstudiante
-        {
-            Estudiante = estudiante!,
-            Fecha = Fecha.Date,
-            Atendio = Atendio,
-            Resultado = Resultado
-        });
 
         await _navegacion.VolverAsync();
     }
