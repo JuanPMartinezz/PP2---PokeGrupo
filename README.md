@@ -23,7 +23,7 @@ Persistencia de estudiantes en SQLite.
 H2 - Calendario de clases y trabajos del cuatrimestre
 Selección de comisión y de cuatrimestre.
 Registro de la fecha de una clase en el calendario.
-Registro de un trabajo (con su nombre) en la fecha indicada.
+Registro de un trabajo en la fecha indicada; su nombre (por ejemplo, TP1) es obligatorio.
 Consulta del calendario con la fecha y el tipo de cada actividad.
 Actividades ordenadas cronológicamente.
 Calendarios independientes por comisión y por cuatrimestre.
@@ -90,10 +90,11 @@ Riesgo de una entrega no entregada.
 Cortes de nivel: riesgo medio desde y riesgo alto desde (por defecto 30 % y 60 %).
 Valores por defecto: 50 % / 50 %, 50 % y 100 % (la fórmula original de H6).
 Validación: cada valor debe ser un número entre 0 y 100, el riesgo fuera de término no puede superar al de no entregado y el corte medio no puede superar al alto.
+Si un valor no es válido se informa el motivo y no se guarda ninguno.
 Muestra los valores actualmente establecidos y permite restablecer los predeterminados.
 RiesgoService lee los umbrales en cada cálculo, por lo que H6, H8 y H9 usan siempre los valores configurados.
 Nivel de riesgo (Bajo, Medio, Alto o Sin datos) en el panel H8 y en la ficha H9, para no tener que interpretar porcentajes.
-Persistencia de los umbrales en SQLite.
+Persistencia de los umbrales en SQLite. No se borran con "Borrar todos los datos".
 
 H8 - Panel de riesgo
 Selección de comisión.
@@ -128,18 +129,21 @@ Historial de contactos con su resultado (H10).
 H8 y H9 reutilizan el mismo RiesgoService, evitando duplicar la lógica de cálculo.
 H10 - Contactos con estudiantes
 Selección de comisión y de estudiante.
-Registro de un contacto con fecha y resultado.
+Registro de un contacto con fecha y resultado; el resultado es obligatorio y se escribe como texto libre.
+La fecha del contacto no puede ser futura.
 El resultado queda asociado únicamente al contacto y al estudiante seleccionados.
-Consulta de los contactos de un estudiante (pantalla de contactos y ficha del estudiante).
+Un estudiante puede tener varios contactos.
+Consulta de los contactos de un estudiante, del más reciente al más antiguo (pantalla de contactos y ficha del estudiante).
 Persistencia de los contactos en SQLite.
 H11 - Contactos en el panel
 El panel de riesgo (H8) indica, para cada estudiante, si fue contactado o está sin contactar.
 Muestra la fecha del último contacto y la cantidad de contactos.
 Lista todos los contactos del estudiante (fecha y resultado), del más reciente al más antiguo.
-Resumen de la comisión: cuántos estudiantes fueron contactados sobre el total.
-El orden del panel sigue siendo por riesgo, de mayor a menor, para priorizar a quién contactar.
+Resumen de la comisión: "Contactados: X de Y", que cuenta siempre a toda la comisión.
 Filtro "Mostrar": todos los alumnos, solo contactados o solo sin contactar.
-La fecha de un contacto no puede ser futura (H10).
+Indica cuántos estudiantes se muestran con el filtro activo.
+Muestra el nivel de riesgo (Bajo, Medio, Alto o Sin datos) de cada estudiante.
+El orden del panel sigue siendo por riesgo, de mayor a menor, para priorizar a quién contactar.
 
 📁 Estructura principal del proyecto
 PP2 │ ├── Models ├── Services ├── ViewModels ├── Views └── PP2.Tests
@@ -249,15 +253,7 @@ Resultado actual
 ✅ Riesgo combinado asistencia + entregas
 ✅ Filtrado por comisiones
 ✅ 18 pruebas unitarias previas aprobadas
-🕒 Verificar compilación y las 8 pruebas nuevas de H2, H7, H10 y H11
 ✅ Integración con Git/GitHub
 
-📌 Mejoras futuras
-Mejoras en la interfaz de usuario.
-Nuevas validaciones.
-Reportes y estadísticas avanzadas.
-Alertas automáticas para estudiantes con alto riesgo.
-Evolución de la fórmula de riesgo según nuevas reglas de negocio.
-Ampliación de historias de usuario en futuros sprints.
 👥 Equipo
 Trabajo práctico desarrollado para Programación II mediante .NET MAUI, C#, MVVM, SQLite y pruebas automatizadas.
