@@ -5,7 +5,7 @@
              x:Class="RegistroAsistencia.Views.EntregaPage"
              Title="Entregas">
 
-    <Grid Padding="20" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto,Auto">
+    <Grid Padding="20" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto">
 
         <Label Grid.Row="0"
                Text="{Binding Comision}"
@@ -15,13 +15,23 @@
                 Title="Trabajo"
                 ItemsSource="{Binding Trabajos}"
                 ItemDisplayBinding="{Binding Texto}"
-                SelectedItem="{Binding TrabajoSeleccionado}" />
+                SelectedItem="{Binding TrabajoSeleccionado}"
+                IsVisible="{Binding HayTrabajos}" />
 
-        <Label Grid.Row="2"
+        <Label Grid.Row="1"
+               Text="Todavía no hay trabajos cargados en esta comisión."
+               Style="{StaticResource TextoSecundario}"
+               IsVisible="{Binding NoHayTrabajos}" />
+
+        <Button Grid.Row="2"
+                Text="Agregar trabajo"
+                Command="{Binding AgregarTrabajoCommand}" />
+
+        <Label Grid.Row="3"
                Text="{Binding Resumen}"
                Style="{StaticResource TextoSecundario}" />
 
-        <CollectionView Grid.Row="3" ItemsSource="{Binding Filas}">
+        <CollectionView Grid.Row="4" ItemsSource="{Binding Filas}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Grid ColumnDefinitions="*,170" Padding="0,4">
@@ -35,15 +45,15 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
 
-        <Label Grid.Row="4"
+        <Label Grid.Row="5"
                Text="{Binding Mensaje}"
                Style="{StaticResource Aviso}" />
 
-        <Button Grid.Row="5"
+        <Button Grid.Row="6"
                 Text="Guardar entregas"
                 Command="{Binding GuardarCommand}" />
 
-        <Button Grid.Row="6"
+        <Button Grid.Row="7"
                 Text="Cerrar entrega (los que faltan quedan como No entregado)"
                 Command="{Binding CerrarEntregaCommand}" />
 

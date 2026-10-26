@@ -94,9 +94,11 @@ public partial class FilaEntrega : ObservableObject
 /// entregado. Al cerrar la entrega, los que no tienen nada quedan como
 /// "No entregado".
 /// </summary>
-public partial class EntregaViewModel : ObservableObject
+public partial class EntregaViewModel : ObservableObject, IActualizable
 {
     private readonly string _comision;
+
+    private readonly INavegacion _navegacion;
 
     private readonly IDialogos _dialogos;
 
@@ -121,29 +123,43 @@ public partial class EntregaViewModel : ObservableObject
 
     public bool HayTrabajos => Trabajos.Count > 0;
 
+    public bool NoHayTrabajos => !HayTrabajos;
+
     public bool HayTrabajoElegido => TrabajoSeleccionado is not null;
 
     public EntregaViewModel(
         string comision,
+        INavegacion navegacion,
         IDialogos dialogos,
         RegistroService registro)
     {
         _comision = comision;
+        _navegacion = navegacion;
         _dialogos = dialogos;
         _registro = registro;
 
-        CargarTrabajos();
+        Actualizar();
     }
 
-    private void CargarTrabajos()
+    // Vuelve a leer los trabajos del calendario y mantiene el elegido
+    public void Actualizar()
     {
+        string? elegido = TrabajoSeleccionado?.Descripcion;
+
+        Trabajos.Clear();
+
         foreach (ActividadCalendario a in
                  DatosSistema.TrabajosDelCalendario(_comision))
         {
             Trabajos.Add(new ItemTrabajo(a.Descripcion, a.Fecha));
         }
 
-        TrabajoSeleccionado = Trabajos.FirstOrDefault();
+        OnPropertyChanged(nameof(HayTrabajos));
+        OnPropertyChanged(nameof(NoHayTrabajos));
+
+        TrabajoSeleccionado =
+            Trabajos.FirstOrDefault(t => t.Descripcion == elegido) ??
+            Trabajos.FirstOrDefault();
     }
 
     partial void OnTrabajoSeleccionadoChanged(ItemTrabajo? value)
@@ -201,8 +217,20 @@ public partial class EntregaViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private Task AgregarTrabajo()
+    {
+        return _navegacion.IrAAsync(Destino.TrabajoNuevo, _comision);
+    }
+
+    [RelayCommand]
     private async Task Guardar()
     {
+        if (!HayTrabajoElegido)
+        {
+            Mensaje = "Elegí un trabajo o agregá uno nuevo";
+            return;
+        }
+
         if (!await ConfirmarCorrecciones())
         {
             return;
@@ -225,6 +253,12 @@ public partial class EntregaViewModel : ObservableObject
     [RelayCommand]
     private async Task CerrarEntrega()
     {
+        if (!HayTrabajoElegido)
+        {
+            Mensaje = "Elegí un trabajo o agregá uno nuevo";
+            return;
+        }
+
         bool acepta = await _dialogos.ConfirmarAsync(
             "Cerrar entrega",
             "Los alumnos que no tengan nada registrado van a quedar como \"No entregado\". ¿Querés continuar?",

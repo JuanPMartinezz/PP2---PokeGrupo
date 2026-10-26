@@ -46,7 +46,7 @@ public sealed class NavegacionMaui : INavegacion
                 new AsistenciaViewModel(dato, this, _dialogos, _registro)),
             Destino.Entrega => Armar(
                 new EntregaPage(),
-                new EntregaViewModel(dato, _dialogos, _registro)),
+                new EntregaViewModel(dato, this, _dialogos, _registro)),
             Destino.Lista => Armar(
                 new ListaAlumnosPage(),
                 new ListaAlumnosViewModel(dato, this, _riesgo)),
@@ -67,6 +67,9 @@ public sealed class NavegacionMaui : INavegacion
             Destino.Calendario => Armar(
                 new CalendarioPage(),
                 new CalendarioViewModel(dato)),
+            Destino.TrabajoNuevo => Armar(
+                new CalendarioPage(),
+                new CalendarioViewModel(dato, true)),
             Destino.ConfigRiesgo => Armar(
                 new ConfigRiesgoPage(),
                 new ConfigRiesgoViewModel(dato)),

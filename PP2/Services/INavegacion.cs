@@ -10,6 +10,7 @@ public enum Destino
     Ficha,
     Contacto,
     Calendario,
+    TrabajoNuevo,
     ConfigRiesgo,
     NuevaComision,
     AlumnoNuevo,

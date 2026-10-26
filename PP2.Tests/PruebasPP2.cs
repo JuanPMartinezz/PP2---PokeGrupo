@@ -256,7 +256,7 @@ public class PruebasPP2
         Alumno("101", "Gómez");
         Alumno("102", "Paz");
         Trabajo tp1 = CargarTrabajo("TP1");
-        var planilla = new EntregaViewModel(ComisionA, _dialogos, _registro);
+        var planilla = new EntregaViewModel(ComisionA, _navegacion, _dialogos, _registro);
         planilla.Filas.First(f => f.Estudiante.Legajo == "101").EstadoTexto = "Entregado";
         planilla.Filas.First(f => f.Estudiante.Legajo == "102").EstadoTexto = "Fuera de término";
 

@@ -45,9 +45,11 @@ public partial class CalendarioViewModel : ObservableObject, IActualizable
     [ObservableProperty]
     private string cuatrimestre = "";
 
-    public CalendarioViewModel(string comision)
+    // Con trabajoInicial el tipo ya viene elegido como "Trabajo"
+    public CalendarioViewModel(string comision, bool trabajoInicial = false)
     {
         _comision = comision;
+        tipoIndice = trabajoInicial ? 1 : 0;
 
         Actualizar();
     }
