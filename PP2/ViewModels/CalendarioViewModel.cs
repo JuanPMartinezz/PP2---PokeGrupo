@@ -6,232 +6,144 @@ using System.Collections.ObjectModel;
 
 namespace RegistroAsistencia.ViewModels;
 
-public partial class CalendarioViewModel : ObservableObject
+/// <summary>
+/// Calendario de la comisión (H2): las clases y los trabajos del
+/// cuatrimestre, cada uno con su fecha.
+/// </summary>
+public partial class CalendarioViewModel : ObservableObject, IActualizable
 {
-    public ObservableCollection<string> Comisiones { get; } = new()
+    private const string DescripcionClase = "Clase";
+
+    private readonly string _comision;
+
+    public string Comision => _comision;
+
+    public IReadOnlyList<string> Tipos { get; } = new[]
     {
-        "Comisión A",
-        "Comisión B"
+        "Clase",
+        "Trabajo"
     };
 
-    public ObservableCollection<string> Cuatrimestres { get; }
-        = new(GenerarCuatrimestres());
+    public ObservableCollection<string> Actividades { get; } = new();
 
-    public ObservableCollection<TipoActividad> TiposActividad { get; }
-        = new(
-            Enum.GetValues<TipoActividad>());
+    // Para decidir si se pide el nombre: las clases no lo necesitan
+    public bool EsTrabajo => TipoIndice == 1;
 
-    public ObservableCollection<ActividadCalendario> Actividades { get; }
-        = new();
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(EsTrabajo))]
+    private int tipoIndice;
 
-    private string comisionSeleccionada = "Comisión A";
+    [ObservableProperty]
+    private DateTime fecha = DateTime.Today;
 
-    public string ComisionSeleccionada
-    {
-        get => comisionSeleccionada;
-
-        set
-        {
-            if (SetProperty(
-                ref comisionSeleccionada,
-                value))
-            {
-                ConsultarCalendario();
-            }
-        }
-    }
-
-    private string cuatrimestreSeleccionado
-        = ObtenerCuatrimestreActual();
-
-    public string CuatrimestreSeleccionado
-    {
-        get => cuatrimestreSeleccionado;
-
-        set
-        {
-            if (SetProperty(
-                ref cuatrimestreSeleccionado,
-                value))
-            {
-                ConsultarCalendario();
-            }
-        }
-    }
-
-    private TipoActividad tipoSeleccionado
-        = TipoActividad.Clase;
-
-    public TipoActividad TipoSeleccionado
-    {
-        get => tipoSeleccionado;
-
-        set => SetProperty(
-            ref tipoSeleccionado,
-            value);
-    }
-
-    private DateTime fechaActividad = DateTime.Today;
-
-    public DateTime FechaActividad
-    {
-        get => fechaActividad;
-
-        set => SetProperty(
-            ref fechaActividad,
-            value);
-    }
-
+    [ObservableProperty]
     private string descripcion = "";
 
-    public string Descripcion
-    {
-        get => descripcion;
-
-        set => SetProperty(
-            ref descripcion,
-            value);
-    }
-
+    [ObservableProperty]
     private string mensaje = "";
 
-    public string Mensaje
-    {
-        get => mensaje;
+    [ObservableProperty]
+    private string cuatrimestre = "";
 
-        set => SetProperty(
-            ref mensaje,
-            value);
+    public CalendarioViewModel(string comision)
+    {
+        _comision = comision;
+
+        Actualizar();
     }
 
-    public CalendarioViewModel()
+    partial void OnFechaChanged(DateTime value)
     {
-        ConsultarCalendario();
+        Cuatrimestre = Cuatrimestres.De(value);
     }
 
-    private static List<string> GenerarCuatrimestres()
+    public void Actualizar()
     {
-        int anioActual = DateTime.Today.Year;
+        Cuatrimestre = Cuatrimestres.De(Fecha);
 
-        var cuatrimestres = new List<string>();
+        Actividades.Clear();
 
-        for (int anio = anioActual - 1;
-             anio <= anioActual + 1;
-             anio++)
+        foreach (ActividadCalendario a in DatosSistema.Calendario
+                     .Where(a => a.Comision == _comision)
+                     .OrderByDescending(a => a.Fecha))
         {
-            cuatrimestres.Add(
-                $"{anio} - 1er cuatrimestre");
+            Actividades.Add(TextoActividad(a));
+        }
+    }
 
-            cuatrimestres.Add(
-                $"{anio} - 2do cuatrimestre");
+    private static string TextoActividad(ActividadCalendario a)
+    {
+        string detalle = a.Tipo == TipoActividad.Trabajo
+            ? $"Trabajo: {a.Descripcion}"
+            : "Clase";
+
+        return $"{Formatos.FechaCorta(a.Fecha)} · {detalle}";
+    }
+
+    private TipoActividad Tipo =>
+        EsTrabajo ? TipoActividad.Trabajo : TipoActividad.Clase;
+
+    private string? Validar()
+    {
+        if (EsTrabajo)
+        {
+            return Validaciones.Trabajo(Descripcion, _comision, Fecha);
         }
 
-        return cuatrimestres;
-    }
+        bool repetida = DatosSistema.ExisteActividadCalendario(
+            _comision,
+            Cuatrimestres.De(Fecha),
+            Fecha,
+            TipoActividad.Clase,
+            DescripcionClase);
 
-    private static string ObtenerCuatrimestreActual()
-    {
-        DateTime hoy = DateTime.Today;
-
-        return hoy.Month <= 7
-            ? $"{hoy.Year} - 1er cuatrimestre"
-            : $"{hoy.Year} - 2do cuatrimestre";
+        return repetida
+            ? "Ya hay una clase cargada para esa fecha"
+            : null;
     }
 
     [RelayCommand]
-    private void RegistrarActividad()
+    private void Agregar()
     {
-        string descripcionLimpia =
-            Descripcion.Trim();
+        string? error = Validar();
 
-        if (TipoSeleccionado == TipoActividad.Trabajo &&
-            string.IsNullOrWhiteSpace(descripcionLimpia))
+        if (error is not null)
         {
-            Mensaje =
-                "Ingrese el nombre del trabajo";
-
+            Mensaje = error;
             return;
         }
-
-        if (TipoSeleccionado == TipoActividad.Clase &&
-            string.IsNullOrWhiteSpace(descripcionLimpia))
-        {
-            descripcionLimpia = "Clase";
-        }
-
-        if (DatosSistema.ExisteActividadCalendario(
-                ComisionSeleccionada,
-                CuatrimestreSeleccionado,
-                FechaActividad,
-                TipoSeleccionado,
-                descripcionLimpia))
-        {
-            Mensaje =
-                "Esa actividad ya fue registrada en el calendario para esa fecha";
-
-            return;
-        }
-
-        var nuevaActividad = new ActividadCalendario
-        {
-            Comision =
-                ComisionSeleccionada,
-
-            Cuatrimestre =
-                CuatrimestreSeleccionado,
-
-            Fecha =
-                FechaActividad.Date,
-
-            Tipo =
-                TipoSeleccionado,
-
-            Descripcion =
-                descripcionLimpia
-        };
 
         try
         {
-            DatosSistema.AgregarActividadCalendario(
-                nuevaActividad);
-
-            Descripcion = "";
-
-            Mensaje =
-                TipoSeleccionado == TipoActividad.Clase
-                    ? "Clase registrada correctamente"
-                    : "Trabajo registrado correctamente";
-
-            ConsultarCalendario();
+            Guardar();
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
-            Mensaje =
-                $"No se pudo guardar la actividad: {ex.Message}";
+            Mensaje = ex.Message;
         }
     }
 
-    [RelayCommand]
-    private void ConsultarCalendario()
+    private void Guardar()
     {
-        Actividades.Clear();
+        string texto = EsTrabajo ? Descripcion.Trim() : DescripcionClase;
 
-        var actividadesFiltradas =
-            DatosSistema.Calendario
-                .Where(a =>
-                    a.Comision ==
-                    ComisionSeleccionada &&
-                    a.Cuatrimestre ==
-                    CuatrimestreSeleccionado)
-                .OrderBy(a => a.Fecha)
-                .ThenBy(a => a.Tipo)
-                .ThenBy(a => a.Descripcion)
-                .ToList();
-
-        foreach (ActividadCalendario actividad
-                 in actividadesFiltradas)
+        if (EsTrabajo)
         {
-            Actividades.Add(actividad);
+            DatosSistema.ObtenerOCrearTrabajo(texto);
         }
+
+        DatosSistema.AgregarActividadCalendario(new ActividadCalendario
+        {
+            Comision = _comision,
+            Cuatrimestre = Cuatrimestres.De(Fecha),
+            Fecha = Fecha.Date,
+            Tipo = Tipo,
+            Descripcion = texto
+        });
+
+        Descripcion = "";
+        Mensaje = "Agregado al calendario";
+
+        Actualizar();
     }
 }

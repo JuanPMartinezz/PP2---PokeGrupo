@@ -6,221 +6,201 @@ using System.Collections.ObjectModel;
 
 namespace RegistroAsistencia.ViewModels;
 
+// Una fila de la planilla: el alumno y su check de presente
+public partial class FilaAsistencia : ObservableObject
+{
+    public FilaAsistencia(Estudiante estudiante, bool? guardado)
+    {
+        Estudiante = estudiante;
+        Guardado = guardado;
+        presente = guardado ?? false;
+    }
+
+    public Estudiante Estudiante { get; }
+
+    public string Nombre => $"{Estudiante.Apellido}, {Estudiante.Nombre}";
+
+    // Lo que hay guardado: nulo si todavía no se tomó asistencia
+    public bool? Guardado { get; private set; }
+
+    [ObservableProperty]
+    private bool presente;
+
+    // Ya había un registro y el check quedó distinto
+    public bool Modifica => Guardado is bool g && g != Presente;
+
+    public void Confirmar()
+    {
+        Guardado = Presente;
+
+        OnPropertyChanged(nameof(Modifica));
+    }
+
+    partial void OnPresenteChanged(bool value)
+    {
+        OnPropertyChanged(nameof(Modifica));
+    }
+}
+
+/// <summary>
+/// Planilla de asistencia de una comisión para una fecha (H3 y H4).
+/// La primera vez se guarda sin preguntar; si se corrige algo que ya
+/// estaba guardado, se pide confirmación.
+/// </summary>
 public partial class AsistenciaViewModel : ObservableObject
 {
-    public ObservableCollection<string> Comisiones { get; } = new()
-    {
-        "Comisión A",
-        "Comisión B"
-    };
+    private readonly string _comision;
 
-    public ObservableCollection<Estudiante> Estudiantes { get; } = new();
+    private readonly INavegacion _navegacion;
 
-    public ObservableCollection<Asistencia> Asistencias { get; } = new();
+    private readonly IDialogos _dialogos;
 
-    private string comisionSeleccionada = "Comisión A";
+    private readonly RegistroService _registro;
 
-    public string ComisionSeleccionada
-    {
-        get => comisionSeleccionada;
+    public string Comision => _comision;
 
-        set
-        {
-            if (SetProperty(ref comisionSeleccionada, value))
-            {
-                AlumnoSeleccionado = null;
+    public ObservableCollection<FilaAsistencia> Filas { get; } = new();
 
-                CargarEstudiantesComision();
-                ConsultarAsistencias();
-            }
-        }
-    }
+    public DateTime FechaMaxima => DateTime.Today;
 
-    private Estudiante? alumnoSeleccionado;
+    [ObservableProperty]
+    private DateTime fecha = DateTime.Today;
 
-    public Estudiante? AlumnoSeleccionado
-    {
-        get => alumnoSeleccionado;
-
-        set => SetProperty(
-            ref alumnoSeleccionado,
-            value);
-    }
-
-    private Asistencia? asistenciaSeleccionada;
-
-    public Asistencia? AsistenciaSeleccionada
-    {
-        get => asistenciaSeleccionada;
-
-        set => SetProperty(
-            ref asistenciaSeleccionada,
-            value);
-    }
-
-    private DateTime fechaClase = DateTime.Today;
-
-    public DateTime FechaClase
-    {
-        get => fechaClase;
-
-        set
-        {
-            if (SetProperty(ref fechaClase, value))
-            {
-                ConsultarAsistencias();
-            }
-        }
-    }
-
+    [ObservableProperty]
     private string mensaje = "";
 
-    public string Mensaje
-    {
-        get => mensaje;
+    [ObservableProperty]
+    private string resumen = "";
 
-        set => SetProperty(
-            ref mensaje,
-            value);
+    public AsistenciaViewModel(
+        string comision,
+        INavegacion navegacion,
+        IDialogos dialogos,
+        RegistroService registro)
+    {
+        _comision = comision;
+        _navegacion = navegacion;
+        _dialogos = dialogos;
+        _registro = registro;
+
+        CargarFilas();
     }
 
-    public AsistenciaViewModel()
+    partial void OnFechaChanged(DateTime value)
     {
-        CargarEstudiantesComision();
-        ConsultarAsistencias();
+        CargarFilas();
     }
 
-    private void CargarEstudiantesComision()
+    private void CargarFilas()
     {
-        Estudiantes.Clear();
+        Filas.Clear();
+        Mensaje = "";
 
-        var estudiantes = DatosSistema.Estudiantes
-            .Where(e => e.Comision == ComisionSeleccionada)
-            .OrderBy(e => e.Apellido)
-            .ThenBy(e => e.Nombre)
+        foreach (Estudiante e in DatosSistema.EstudiantesDe(_comision))
+        {
+            Filas.Add(CrearFila(e));
+        }
+
+        ActualizarResumen();
+    }
+
+    private FilaAsistencia CrearFila(Estudiante estudiante)
+    {
+        Asistencia? guardada = DatosSistema.BuscarAsistencia(
+            estudiante.Legajo,
+            Fecha);
+
+        bool? presente = guardada is null
+            ? null
+            : guardada.Estado == EstadoAsistencia.Presente;
+
+        var fila = new FilaAsistencia(estudiante, presente);
+
+        fila.PropertyChanged += (_, _) => ActualizarResumen();
+
+        return fila;
+    }
+
+    private void ActualizarResumen()
+    {
+        int presentes = Filas.Count(f => f.Presente);
+
+        Resumen = $"Presentes: {presentes} de {Filas.Count}";
+    }
+
+    [RelayCommand]
+    private void MarcarTodos()
+    {
+        foreach (FilaAsistencia fila in Filas)
+        {
+            fila.Presente = true;
+        }
+    }
+
+    [RelayCommand]
+    private async Task Guardar()
+    {
+        string? error = Validaciones.FechaAsistencia(Fecha);
+
+        if (error is not null)
+        {
+            Mensaje = error;
+            return;
+        }
+
+        if (!await ConfirmarCorrecciones())
+        {
+            return;
+        }
+
+        ResultadoGuardado resultado = GuardarMarcas();
+
+        Mensaje = TextoResultado(resultado);
+    }
+
+    // Pregunta solo si se está cambiando algo que ya estaba guardado
+    private async Task<bool> ConfirmarCorrecciones()
+    {
+        int cambios = Filas.Count(f => f.Modifica);
+
+        if (cambios == 0)
+        {
+            return true;
+        }
+
+        return await _dialogos.ConfirmarAsync(
+            "Modificar asistencia",
+            $"Vas a modificar {cambios} registro(s) que ya estaban guardados. ¿Querés continuar?",
+            "Modificar",
+            "Cancelar");
+    }
+
+    private ResultadoGuardado GuardarMarcas()
+    {
+        var marcas = Filas
+            .Select(f => new MarcaAsistencia(f.Estudiante, f.Presente))
             .ToList();
 
-        foreach (var estudiante in estudiantes)
+        ResultadoGuardado resultado = _registro.GuardarAsistencia(
+            Fecha,
+            marcas);
+
+        foreach (FilaAsistencia fila in Filas)
         {
-            Estudiantes.Add(estudiante);
+            fila.Confirmar();
         }
+
+        return resultado;
     }
 
-    [RelayCommand]
-    private void ConsultarAsistencias()
+    private static string TextoResultado(ResultadoGuardado resultado)
     {
-        Asistencias.Clear();
-
-        var asistencias = DatosSistema.Asistencias
-            .Where(a =>
-                a.Clase.Fecha.Date == FechaClase.Date &&
-                a.Estudiante.Comision == ComisionSeleccionada)
-            .OrderBy(a => a.Estudiante.Apellido)
-            .ThenBy(a => a.Estudiante.Nombre)
-            .ToList();
-
-        foreach (var asistencia in asistencias)
+        if (resultado.Nuevos == 0 && resultado.Modificados == 0)
         {
-            Asistencias.Add(asistencia);
-        }
-    }
-
-    [RelayCommand]
-    private void RegistrarPresente()
-    {
-        RegistrarAsistencia(
-            EstadoAsistencia.Presente);
-    }
-
-    [RelayCommand]
-    private void RegistrarAusente()
-    {
-        RegistrarAsistencia(
-            EstadoAsistencia.Ausente);
-    }
-
-    private void RegistrarAsistencia(
-        EstadoAsistencia estado)
-    {
-        if (AlumnoSeleccionado is null)
-        {
-            Mensaje = "Seleccione un alumno";
-            return;
+            return "No había cambios para guardar";
         }
 
-        if (DatosSistema.ExisteAsistencia(
-                AlumnoSeleccionado.Legajo,
-                FechaClase))
-        {
-            Mensaje =
-                "La asistencia ya fue registrada para ese alumno y fecha";
-
-            return;
-        }
-
-        var asistencia = new Asistencia
-        {
-            Estudiante = AlumnoSeleccionado,
-
-            Clase = new Clase
-            {
-                Fecha = FechaClase.Date
-            },
-
-            Estado = estado
-        };
-
-        try
-        {
-            DatosSistema.AgregarAsistencia(asistencia);
-
-            Mensaje =
-                estado == EstadoAsistencia.Presente
-                    ? "Presente registrado"
-                    : "Ausencia registrada";
-
-            ConsultarAsistencias();
-        }
-        catch (Exception ex)
-        {
-            Mensaje =
-                $"No se pudo guardar la asistencia: {ex.Message}";
-        }
-    }
-
-    [RelayCommand]
-    private void CorregirAsistencia()
-    {
-        if (AsistenciaSeleccionada is null)
-        {
-            Mensaje =
-                "Seleccione una asistencia del historial";
-
-            return;
-        }
-
-        EstadoAsistencia nuevoEstado =
-            AsistenciaSeleccionada.Estado ==
-            EstadoAsistencia.Presente
-                ? EstadoAsistencia.Ausente
-                : EstadoAsistencia.Presente;
-
-        try
-        {
-            AsistenciaSeleccionada =
-                DatosSistema.ActualizarEstadoAsistencia(
-                    AsistenciaSeleccionada,
-                    nuevoEstado);
-
-            Mensaje =
-                $"Asistencia corregida a {nuevoEstado}";
-
-            ConsultarAsistencias();
-        }
-        catch (Exception ex)
-        {
-            Mensaje =
-                $"No se pudo corregir la asistencia: {ex.Message}";
-        }
+        return $"Asistencia guardada: {resultado.Nuevos} nuevos, " +
+               $"{resultado.Modificados} corregidos";
     }
 }

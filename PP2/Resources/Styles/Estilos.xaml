@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <!-- Colores de los niveles de riesgo -->
+    <Color x:Key="RiesgoAlto">#C62828</Color>
+    <Color x:Key="RiesgoMedio">#B26A00</Color>
+    <Color x:Key="RiesgoBajo">#2E7D32</Color>
+    <Color x:Key="RiesgoSinDatos">#6E6E6E</Color>
+
+    <!-- Título de cada pantalla -->
+    <Style x:Key="TituloPagina" TargetType="Label">
+        <Setter Property="FontSize" Value="26" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Black}, Dark={StaticResource White}}" />
+    </Style>
+
+    <!-- Texto secundario -->
+    <Style x:Key="TextoSecundario" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource Gray500}" />
+    </Style>
+
+    <!-- Mensajes de aviso o error de cada pantalla -->
+    <Style x:Key="Aviso" TargetType="Label">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="TextColor" Value="{StaticResource Magenta}" />
+    </Style>
+
+    <!-- Fila o tarjeta tocable -->
+    <Style x:Key="Tarjeta" TargetType="Border">
+        <Setter Property="Padding" Value="16,12" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Stroke" Value="{StaticResource Gray200}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+    </Style>
+
+    <!-- Botón de una acción que borra datos -->
+    <Style x:Key="BotonPeligro" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource RiesgoAlto}" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
+</ResourceDictionary>

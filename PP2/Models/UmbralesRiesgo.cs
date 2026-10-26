@@ -24,6 +24,18 @@ public class UmbralesRiesgo
 
     public decimal PesoEntregas => 100 - PesoAsistencia;
 
+    public UmbralesRiesgo Copiar()
+    {
+        return new UmbralesRiesgo
+        {
+            PesoAsistencia = PesoAsistencia,
+            RiesgoFueraDeTermino = RiesgoFueraDeTermino,
+            RiesgoNoEntregado = RiesgoNoEntregado,
+            RiesgoMedio = RiesgoMedio,
+            RiesgoAlto = RiesgoAlto
+        };
+    }
+
     /// <summary>
     /// Devuelve el motivo por el que los valores no son válidos,
     /// o null si todos son correctos.

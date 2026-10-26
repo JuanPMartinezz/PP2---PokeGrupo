@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.FichaAlumnoPage"
+             Title="Ficha del alumno">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+
+            <Label Text="{Binding NombreCompleto}" Style="{StaticResource TituloPagina}" />
+            <Label Text="{Binding Datos}" Style="{StaticResource TextoSecundario}" />
+
+            <Label Text="{Binding RiesgoTexto}"
+                   FontSize="20"
+                   FontAttributes="Bold"
+                   TextColor="{StaticResource RiesgoSinDatos}">
+                <Label.Triggers>
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Alto">
+                        <Setter Property="TextColor" Value="{StaticResource RiesgoAlto}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Medio">
+                        <Setter Property="TextColor" Value="{StaticResource RiesgoMedio}" />
+                    </DataTrigger>
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Bajo">
+                        <Setter Property="TextColor" Value="{StaticResource RiesgoBajo}" />
+                    </DataTrigger>
+                </Label.Triggers>
+            </Label>
+
+            <Label Text="{Binding AsistenciaTexto}" />
+            <Label Text="{Binding EntregasTexto}" />
+            <Label Text="{Binding ContactoTexto}" />
+
+            <Label Text="Contactos" FontAttributes="Bold" Margin="0,10,0,0" />
+            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Contactos}" Spacing="4">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}" />
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+
+            <Button Text="Registrar contacto"
+                    Margin="0,10,0,0"
+                    Command="{Binding RegistrarContactoCommand}" />
+
+            <Button Text="Editar datos del alumno"
+                    Command="{Binding EditarCommand}" />
+
+            <Button Text="Eliminar alumno"
+                    Style="{StaticResource BotonPeligro}"
+                    Command="{Binding EliminarCommand}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

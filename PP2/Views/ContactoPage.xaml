@@ -1,179 +1,34 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="RegistroAsistencia.Views.ContactoPage"
-    Title="H10 - Contactos con estudiantes">
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.ContactoPage"
+             Title="Registrar contacto">
 
     <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="12">
 
-        <VerticalStackLayout
-            Padding="20"
-            Spacing="12">
+            <Label Text="{Binding Alumno}" Style="{StaticResource TituloPagina}" />
 
-            <Label
-                Text="H10 - Contactos con estudiantes"
-                FontSize="24"
-                FontAttributes="Bold" />
+            <Label Text="Fecha del contacto" />
+            <DatePicker Date="{Binding Fecha}"
+                        MaximumDate="{Binding FechaMaxima}" />
 
-            <Label
-                Text="Registrá cada contacto con un estudiante y su resultado."
-                TextColor="Gray" />
+            <Grid ColumnDefinitions="*,Auto">
+                <Label Text="El alumno atendió" VerticalOptions="Center" />
+                <Switch Grid.Column="1" IsToggled="{Binding Atendio}" />
+            </Grid>
 
-            <!-- COMISIÓN -->
+            <Label Text="¿Qué pasó?" />
+            <Editor Text="{Binding Resultado}"
+                    Placeholder="Ej.: dijo que volvía la semana próxima / sonó y no contestó"
+                    AutoSize="TextChanges"
+                    MinimumHeightRequest="100" />
 
-            <Label
-                Text="Comisión"
-                FontAttributes="Bold" />
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
 
-            <Picker
-                Title="Seleccionar comisión"
-                ItemsSource="{Binding Comisiones}"
-                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
-
-            <!-- ESTUDIANTE -->
-
-            <Label
-                Text="Estudiante"
-                FontAttributes="Bold" />
-
-            <Picker
-                Title="Seleccionar estudiante"
-                ItemsSource="{Binding Estudiantes}"
-                SelectedItem="{Binding EstudianteSeleccionado, Mode=TwoWay}" />
-
-            <!-- REGISTRAR CONTACTO -->
-
-            <Border
-                Padding="15"
-                Stroke="LightGray"
-                StrokeThickness="1">
-
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="10" />
-                </Border.StrokeShape>
-
-                <VerticalStackLayout Spacing="10">
-
-                    <Label
-                        Text="Registrar contacto"
-                        FontSize="20"
-                        FontAttributes="Bold" />
-
-                    <Label
-                        Text="Fecha del contacto"
-                        FontAttributes="Bold" />
-
-                    <DatePicker
-                        Date="{Binding FechaContacto, Mode=TwoWay}" />
-
-                    <Label
-                        Text="Resultado del contacto"
-                        FontAttributes="Bold" />
-
-                    <Editor
-                        Placeholder="Ej.: Respondió y se comprometió a entregar el TP1"
-                        Text="{Binding Resultado, Mode=TwoWay}"
-                        HeightRequest="100" />
-
-                    <Button
-                        Text="Registrar contacto"
-                        Command="{Binding RegistrarContactoCommand}"
-                        BackgroundColor="LightGreen"
-                        TextColor="Black" />
-
-                </VerticalStackLayout>
-
-            </Border>
-
-            <!-- MENSAJE -->
-
-            <Label
-                Text="{Binding Mensaje}"
-                FontAttributes="Bold"
-                TextColor="DarkRed" />
-
-            <!-- CONTACTOS REGISTRADOS -->
-
-            <Label
-                Text="Contactos registrados"
-                FontSize="20"
-                FontAttributes="Bold"
-                Margin="0,10,0,0" />
-
-            <Label
-                Text="La lista corresponde únicamente al estudiante seleccionado."
-                TextColor="Gray" />
-
-            <CollectionView
-                ItemsSource="{Binding Contactos}"
-                SelectionMode="None"
-                HeightRequest="320">
-
-                <CollectionView.EmptyView>
-
-                    <VerticalStackLayout
-                        Padding="20"
-                        Spacing="5">
-
-                        <Label
-                            Text="No hay contactos registrados."
-                            FontAttributes="Bold"
-                            HorizontalTextAlignment="Center" />
-
-                        <Label
-                            Text="Seleccioná un estudiante y registrá un contacto."
-                            TextColor="Gray"
-                            HorizontalTextAlignment="Center" />
-
-                    </VerticalStackLayout>
-
-                </CollectionView.EmptyView>
-
-                <CollectionView.ItemTemplate>
-
-                    <DataTemplate>
-
-                        <Border
-                            Margin="0,5"
-                            Padding="12"
-                            Stroke="LightGray"
-                            StrokeThickness="1">
-
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8" />
-                            </Border.StrokeShape>
-
-                            <VerticalStackLayout Spacing="4">
-
-                                <Label
-                                    Text="{Binding Fecha,
-                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
-                                    FontSize="17"
-                                    FontAttributes="Bold" />
-
-                                <Label
-                                    Text="{Binding Estudiante,
-                                    StringFormat='Estudiante: {0}'}"
-                                    TextColor="Gray" />
-
-                                <Label
-                                    Text="{Binding Resultado,
-                                    StringFormat='Resultado: {0}'}" />
-
-                            </VerticalStackLayout>
-
-                        </Border>
-
-                    </DataTemplate>
-
-                </CollectionView.ItemTemplate>
-
-            </CollectionView>
+            <Button Text="Guardar contacto" Command="{Binding GuardarCommand}" />
 
         </VerticalStackLayout>
-
     </ScrollView>
 
 </ContentPage>

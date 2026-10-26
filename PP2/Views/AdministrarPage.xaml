@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.AdministrarPage"
+             Title="Administrar datos">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="10">
+
+            <Label Text="Cuidado: lo que se borra acá no se puede recuperar."
+                   Style="{StaticResource TextoSecundario}" />
+
+            <Picker Title="Comisión"
+                    ItemsSource="{Binding Comisiones}"
+                    SelectedItem="{Binding ComisionSeleccionada}" />
+
+            <Button Text="Cambiar el nombre de la comisión"
+                    Command="{Binding RenombrarCommand}" />
+
+            <Button Text="Vaciar la comisión (borra sus alumnos)"
+                    Style="{StaticResource BotonPeligro}"
+                    Command="{Binding VaciarCommand}" />
+
+            <Button Text="Eliminar la comisión"
+                    Style="{StaticResource BotonPeligro}"
+                    Command="{Binding EliminarCommand}" />
+
+            <BoxView HeightRequest="1" Margin="0,20" />
+
+            <Button Text="Borrar todos los datos"
+                    Style="{StaticResource BotonPeligro}"
+                    Command="{Binding BorrarTodoCommand}" />
+
+            <Label Text="{Binding Mensaje}" Style="{StaticResource Aviso}" />
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</ContentPage>

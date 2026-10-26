@@ -24,8 +24,9 @@ Para usar la nómina real del TP, reemplazá los registros del método `CrearDat
 - `Asistencias`: `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`) y `Estado` (valor numérico del enum `EstadoAsistencia`: Presente = 0, Ausente = 1).
 
 - `ActividadesCalendario` (H2): `Id` (clave autoincremental), `Comision`, `Cuatrimestre`, `Fecha` (`yyyy-MM-dd`), `Tipo` (valor numérico del enum `TipoActividad`: Clase = 0, Trabajo = 1) y `Descripcion`.
-- `UmbralesRiesgo` (H7): una sola fila (`Id` = 1) con `PesoAsistencia`, `RiesgoFueraDeTermino`, `RiesgoNoEntregado`, `RiesgoMedio` y `RiesgoAlto`. Si todavía no existe la fila, se usan los valores por defecto (50, 50, 100, 30 y 60). `RiesgoMedio` y `RiesgoAlto` aceptan nulos para poder leer bases creadas antes de agregarlos.
-- `Contactos` (H10): `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`) y `Resultado`.
+- `Comisiones`: `Nombre` (clave primaria). Si la tabla está vacía se cargan "Comisión A" y "Comisión B"; también se incorporan las comisiones que ya tengan alumnos o actividades.
+- `UmbralesComision` (H7): una fila por comisión (`Comision` es la clave primaria) con `PesoAsistencia`, `RiesgoFueraDeTermino`, `RiesgoNoEntregado`, `RiesgoMedio` y `RiesgoAlto`. Si una comisión no tiene fila se usan los valores por defecto (50, 50, 100, 30 y 60). La tabla anterior `UmbralesRiesgo` (una sola fila para todos) ya no se usa: los umbrales de cada comisión vuelven a los valores por defecto.
+- `Contactos` (H10): `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`), `Atendio` (verdadero si el alumno atendió; en contactos viejos, sin valor, se toma como verdadero) y `Resultado`.
 
 El legajo conecta una asistencia (y un contacto) con su estudiante. Al abrir la app, las asistencias se reconstruyen vinculándolas con los objetos de estudiante cargados en memoria. Se impide registrar más de una asistencia para el mismo alumno y fecha.
 

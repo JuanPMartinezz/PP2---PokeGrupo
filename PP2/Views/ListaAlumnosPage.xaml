@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.ListaAlumnosPage"
+             Title="Alumnos">
+
+    <Grid Padding="20" RowSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+
+        <Picker Grid.Row="0"
+                Title="Comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada}" />
+
+        <Picker Grid.Row="1"
+                Title="Orden"
+                ItemsSource="{Binding Ordenes}"
+                SelectedIndex="{Binding OrdenIndice}" />
+
+        <Picker Grid.Row="2"
+                Title="Contacto"
+                ItemsSource="{Binding FiltrosContacto}"
+                SelectedIndex="{Binding ContactoIndice}" />
+
+        <Picker Grid.Row="3"
+                Title="Nivel de riesgo"
+                ItemsSource="{Binding FiltrosNivel}"
+                SelectedIndex="{Binding NivelIndice}" />
+
+        <Label Grid.Row="4"
+               Text="{Binding Resumen}"
+               Style="{StaticResource TextoSecundario}" />
+
+        <CollectionView Grid.Row="5" ItemsSource="{Binding Alumnos}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Border Style="{StaticResource Tarjeta}" Margin="0,4">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding Abrir}" />
+                        </Border.GestureRecognizers>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Text="{Binding Nombre}"
+                                   VerticalOptions="Center" />
+                            <Label Grid.Column="1"
+                                   Text="{Binding Riesgo}"
+                                   FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   TextColor="{StaticResource RiesgoSinDatos}">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Alto">
+                                        <Setter Property="TextColor" Value="{StaticResource RiesgoAlto}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Medio">
+                                        <Setter Property="TextColor" Value="{StaticResource RiesgoMedio}" />
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Bajo">
+                                        <Setter Property="TextColor" Value="{StaticResource RiesgoBajo}" />
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+    </Grid>
+
+</ContentPage>

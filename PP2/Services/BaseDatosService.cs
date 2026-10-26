@@ -20,7 +20,8 @@ public sealed class BaseDatosService
         _conexion.CreateTable<EntregaDb>();
         _conexion.CreateTable<ActividadCalendarioDb>();
         _conexion.CreateTable<ContactoDb>();
-        _conexion.CreateTable<UmbralesRiesgoDb>();
+        _conexion.CreateTable<ComisionDb>();
+        _conexion.CreateTable<UmbralesComisionDb>();
     }
 
     public List<Estudiante> ObtenerEstudiantes()
@@ -35,7 +36,7 @@ public sealed class BaseDatosService
          Apellido = e.Apellido,
 
          Comision = string.IsNullOrWhiteSpace(e.Comision)
-             ? "Comisión A"
+             ? DatosSistema.ComisionesIniciales[0]
              : e.Comision
      })
      .ToList();
@@ -74,8 +75,75 @@ public sealed class BaseDatosService
             Apellido = estudiante.Apellido.Trim(),
 
             Comision = string.IsNullOrWhiteSpace(estudiante.Comision)
-                ? "Comisión A"
+                ? DatosSistema.ComisionesIniciales[0]
                 : estudiante.Comision.Trim()
+        });
+    }
+
+    // Guarda los cambios de nombre, apellido y comisión
+    public void ActualizarEstudiante(Estudiante estudiante)
+    {
+        _conexion.Update(new EstudianteDb
+        {
+            Legajo = estudiante.Legajo,
+            Nombre = estudiante.Nombre.Trim(),
+            Apellido = estudiante.Apellido.Trim(),
+            Comision = estudiante.Comision.Trim()
+        });
+    }
+
+    // Comisiones
+
+    public List<string> ObtenerComisiones()
+    {
+        return _conexion.Table<ComisionDb>()
+            .ToList()
+            .Select(c => c.Nombre)
+            .OrderBy(nombre => nombre)
+            .ToList();
+    }
+
+    public void GuardarComision(string nombre)
+    {
+        _conexion.InsertOrReplace(new ComisionDb { Nombre = nombre });
+    }
+
+    // Cambia el nombre en la comisión y en todo lo que la usa
+    public void RenombrarComision(string actual, string nuevo)
+    {
+        _conexion.RunInTransaction(() =>
+        {
+            _conexion.Execute(
+                "UPDATE Estudiantes SET Comision = ? WHERE Comision = ?",
+                nuevo, actual);
+
+            _conexion.Execute(
+                "UPDATE ActividadesCalendario SET Comision = ? WHERE Comision = ?",
+                nuevo, actual);
+
+            _conexion.Execute(
+                "UPDATE UmbralesComision SET Comision = ? WHERE Comision = ?",
+                nuevo, actual);
+
+            _conexion.Execute(
+                "UPDATE Comisiones SET Nombre = ? WHERE Nombre = ?",
+                nuevo, actual);
+        });
+    }
+
+    // Elimina la comisión, su calendario y sus umbrales
+    public void EliminarComision(string nombre)
+    {
+        _conexion.RunInTransaction(() =>
+        {
+            _conexion.Table<ActividadCalendarioDb>()
+                .Delete(a => a.Comision == nombre);
+
+            _conexion.Table<UmbralesComisionDb>()
+                .Delete(u => u.Comision == nombre);
+
+            _conexion.Table<ComisionDb>()
+                .Delete(c => c.Nombre == nombre);
         });
     }
 
@@ -292,6 +360,11 @@ public sealed class BaseDatosService
             {
                 Estudiante = estudiante,
                 Fecha = DateTime.Parse(fila.Fecha),
+
+                // Los contactos anteriores no guardaban este dato:
+                // se los considera atendidos
+                Atendio = fila.Atendio ?? true,
+
                 Resultado = fila.Resultado
             });
         }
@@ -305,57 +378,62 @@ public sealed class BaseDatosService
         {
             LegajoEstudiante = contacto.Estudiante.Legajo,
             Fecha = contacto.Fecha.Date.ToString("yyyy-MM-dd"),
+            Atendio = contacto.Atendio,
             Resultado = contacto.Resultado
         });
     }
 
-    // Métodos para gestionar los umbrales de riesgo (H7)
+    // Métodos para gestionar los umbrales de riesgo (H7), uno por comisión
 
-    public UmbralesRiesgo ObtenerUmbrales()
+    public Dictionary<string, UmbralesRiesgo> ObtenerUmbrales()
     {
-        UmbralesRiesgoDb? fila =
-            _conexion.Table<UmbralesRiesgoDb>()
-                .FirstOrDefault(u => u.Id == 1);
+        var resultado = new Dictionary<string, UmbralesRiesgo>();
 
-        if (fila is null)
+        foreach (UmbralesComisionDb fila
+                 in _conexion.Table<UmbralesComisionDb>().ToList())
         {
-            // Todavía no se configuró nada: valores por defecto.
-            return new UmbralesRiesgo();
+            resultado[fila.Comision] = new UmbralesRiesgo
+            {
+                PesoAsistencia = (decimal)fila.PesoAsistencia,
+                RiesgoFueraDeTermino = (decimal)fila.RiesgoFueraDeTermino,
+                RiesgoNoEntregado = (decimal)fila.RiesgoNoEntregado,
+                RiesgoMedio = (decimal)fila.RiesgoMedio,
+                RiesgoAlto = (decimal)fila.RiesgoAlto
+            };
         }
 
-        var umbrales = new UmbralesRiesgo
-        {
-            PesoAsistencia = (decimal)fila.PesoAsistencia,
-            RiesgoFueraDeTermino = (decimal)fila.RiesgoFueraDeTermino,
-            RiesgoNoEntregado = (decimal)fila.RiesgoNoEntregado
-        };
-
-        // Las columnas de nivel se agregaron después: si la fila es
-        // anterior y no las tiene, se mantienen los valores por defecto.
-        if (fila.RiesgoMedio.HasValue)
-        {
-            umbrales.RiesgoMedio = (decimal)fila.RiesgoMedio.Value;
-        }
-
-        if (fila.RiesgoAlto.HasValue)
-        {
-            umbrales.RiesgoAlto = (decimal)fila.RiesgoAlto.Value;
-        }
-
-        return umbrales;
+        return resultado;
     }
 
-    public void GuardarUmbrales(UmbralesRiesgo umbrales)
+    public void GuardarUmbrales(string comision, UmbralesRiesgo umbrales)
     {
-        // Siempre se usa el Id 1: la tabla guarda una sola configuración.
-        _conexion.InsertOrReplace(new UmbralesRiesgoDb
+        _conexion.InsertOrReplace(new UmbralesComisionDb
         {
-            Id = 1,
+            Comision = comision,
             PesoAsistencia = (double)umbrales.PesoAsistencia,
             RiesgoFueraDeTermino = (double)umbrales.RiesgoFueraDeTermino,
             RiesgoNoEntregado = (double)umbrales.RiesgoNoEntregado,
             RiesgoMedio = (double)umbrales.RiesgoMedio,
             RiesgoAlto = (double)umbrales.RiesgoAlto
+        });
+    }
+
+    // Elimina un estudiante junto con sus asistencias, entregas y contactos
+    public void EliminarEstudiante(string legajo)
+    {
+        _conexion.RunInTransaction(() =>
+        {
+            _conexion.Table<ContactoDb>()
+                .Delete(c => c.LegajoEstudiante == legajo);
+
+            _conexion.Table<EntregaDb>()
+                .Delete(e => e.LegajoEstudiante == legajo);
+
+            _conexion.Table<AsistenciaDb>()
+                .Delete(a => a.LegajoEstudiante == legajo);
+
+            _conexion.Table<EstudianteDb>()
+                .Delete(e => e.Legajo == legajo);
         });
     }
 
@@ -367,6 +445,8 @@ public sealed class BaseDatosService
         _conexion.DeleteAll<AsistenciaDb>();
         _conexion.DeleteAll<TrabajoDb>();
         _conexion.DeleteAll<EstudianteDb>();
+        _conexion.DeleteAll<UmbralesComisionDb>();
+        _conexion.DeleteAll<ComisionDb>();
     }
 
     private static AsistenciaDb CrearAsistencia(string legajo, DateTime fecha, EstadoAsistencia estado) => new()
@@ -455,15 +535,27 @@ public sealed class BaseDatosService
         public string Fecha { get; set; }
             = string.Empty;
 
+        // Nulo en los contactos anteriores a este dato
+        public bool? Atendio { get; set; }
+
         public string Resultado { get; set; }
             = string.Empty;
     }
 
-    [Table("UmbralesRiesgo")]
-    public class UmbralesRiesgoDb
+    [Table("Comisiones")]
+    public class ComisionDb
     {
         [PrimaryKey]
-        public int Id { get; set; }
+        public string Nombre { get; set; }
+            = string.Empty;
+    }
+
+    [Table("UmbralesComision")]
+    public class UmbralesComisionDb
+    {
+        [PrimaryKey]
+        public string Comision { get; set; }
+            = string.Empty;
 
         public double PesoAsistencia { get; set; }
 
@@ -471,10 +563,9 @@ public sealed class BaseDatosService
 
         public double RiesgoNoEntregado { get; set; }
 
-        // Aceptan nulos para poder leer filas guardadas antes de agregarlas.
-        public double? RiesgoMedio { get; set; }
+        public double RiesgoMedio { get; set; }
 
-        public double? RiesgoAlto { get; set; }
+        public double RiesgoAlto { get; set; }
     }
 
 }

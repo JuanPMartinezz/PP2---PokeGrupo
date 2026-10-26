@@ -2,202 +2,83 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
-using System.Collections.ObjectModel;
 
 namespace RegistroAsistencia.ViewModels;
 
+/// <summary>
+/// Registro de un contacto con un alumno (H10): fecha, si atendió o no
+/// y qué se habló.
+/// </summary>
 public partial class ContactoViewModel : ObservableObject
 {
-    public ObservableCollection<string> Comisiones { get; } = new()
-    {
-        "Comisión A",
-        "Comisión B"
-    };
+    private readonly string _legajo;
 
-    public ObservableCollection<Estudiante> Estudiantes { get; }
-        = new();
+    private readonly INavegacion _navegacion;
 
-    public ObservableCollection<ContactoEstudiante> Contactos { get; }
-        = new();
+    public string Alumno { get; }
 
-    private string comisionSeleccionada = "Comisión A";
+    public DateTime FechaMaxima => DateTime.Today;
 
-    public string ComisionSeleccionada
-    {
-        get => comisionSeleccionada;
+    [ObservableProperty]
+    private DateTime fecha = DateTime.Today;
 
-        set
-        {
-            if (SetProperty(
-                ref comisionSeleccionada,
-                value))
-            {
-                EstudianteSeleccionado = null;
+    [ObservableProperty]
+    private bool atendio = true;
 
-                CargarEstudiantesComision();
-                ConsultarContactos();
-            }
-        }
-    }
-
-    private Estudiante? estudianteSeleccionado;
-
-    public Estudiante? EstudianteSeleccionado
-    {
-        get => estudianteSeleccionado;
-
-        set
-        {
-            if (SetProperty(
-                ref estudianteSeleccionado,
-                value))
-            {
-                ConsultarContactos();
-            }
-        }
-    }
-
-    private DateTime fechaContacto = DateTime.Today;
-
-    public DateTime FechaContacto
-    {
-        get => fechaContacto;
-
-        set => SetProperty(
-            ref fechaContacto,
-            value);
-    }
-
+    [ObservableProperty]
     private string resultado = "";
 
-    public string Resultado
-    {
-        get => resultado;
-
-        set => SetProperty(
-            ref resultado,
-            value);
-    }
-
+    [ObservableProperty]
     private string mensaje = "";
 
-    public string Mensaje
+    public ContactoViewModel(string legajo, INavegacion navegacion)
     {
-        get => mensaje;
+        _legajo = legajo;
+        _navegacion = navegacion;
 
-        set => SetProperty(
-            ref mensaje,
-            value);
+        Alumno = DatosSistema.BuscarEstudiante(legajo)?.ToString() ?? "";
     }
 
-    public ContactoViewModel()
+    private string? Validar()
     {
-        CargarEstudiantesComision();
-        ConsultarContactos();
-    }
+        string? error = Validaciones.FechaContacto(Fecha);
 
-    private void CargarEstudiantesComision()
-    {
-        Estudiantes.Clear();
-
-        var estudiantesComision =
-            DatosSistema.Estudiantes
-                .Where(e =>
-                    e.Comision == ComisionSeleccionada)
-                .OrderBy(e => e.Apellido)
-                .ThenBy(e => e.Nombre)
-                .ToList();
-
-        foreach (Estudiante estudiante
-                 in estudiantesComision)
+        if (error is null && string.IsNullOrWhiteSpace(Resultado))
         {
-            Estudiantes.Add(estudiante);
+            error = Atendio
+                ? "Escribí de qué se habló en el contacto"
+                : "Escribí qué pasó (por ejemplo: sonó y no contestó)";
         }
+
+        return error;
     }
 
     [RelayCommand]
-    private void RegistrarContacto()
+    private async Task Guardar()
     {
-        if (EstudianteSeleccionado is null)
-        {
-            Mensaje =
-                "Seleccione un estudiante";
+        string? error = Validar();
 
+        Estudiante? estudiante = DatosSistema.BuscarEstudiante(_legajo);
+
+        if (error is null && estudiante is null)
+        {
+            error = "No se encontró al alumno";
+        }
+
+        if (error is not null)
+        {
+            Mensaje = error;
             return;
         }
 
-        string resultadoLimpio =
-            Resultado.Trim();
-
-        if (string.IsNullOrWhiteSpace(resultadoLimpio))
+        DatosSistema.AgregarContacto(new ContactoEstudiante
         {
-            Mensaje =
-                "Ingrese el resultado del contacto";
+            Estudiante = estudiante!,
+            Fecha = Fecha.Date,
+            Atendio = Atendio,
+            Resultado = Resultado
+        });
 
-            return;
-        }
-
-        if (FechaContacto.Date > DateTime.Today)
-        {
-            Mensaje =
-                "La fecha del contacto no puede ser futura";
-
-            return;
-        }
-
-        var nuevoContacto = new ContactoEstudiante
-        {
-            Estudiante =
-                EstudianteSeleccionado,
-
-            Fecha =
-                FechaContacto.Date,
-
-            Resultado =
-                resultadoLimpio
-        };
-
-        try
-        {
-            DatosSistema.AgregarContacto(
-                nuevoContacto);
-
-            Resultado = "";
-
-            Mensaje =
-                "Contacto registrado correctamente";
-
-            ConsultarContactos();
-        }
-        catch (Exception ex)
-        {
-            Mensaje =
-                $"No se pudo guardar el contacto: {ex.Message}";
-        }
-    }
-
-    [RelayCommand]
-    private void ConsultarContactos()
-    {
-        Contactos.Clear();
-
-        if (EstudianteSeleccionado is null)
-        {
-            return;
-        }
-
-        var contactosEstudiante =
-            DatosSistema.Contactos
-                .Where(c =>
-                    c.Estudiante.Legajo ==
-                    EstudianteSeleccionado.Legajo)
-                .OrderByDescending(c => c.Fecha)
-                .ToList();
-
-        foreach (ContactoEstudiante contacto
-                 in contactosEstudiante)
-        {
-            Contactos.Add(contacto);
-        }
+        await _navegacion.VolverAsync();
     }
 }

@@ -5,79 +5,11 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:RegistroAsistencia"
-    xmlns:views="clr-namespace:RegistroAsistencia.Views"
-    Title="RegistroAsistencia">
+    FlyoutBehavior="Disabled"
+    Title="Registro de asistencia">
 
-    <FlyoutItem Title="H1 - Estudiantes">
-
-        <ShellContent
-            Title="Nómina"
-            ContentTemplate="{DataTemplate local:MainPage}" />
-
-    </FlyoutItem>
-
-    <!-- H2 -->
-
-    <FlyoutItem Title="H2 - Calendario">
-
-        <ShellContent
-            Title="Clases y trabajos"
-            ContentTemplate="{DataTemplate views:CalendarioPage}" />
-
-    </FlyoutItem>
-
-    <FlyoutItem Title="H3 y H4 - Asistencia">
-
-        <ShellContent
-            Title="Registro y corrección"
-            ContentTemplate="{DataTemplate views:AsistenciaPage}" />
-
-    </FlyoutItem>
-
-    <!-- H5 -->
-
-    <FlyoutItem Title="H5 - Entregas">
-
-        <ShellContent
-            Title="Trabajos y entregas"
-            ContentTemplate="{DataTemplate views:TrabajoPage}" />
-
-    </FlyoutItem>
-
-    <!-- H7 -->
-
-    <FlyoutItem Title="H7 - Umbrales">
-
-        <ShellContent
-            Title="Umbrales de riesgo"
-            ContentTemplate="{DataTemplate views:ConfiguracionPage}" />
-
-    </FlyoutItem>
-
-    <FlyoutItem Title="H8 - Riesgo">
-
-        <ShellContent
-            Title="Ranking"
-            ContentTemplate="{DataTemplate views:RiesgoPage}" />
-
-    </FlyoutItem>
-
-    <FlyoutItem Title="H9 - Ficha del estudiante">
-
-        <ShellContent
-            Title="Ficha"
-            ContentTemplate="{DataTemplate views:FichaEstudiantePage}" />
-
-    </FlyoutItem>
-
-    <!-- H10 -->
-
-    <FlyoutItem Title="H10 - Contactos">
-
-        <ShellContent
-            Title="Contactos con estudiantes"
-            ContentTemplate="{DataTemplate views:ContactoPage}" />
-
-    </FlyoutItem>
+    <ShellContent
+        Title="Inicio"
+        ContentTemplate="{DataTemplate local:MainPage}" />
 
 </Shell>

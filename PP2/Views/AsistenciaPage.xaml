@@ -1,257 +1,48 @@
 <?xml version="1.0" encoding="utf-8" ?>
-
-<ContentPage
-    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    x:Class="RegistroAsistencia.Views.AsistenciaPage"
-    Title="H3 y H4 - Asistencias">
-
-    <ScrollView>
-
-        <VerticalStackLayout
-            Padding="20"
-            Spacing="12">
-
-            <!-- H3 - Registro de asistencia -->
-
-            <Label
-                Text="H3 - Registro de asistencia"
-                FontSize="24"
-                FontAttributes="Bold" />
-
-            <Label
-                Text="Seleccioná una comisión, un alumno y una fecha."
-                TextColor="Gray" />
-
-            <!-- Comisión -->
-
-            <Label
-                Text="Comisión"
-                FontAttributes="Bold" />
-
-            <Picker
-                Title="Seleccionar comisión"
-                ItemsSource="{Binding Comisiones}"
-                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
-
-            <!-- Estudiante -->
-
-            <Label
-                Text="Estudiante"
-                FontAttributes="Bold" />
-
-            <Picker
-                Title="Seleccionar alumno"
-                ItemsSource="{Binding Estudiantes}"
-                SelectedItem="{Binding AlumnoSeleccionado, Mode=TwoWay}" />
-
-            <!-- Fecha -->
-
-            <Label
-                Text="Fecha de la clase"
-                FontAttributes="Bold" />
-
-            <DatePicker
-                Date="{Binding FechaClase, Mode=TwoWay}" />
-
-            <!-- Registro -->
-
-            <Grid
-                ColumnDefinitions="*,*"
-                ColumnSpacing="10">
-
-                <Button
-                    Grid.Column="0"
-                    Text="Presente"
-                    Command="{Binding RegistrarPresenteCommand}"
-                    BackgroundColor="LightGreen"
-                    TextColor="Black" />
-
-                <Button
-                    Grid.Column="1"
-                    Text="Ausente"
-                    Command="{Binding RegistrarAusenteCommand}"
-                    BackgroundColor="LightCoral"
-                    TextColor="Black" />
-
-            </Grid>
-
-            <!-- Mensaje -->
-
-            <Label
-                Text="{Binding Mensaje}"
-                FontAttributes="Bold"
-                TextColor="DarkRed" />
-
-            <!-- Consulta por fecha -->
-
-            <Label
-                Text="Asistencias de la fecha seleccionada"
-                FontSize="20"
-                FontAttributes="Bold"
-                Margin="0,10,0,0" />
-
-            <Label
-                Text="{Binding FechaClase,
-                StringFormat='Fecha consultada: {0:dd/MM/yyyy}'}"
-                TextColor="Gray" />
-
-            <Label
-                Text="{Binding ComisionSeleccionada,
-                StringFormat='Comisión: {0}'}"
-                TextColor="Gray" />
-
-            <Label
-                Text="A continuación se muestran las asistencias registradas para la fecha y comisión seleccionadas."
-                FontSize="13"
-                TextColor="Gray" />
-
-            <!-- Lista de asistencias -->
-
-            <CollectionView
-                ItemsSource="{Binding Asistencias}"
-                SelectedItem="{Binding AsistenciaSeleccionada, Mode=TwoWay}"
-                SelectionMode="Single"
-                HeightRequest="300">
-
-                <CollectionView.EmptyView>
-
-                    <VerticalStackLayout
-                        HorizontalOptions="Center"
-                        VerticalOptions="Center"
-                        Spacing="5"
-                        Padding="20">
-
-                        <Label
-                            Text="No hay asistencias registradas para esta fecha."
-                            HorizontalTextAlignment="Center"
-                            FontAttributes="Bold" />
-
-                        <Label
-                            Text="Seleccioná un estudiante y registrá su asistencia."
-                            TextColor="Gray"
-                            HorizontalTextAlignment="Center" />
-
-                    </VerticalStackLayout>
-
-                </CollectionView.EmptyView>
-
-                <CollectionView.ItemTemplate>
-
-                    <DataTemplate>
-
-                        <Border
-                            Margin="0,5"
-                            Padding="12"
-                            Stroke="LightGray"
-                            StrokeThickness="1">
-
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="8" />
-                            </Border.StrokeShape>
-
-                            <Grid
-                                ColumnDefinitions="*,Auto"
-                                RowDefinitions="Auto,Auto,Auto,Auto"
-                                ColumnSpacing="15"
-                                RowSpacing="4">
-
-                                <!-- Nombre -->
-
-                                <Label
-                                    Grid.Row="0"
-                                    Grid.Column="0"
-                                    Text="{Binding Estudiante}"
-                                    FontSize="17"
-                                    FontAttributes="Bold" />
-
-                                <!-- Legajo -->
-
-                                <Label
-                                    Grid.Row="1"
-                                    Grid.Column="0"
-                                    Text="{Binding Estudiante.Legajo,
-                                    StringFormat='Legajo: {0}'}" />
-
-                                <!-- Comisión -->
-
-                                <Label
-                                    Grid.Row="2"
-                                    Grid.Column="0"
-                                    Text="{Binding Estudiante.Comision,
-                                    StringFormat='Comisión: {0}'}"
-                                    TextColor="Gray" />
-
-                                <!-- Fecha -->
-
-                                <Label
-                                    Grid.Row="3"
-                                    Grid.Column="0"
-                                    Text="{Binding Clase.Fecha,
-                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
-                                    TextColor="Gray" />
-
-                                <!-- Estado -->
-
-                                <VerticalStackLayout
-                                    Grid.Row="0"
-                                    Grid.RowSpan="4"
-                                    Grid.Column="1"
-                                    VerticalOptions="Center"
-                                    HorizontalOptions="Center"
-                                    Spacing="3">
-
-                                    <Label
-                                        Text="Estado"
-                                        FontSize="12"
-                                        TextColor="Gray"
-                                        HorizontalTextAlignment="Center" />
-
-                                    <Label
-                                        Text="{Binding Estado}"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        HorizontalTextAlignment="Center" />
-
-                                </VerticalStackLayout>
-
-                            </Grid>
-
-                        </Border>
-
-                    </DataTemplate>
-
-                </CollectionView.ItemTemplate>
-
-            </CollectionView>
-
-            <!-- H4 -->
-
-            <Label
-                Text="H4 - Corregir asistencia"
-                FontSize="20"
-                FontAttributes="Bold"
-                Margin="0,10,0,0" />
-
-            <Label
-                Text="Seleccioná una asistencia de la lista para modificar su estado."
-                TextColor="Gray" />
-
-            <Label
-                Text="Presente cambia a Ausente y Ausente cambia a Presente."
-                FontSize="13"
-                TextColor="Gray" />
-
-            <Button
-                Text="Corregir estado de la asistencia seleccionada"
-                Command="{Binding CorregirAsistenciaCommand}"
-                BackgroundColor="Orange"
-                TextColor="Black"
-                FontAttributes="Bold"
-                Margin="0,0,0,20" />
-
-        </VerticalStackLayout>
-
-    </ScrollView>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.AsistenciaPage"
+             Title="Asistencia">
+
+    <Grid Padding="20" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,*,Auto,Auto">
+
+        <Label Grid.Row="0"
+               Text="{Binding Comision}"
+               Style="{StaticResource TituloPagina}" />
+
+        <DatePicker Grid.Row="1"
+                    Date="{Binding Fecha}"
+                    MaximumDate="{Binding FechaMaxima}" />
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+            <Label Text="{Binding Resumen}"
+                   VerticalOptions="Center" />
+            <Button Grid.Column="1"
+                    Text="Marcar todos presentes"
+                    Command="{Binding MarcarTodosCommand}" />
+        </Grid>
+
+        <CollectionView Grid.Row="3" ItemsSource="{Binding Filas}">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid ColumnDefinitions="Auto,*" Padding="0,4">
+                        <CheckBox IsChecked="{Binding Presente}" />
+                        <Label Grid.Column="1"
+                               Text="{Binding Nombre}"
+                               VerticalOptions="Center" />
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Label Grid.Row="4"
+               Text="{Binding Mensaje}"
+               Style="{StaticResource Aviso}" />
+
+        <Button Grid.Row="5"
+                Text="Guardar asistencia"
+                Command="{Binding GuardarCommand}" />
+
+    </Grid>
 
 </ContentPage>
