@@ -21,6 +21,8 @@ public class FichaEstudianteViewModel : ObservableObject
 
     public ObservableCollection<Entrega> HistorialEntregas { get; } = new();
 
+    public ObservableCollection<ContactoEstudiante> HistorialContactos { get; } = new();
+
     private string comisionSeleccionada = "Comisión A";
 
     public string ComisionSeleccionada
@@ -106,12 +108,28 @@ public class FichaEstudianteViewModel : ObservableObject
         private set => SetProperty(ref totalEntregas, value);
     }
 
+    private int totalContactos;
+
+    public int TotalContactos
+    {
+        get => totalContactos;
+        private set => SetProperty(ref totalContactos, value);
+    }
+
     private decimal porcentajeRiesgo;
 
     public decimal PorcentajeRiesgo
     {
         get => porcentajeRiesgo;
         private set => SetProperty(ref porcentajeRiesgo, value);
+    }
+
+    private string nivelRiesgo = "";
+
+    public string NivelRiesgo
+    {
+        get => nivelRiesgo;
+        private set => SetProperty(ref nivelRiesgo, value);
     }
 
     private string mensaje = "Seleccione un estudiante.";
@@ -149,6 +167,7 @@ public class FichaEstudianteViewModel : ObservableObject
     {
         Historial.Clear();
         HistorialEntregas.Clear();
+        HistorialContactos.Clear();
 
         if (EstudianteSeleccionado is null)
         {
@@ -159,11 +178,19 @@ public class FichaEstudianteViewModel : ObservableObject
 
         CargarAsistencias();
         CargarEntregas();
+        CargarContactos();
 
         PorcentajeRiesgo =
             _riesgoService.CalcularRiesgo(EstudianteSeleccionado);
 
-        Mensaje = TotalClases == 0 && TotalEntregas == 0
+        NivelRiesgo =
+            _riesgoService.ObtenerNivel(
+                PorcentajeRiesgo,
+                TotalClases + TotalEntregas);
+
+        Mensaje = TotalClases == 0 &&
+                  TotalEntregas == 0 &&
+                  TotalContactos == 0
             ? "El estudiante todavía no tiene registros."
             : "Ficha actualizada correctamente.";
     }
@@ -229,6 +256,29 @@ public class FichaEstudianteViewModel : ObservableObject
         TotalEntregas = entregasEstudiante.Count;
     }
 
+    private void CargarContactos()
+    {
+        if (EstudianteSeleccionado is null)
+        {
+            return;
+        }
+
+        List<ContactoEstudiante> contactosEstudiante =
+            DatosSistema.Contactos
+                .Where(c =>
+                    c.Estudiante.Legajo ==
+                    EstudianteSeleccionado.Legajo)
+                .OrderByDescending(c => c.Fecha)
+                .ToList();
+
+        foreach (ContactoEstudiante contacto in contactosEstudiante)
+        {
+            HistorialContactos.Add(contacto);
+        }
+
+        TotalContactos = contactosEstudiante.Count;
+    }
+
     private void LimpiarFicha()
     {
         Presentes = 0;
@@ -240,6 +290,10 @@ public class FichaEstudianteViewModel : ObservableObject
         EntregadosFueraDeTermino = 0;
         TotalEntregas = 0;
 
+        TotalContactos = 0;
+
         PorcentajeRiesgo = 0;
+
+        NivelRiesgo = "";
     }
 }

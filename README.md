@@ -20,6 +20,15 @@ Listado ordenado por apellido.
 Conteo automático de alumnos por comisión.
 Validación de legajos duplicados.
 Persistencia de estudiantes en SQLite.
+H2 - Calendario de clases y trabajos del cuatrimestre
+Selección de comisión y de cuatrimestre.
+Registro de la fecha de una clase en el calendario.
+Registro de un trabajo (con su nombre) en la fecha indicada.
+Consulta del calendario con la fecha y el tipo de cada actividad.
+Actividades ordenadas cronológicamente.
+Calendarios independientes por comisión y por cuatrimestre.
+Prevención de actividades duplicadas (misma comisión, cuatrimestre, fecha, tipo y descripción).
+Persistencia de las actividades en SQLite.
 H3 - Registro de asistencia
 Registro de estudiantes presentes.
 Registro de estudiantes ausentes.
@@ -73,6 +82,18 @@ Si solo existen entregas, se utiliza únicamente el riesgo por entregas.
 Si no existen registros, el riesgo es 0 %.
 No se penaliza al estudiante por información que todavía no fue registrada.
 La lógica se encuentra centralizada en RiesgoService.
+H7 - Umbrales configurables
+Pantalla para modificar los valores del cálculo de riesgo sin tocar el código:
+Peso de la asistencia en el riesgo final (el de las entregas es el resto hasta 100 %).
+Riesgo de una entrega fuera de término.
+Riesgo de una entrega no entregada.
+Cortes de nivel: riesgo medio desde y riesgo alto desde (por defecto 30 % y 60 %).
+Valores por defecto: 50 % / 50 %, 50 % y 100 % (la fórmula original de H6).
+Validación: cada valor debe ser un número entre 0 y 100, el riesgo fuera de término no puede superar al de no entregado y el corte medio no puede superar al alto.
+Muestra los valores actualmente establecidos y permite restablecer los predeterminados.
+RiesgoService lee los umbrales en cada cálculo, por lo que H6, H8 y H9 usan siempre los valores configurados.
+Nivel de riesgo (Bajo, Medio, Alto o Sin datos) en el panel H8 y en la ficha H9, para no tener que interpretar porcentajes.
+Persistencia de los umbrales en SQLite.
 
 H8 - Panel de riesgo
 Selección de comisión.
@@ -103,7 +124,22 @@ Cantidad de trabajos no entregados.
 Cantidad de trabajos entregados fuera de término.
 Total de entregas.
 Historial de entregas.
+Historial de contactos con su resultado (H10).
 H8 y H9 reutilizan el mismo RiesgoService, evitando duplicar la lógica de cálculo.
+H10 - Contactos con estudiantes
+Selección de comisión y de estudiante.
+Registro de un contacto con fecha y resultado.
+El resultado queda asociado únicamente al contacto y al estudiante seleccionados.
+Consulta de los contactos de un estudiante (pantalla de contactos y ficha del estudiante).
+Persistencia de los contactos en SQLite.
+H11 - Contactos en el panel
+El panel de riesgo (H8) indica, para cada estudiante, si fue contactado o está sin contactar.
+Muestra la fecha del último contacto y la cantidad de contactos.
+Lista todos los contactos del estudiante (fecha y resultado), del más reciente al más antiguo.
+Resumen de la comisión: cuántos estudiantes fueron contactados sobre el total.
+El orden del panel sigue siendo por riesgo, de mayor a menor, para priorizar a quién contactar.
+Filtro "Mostrar": todos los alumnos, solo contactados o solo sin contactar.
+La fecha de un contacto no puede ser futura (H10).
 
 📁 Estructura principal del proyecto
 PP2 │ ├── Models ├── Services ├── ViewModels ├── Views └── PP2.Tests
@@ -118,6 +154,10 @@ Trabajo
 Entrega
 EstadoEntrega
 ResultadoRiesgo
+TipoActividad
+ActividadCalendario
+ContactoEstudiante
+UmbralesRiesgo
 Services
 DatosSistema
 BaseDatosService
@@ -128,12 +168,18 @@ AsistenciaViewModel
 TrabajoViewModel
 RiesgoViewModel
 FichaEstudianteViewModel
+CalendarioViewModel
+ContactoViewModel
+ConfiguracionViewModel
 Views
 MainPage
 AsistenciaPage
 TrabajoPage
 RiesgoPage
 FichaEstudiantePage
+CalendarioPage
+ContactoPage
+ConfiguracionPage
 💾 Persistencia
 La aplicación utiliza SQLite para mantener la información aunque la aplicación se cierre.
 
@@ -152,7 +198,7 @@ Framework:
 
 xUnit
 
-Las pruebas cubren las historias H1, H3, H4, H5, H6, H8 y H9.
+Las pruebas cubren las historias H1, H2, H3, H4, H5, H6, H7, H8, H9, H10 y H11.
 
 Se verifican, entre otros casos:
 
@@ -171,25 +217,39 @@ Ordenamiento del ranking.
 Estadísticas de riesgo.
 Historial individual de estudiantes.
 Estadísticas de la ficha individual.
+Registro de una clase en el calendario (H2).
+Orden cronológico de las actividades del calendario (H2).
+Asociación del contacto y su resultado únicamente al estudiante correspondiente (H10).
+Visualización del resultado del contacto en la ficha del estudiante (H10).
+Rechazo de un contacto con fecha futura (H10).
+Guardado de umbrales válidos y uso de los nuevos valores en el cálculo de riesgo (H7).
+Visualización de los valores actuales y rechazo de valores no válidos, incluido un corte medio mayor que el alto (H7).
+Nivel de riesgo según los cortes configurados (H7).
+Indicación de quién fue contactado y cuándo en el panel de riesgo (H11).
+Historial completo de contactos por estudiante en el panel (H11).
+Filtro del panel por contactados y sin contactar (H11).
 Resultado actual
-✅ 18 pruebas ejecutadas
-✅ 18 pruebas aprobadas
-✅ 0 pruebas fallidas
+✅ 18 pruebas previas (H1, H3, H4, H5, H6, H8, H9) aprobadas
+🕒 8 pruebas nuevas (H2, H7, H10 y H11) pendientes de ejecutar en Visual Studio
 
 🔧 Estado actual
 ✅ H1 implementada
+✅ H2 implementada
 ✅ H3 implementada
 ✅ H4 implementada
 ✅ H5 implementada
 ✅ H6 implementada
+✅ H7 implementada
 ✅ H8 implementada
 ✅ H9 implementada
+✅ H10 implementada
+✅ H11 implementada
 
 ✅ Persistencia con SQLite
 ✅ Riesgo combinado asistencia + entregas
 ✅ Filtrado por comisiones
-✅ 18 pruebas unitarias aprobadas
-✅ Compilación sin errores
+✅ 18 pruebas unitarias previas aprobadas
+🕒 Verificar compilación y las 8 pruebas nuevas de H2, H7, H10 y H11
 ✅ Integración con Git/GitHub
 
 📌 Mejoras futuras

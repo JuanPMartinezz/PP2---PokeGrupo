@@ -23,7 +23,11 @@ Para usar la nómina real del TP, reemplazá los registros del método `CrearDat
 - `Estudiantes`: `Legajo` (clave primaria), `Nombre`, `Apellido`.
 - `Asistencias`: `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`) y `Estado` (valor numérico del enum `EstadoAsistencia`: Presente = 0, Ausente = 1).
 
-El legajo conecta una asistencia con su estudiante. Al abrir la app, las asistencias se reconstruyen vinculándolas con los objetos de estudiante cargados en memoria. Se impide registrar más de una asistencia para el mismo alumno y fecha.
+- `ActividadesCalendario` (H2): `Id` (clave autoincremental), `Comision`, `Cuatrimestre`, `Fecha` (`yyyy-MM-dd`), `Tipo` (valor numérico del enum `TipoActividad`: Clase = 0, Trabajo = 1) y `Descripcion`.
+- `UmbralesRiesgo` (H7): una sola fila (`Id` = 1) con `PesoAsistencia`, `RiesgoFueraDeTermino`, `RiesgoNoEntregado`, `RiesgoMedio` y `RiesgoAlto`. Si todavía no existe la fila, se usan los valores por defecto (50, 50, 100, 30 y 60). `RiesgoMedio` y `RiesgoAlto` aceptan nulos para poder leer bases creadas antes de agregarlos.
+- `Contactos` (H10): `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`) y `Resultado`.
+
+El legajo conecta una asistencia (y un contacto) con su estudiante. Al abrir la app, las asistencias se reconstruyen vinculándolas con los objetos de estudiante cargados en memoria. Se impide registrar más de una asistencia para el mismo alumno y fecha.
 
 ## Flujo resumido
 

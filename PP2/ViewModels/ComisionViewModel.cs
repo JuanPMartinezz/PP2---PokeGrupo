@@ -132,7 +132,7 @@ public partial class ComisionViewModel : ObservableObject
             CargarEstudiantesComision();
 
             Mensaje =
-                "Se eliminaron todos los alumnos y asistencias.";
+                "Se eliminaron todos los alumnos, asistencias, trabajos, entregas, calendario y contactos.";
         }
         catch (Exception ex)
         {

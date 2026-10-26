@@ -4,6 +4,11 @@ namespace RegistroAsistencia.Services;
 
 public class RiesgoService
 {
+    public const string NivelAlto = "Alto";
+    public const string NivelMedio = "Medio";
+    public const string NivelBajo = "Bajo";
+    public const string NivelSinDatos = "Sin datos";
+
     // Riesgo según asistencias
     public decimal CalcularPorcentajeAusencias(
         Estudiante estudiante)
@@ -40,6 +45,9 @@ public class RiesgoService
             return 0;
         }
 
+        // Valores configurables (H7)
+        UmbralesRiesgo umbrales = DatosSistema.Umbrales;
+
         decimal riesgoTotal = 0;
 
         foreach (var entrega in entregas)
@@ -51,11 +59,11 @@ public class RiesgoService
                     break;
 
                 case EstadoEntrega.EntregadoFueraDeTermino:
-                    riesgoTotal += 50;
+                    riesgoTotal += umbrales.RiesgoFueraDeTermino;
                     break;
 
                 case EstadoEntrega.NoEntregado:
-                    riesgoTotal += 100;
+                    riesgoTotal += umbrales.RiesgoNoEntregado;
                     break;
             }
         }
@@ -88,12 +96,15 @@ public class RiesgoService
         decimal riesgoEntregas =
             CalcularPorcentajeEntregas(estudiante);
 
-        // Si tiene ambos tipos de registros:
-        // 50 % asistencia + 50 % entregas.
+        // Si tiene ambos tipos de registros se combinan según los pesos
+        // configurados (H7). Por defecto: 50 % asistencia + 50 % entregas.
         if (tieneAsistencias && tieneEntregas)
         {
+            UmbralesRiesgo umbrales = DatosSistema.Umbrales;
+
             return Math.Round(
-                (riesgoAsistencia + riesgoEntregas) / 2,
+                (riesgoAsistencia * umbrales.PesoAsistencia +
+                 riesgoEntregas * umbrales.PesoEntregas) / 100,
                 2);
         }
 
@@ -105,5 +116,32 @@ public class RiesgoService
 
         // Si solo tiene entregas.
         return riesgoEntregas;
+    }
+
+    // Nivel de riesgo según los umbrales configurados (H7).
+    // Un estudiante sin asistencias ni entregas registradas no tiene datos
+    // suficientes: no se lo marca como "Bajo" solo porque su riesgo es 0.
+    public string ObtenerNivel(
+        decimal porcentajeRiesgo,
+        int totalRegistros)
+    {
+        if (totalRegistros == 0)
+        {
+            return NivelSinDatos;
+        }
+
+        UmbralesRiesgo umbrales = DatosSistema.Umbrales;
+
+        if (porcentajeRiesgo >= umbrales.RiesgoAlto)
+        {
+            return NivelAlto;
+        }
+
+        if (porcentajeRiesgo >= umbrales.RiesgoMedio)
+        {
+            return NivelMedio;
+        }
+
+        return NivelBajo;
     }
 }

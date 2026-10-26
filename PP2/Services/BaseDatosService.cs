@@ -18,6 +18,9 @@ public sealed class BaseDatosService
         _conexion.CreateTable<AsistenciaDb>();
         _conexion.CreateTable<TrabajoDb>();
         _conexion.CreateTable<EntregaDb>();
+        _conexion.CreateTable<ActividadCalendarioDb>();
+        _conexion.CreateTable<ContactoDb>();
+        _conexion.CreateTable<UmbralesRiesgoDb>();
     }
 
     public List<Estudiante> ObtenerEstudiantes()
@@ -228,8 +231,138 @@ public sealed class BaseDatosService
         _conexion.Update(registro);
     }
 
+    // Métodos para gestionar el calendario (H2)
+
+    public List<ActividadCalendario> ObtenerActividadesCalendario()
+    {
+        var resultado = new List<ActividadCalendario>();
+
+        foreach (var fila in _conexion
+                     .Table<ActividadCalendarioDb>()
+                     .OrderBy(a => a.Fecha)
+                     .ToList())
+        {
+            resultado.Add(new ActividadCalendario
+            {
+                Comision = fila.Comision,
+                Cuatrimestre = fila.Cuatrimestre,
+                Fecha = DateTime.Parse(fila.Fecha),
+                Tipo = (TipoActividad)fila.Tipo,
+                Descripcion = fila.Descripcion
+            });
+        }
+
+        return resultado;
+    }
+
+    public void GuardarActividadCalendario(
+        ActividadCalendario actividad)
+    {
+        _conexion.Insert(new ActividadCalendarioDb
+        {
+            Comision = actividad.Comision,
+            Cuatrimestre = actividad.Cuatrimestre,
+            Fecha = actividad.Fecha.Date.ToString("yyyy-MM-dd"),
+            Tipo = (int)actividad.Tipo,
+            Descripcion = actividad.Descripcion
+        });
+    }
+
+    // Métodos para gestionar contactos con estudiantes (H10)
+
+    public List<ContactoEstudiante> ObtenerContactos(
+        IReadOnlyCollection<Estudiante> estudiantes)
+    {
+        var porLegajo = estudiantes.ToDictionary(e => e.Legajo);
+        var resultado = new List<ContactoEstudiante>();
+
+        foreach (var fila in _conexion
+                     .Table<ContactoDb>()
+                     .OrderBy(c => c.Fecha)
+                     .ToList())
+        {
+            if (!porLegajo.TryGetValue(
+                    fila.LegajoEstudiante,
+                    out var estudiante))
+            {
+                continue;
+            }
+
+            resultado.Add(new ContactoEstudiante
+            {
+                Estudiante = estudiante,
+                Fecha = DateTime.Parse(fila.Fecha),
+                Resultado = fila.Resultado
+            });
+        }
+
+        return resultado;
+    }
+
+    public void GuardarContacto(ContactoEstudiante contacto)
+    {
+        _conexion.Insert(new ContactoDb
+        {
+            LegajoEstudiante = contacto.Estudiante.Legajo,
+            Fecha = contacto.Fecha.Date.ToString("yyyy-MM-dd"),
+            Resultado = contacto.Resultado
+        });
+    }
+
+    // Métodos para gestionar los umbrales de riesgo (H7)
+
+    public UmbralesRiesgo ObtenerUmbrales()
+    {
+        UmbralesRiesgoDb? fila =
+            _conexion.Table<UmbralesRiesgoDb>()
+                .FirstOrDefault(u => u.Id == 1);
+
+        if (fila is null)
+        {
+            // Todavía no se configuró nada: valores por defecto.
+            return new UmbralesRiesgo();
+        }
+
+        var umbrales = new UmbralesRiesgo
+        {
+            PesoAsistencia = (decimal)fila.PesoAsistencia,
+            RiesgoFueraDeTermino = (decimal)fila.RiesgoFueraDeTermino,
+            RiesgoNoEntregado = (decimal)fila.RiesgoNoEntregado
+        };
+
+        // Las columnas de nivel se agregaron después: si la fila es
+        // anterior y no las tiene, se mantienen los valores por defecto.
+        if (fila.RiesgoMedio.HasValue)
+        {
+            umbrales.RiesgoMedio = (decimal)fila.RiesgoMedio.Value;
+        }
+
+        if (fila.RiesgoAlto.HasValue)
+        {
+            umbrales.RiesgoAlto = (decimal)fila.RiesgoAlto.Value;
+        }
+
+        return umbrales;
+    }
+
+    public void GuardarUmbrales(UmbralesRiesgo umbrales)
+    {
+        // Siempre se usa el Id 1: la tabla guarda una sola configuración.
+        _conexion.InsertOrReplace(new UmbralesRiesgoDb
+        {
+            Id = 1,
+            PesoAsistencia = (double)umbrales.PesoAsistencia,
+            RiesgoFueraDeTermino = (double)umbrales.RiesgoFueraDeTermino,
+            RiesgoNoEntregado = (double)umbrales.RiesgoNoEntregado,
+            RiesgoMedio = (double)umbrales.RiesgoMedio,
+            RiesgoAlto = (double)umbrales.RiesgoAlto
+        });
+    }
+
     public void BorrarTodosLosRegistros()
     {
+        _conexion.DeleteAll<ContactoDb>();
+        _conexion.DeleteAll<ActividadCalendarioDb>();
         _conexion.DeleteAll<EntregaDb>();
         _conexion.DeleteAll<AsistenciaDb>();
         _conexion.DeleteAll<TrabajoDb>();
@@ -287,6 +420,61 @@ public sealed class BaseDatosService
         public int TrabajoId { get; set; }
 
         public int Estado { get; set; }
+    }
+
+    [Table("ActividadesCalendario")]
+    public class ActividadCalendarioDb
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        public string Comision { get; set; }
+            = string.Empty;
+
+        public string Cuatrimestre { get; set; }
+            = string.Empty;
+
+        public string Fecha { get; set; }
+            = string.Empty;
+
+        public int Tipo { get; set; }
+
+        public string Descripcion { get; set; }
+            = string.Empty;
+    }
+
+    [Table("Contactos")]
+    public class ContactoDb
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+
+        public string LegajoEstudiante { get; set; }
+            = string.Empty;
+
+        public string Fecha { get; set; }
+            = string.Empty;
+
+        public string Resultado { get; set; }
+            = string.Empty;
+    }
+
+    [Table("UmbralesRiesgo")]
+    public class UmbralesRiesgoDb
+    {
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        public double PesoAsistencia { get; set; }
+
+        public double RiesgoFueraDeTermino { get; set; }
+
+        public double RiesgoNoEntregado { get; set; }
+
+        // Aceptan nulos para poder leer filas guardadas antes de agregarlas.
+        public double? RiesgoMedio { get; set; }
+
+        public double? RiesgoAlto { get; set; }
     }
 
 }

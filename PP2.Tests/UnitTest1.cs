@@ -1167,5 +1167,585 @@ public class UnitTest1
             EstadoEntrega.Entregado,
             juanSinCambios.Estado);
     }
-}
+    //Prueba H2 - CAT1
+    [Fact]
+    public void RegistrarActividad_Clase_DeberiaRegistrarLaFechaEnElCalendario()
+    {
+        // Arrange
+        DatosSistema.Calendario.Clear();
 
+        var viewModel = new CalendarioViewModel
+        {
+            ComisionSeleccionada = "Comisión A",
+            CuatrimestreSeleccionado = "2026 - 2do cuatrimestre",
+            TipoSeleccionado = TipoActividad.Clase,
+            FechaActividad = new DateTime(2026, 10, 14)
+        };
+
+        // Act
+        viewModel.RegistrarActividadCommand.Execute(null);
+
+        // Assert
+        ActividadCalendario actividad =
+            Assert.Single(DatosSistema.Calendario);
+
+        Assert.Equal(
+            new DateTime(2026, 10, 14),
+            actividad.Fecha.Date);
+
+        Assert.Equal(
+            TipoActividad.Clase,
+            actividad.Tipo);
+
+        Assert.Equal(
+            "Comisión A",
+            actividad.Comision);
+
+        Assert.Equal(
+            "2026 - 2do cuatrimestre",
+            actividad.Cuatrimestre);
+
+        Assert.Equal(
+            "Clase registrada correctamente",
+            viewModel.Mensaje);
+    }
+    //Prueba H2 - CAT4
+    [Fact]
+    public void ConsultarCalendario_DeberiaOrdenarLasActividadesCronologicamente()
+    {
+        // Arrange
+        DatosSistema.Calendario.Clear();
+
+        // Se cargan desordenadas a propósito
+        DatosSistema.Calendario.Add(new ActividadCalendario
+        {
+            Comision = "Comisión A",
+            Cuatrimestre = "2026 - 2do cuatrimestre",
+            Fecha = new DateTime(2026, 10, 28),
+            Tipo = TipoActividad.Trabajo,
+            Descripcion = "TP1"
+        });
+
+        DatosSistema.Calendario.Add(new ActividadCalendario
+        {
+            Comision = "Comisión A",
+            Cuatrimestre = "2026 - 2do cuatrimestre",
+            Fecha = new DateTime(2026, 10, 14),
+            Tipo = TipoActividad.Clase,
+            Descripcion = "Clase"
+        });
+
+        DatosSistema.Calendario.Add(new ActividadCalendario
+        {
+            Comision = "Comisión A",
+            Cuatrimestre = "2026 - 2do cuatrimestre",
+            Fecha = new DateTime(2026, 10, 21),
+            Tipo = TipoActividad.Clase,
+            Descripcion = "Clase"
+        });
+
+        // Act
+        var viewModel = new CalendarioViewModel
+        {
+            ComisionSeleccionada = "Comisión A",
+            CuatrimestreSeleccionado = "2026 - 2do cuatrimestre"
+        };
+
+        // Assert
+        DateTime[] fechas =
+            viewModel.Actividades
+                .Select(a => a.Fecha.Date)
+                .ToArray();
+
+        Assert.Equal(
+            new[]
+            {
+                new DateTime(2026, 10, 14),
+                new DateTime(2026, 10, 21),
+                new DateTime(2026, 10, 28)
+            },
+            fechas);
+    }
+    //Prueba H10 - CA3
+    [Fact]
+    public void CargarFicha_DeberiaMostrarElResultadoDelContacto()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Asistencias.Clear();
+        DatosSistema.Entregas.Clear();
+        DatosSistema.Contactos.Clear();
+
+        var estudiante = new Estudiante
+        {
+            Nombre = "Paola",
+            Apellido = "Clemente",
+            Legajo = "H10-003",
+            Comision = "Comisión A"
+        };
+
+        DatosSistema.Estudiantes.Add(estudiante);
+
+        DatosSistema.Contactos.Add(new ContactoEstudiante
+        {
+            Estudiante = estudiante,
+            Fecha = new DateTime(2026, 10, 22),
+            Resultado = "No respondió, se reintenta la semana próxima"
+        });
+
+        var viewModel = new FichaEstudianteViewModel();
+
+        // Act
+        viewModel.EstudianteSeleccionado = estudiante;
+
+        // Assert
+        ContactoEstudiante contacto =
+            Assert.Single(viewModel.HistorialContactos);
+
+        Assert.Equal(
+            "No respondió, se reintenta la semana próxima",
+            contacto.Resultado);
+
+        Assert.Equal(
+            new DateTime(2026, 10, 22),
+            contacto.Fecha.Date);
+
+        Assert.Equal(1, viewModel.TotalContactos);
+    }
+    //Prueba H10 - CA4
+    [Fact]
+    public void RegistrarContacto_DeberiaAsociarseSoloAlEstudianteCorrespondiente()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Contactos.Clear();
+
+        var ana = new Estudiante
+        {
+            Nombre = "Ana",
+            Apellido = "Lopez",
+            Legajo = "H10-004",
+            Comision = "Comisión A"
+        };
+
+        var juan = new Estudiante
+        {
+            Nombre = "Juan",
+            Apellido = "Perez",
+            Legajo = "H10-005",
+            Comision = "Comisión A"
+        };
+
+        DatosSistema.Estudiantes.Add(ana);
+        DatosSistema.Estudiantes.Add(juan);
+
+        var viewModel = new ContactoViewModel
+        {
+            ComisionSeleccionada = "Comisión A",
+            EstudianteSeleccionado = ana,
+            FechaContacto = new DateTime(2026, 10, 20),
+            Resultado = "Respondió el mensaje"
+        };
+
+        viewModel.RegistrarContactoCommand.Execute(null);
+
+        // Act
+        viewModel.EstudianteSeleccionado = juan;
+        viewModel.Resultado = "No respondió";
+
+        viewModel.RegistrarContactoCommand.Execute(null);
+
+        // Assert
+        Assert.Equal(2, DatosSistema.Contactos.Count);
+
+        ContactoEstudiante contactoAna =
+            Assert.Single(
+                DatosSistema.Contactos,
+                c => c.Estudiante.Legajo == "H10-004");
+
+        Assert.Equal(
+            "Respondió el mensaje",
+            contactoAna.Resultado);
+
+        ContactoEstudiante contactoJuan =
+            Assert.Single(
+                DatosSistema.Contactos,
+                c => c.Estudiante.Legajo == "H10-005");
+
+        Assert.Equal(
+            "No respondió",
+            contactoJuan.Resultado);
+
+        // La consulta del estudiante seleccionado solo muestra el suyo
+        ContactoEstudiante mostrado =
+            Assert.Single(viewModel.Contactos);
+
+        Assert.Equal(
+            "H10-005",
+            mostrado.Estudiante.Legajo);
+
+        // Una fecha futura no se puede registrar
+        viewModel.Resultado = "Respondió el mensaje";
+        viewModel.FechaContacto = DateTime.Today.AddDays(1);
+
+        viewModel.RegistrarContactoCommand.Execute(null);
+
+        Assert.Contains("futura", viewModel.Mensaje);
+        Assert.Equal(2, DatosSistema.Contactos.Count);
+    }
+    //Prueba H7 - CA1 y CA3
+    [Fact]
+    public void GuardarUmbrales_ConValoresValidos_DeberiaUsarlosEnElCalculoDeRiesgo()
+    {
+        // Arrange
+        DatosSistema.RestablecerUmbrales();
+        DatosSistema.Asistencias.Clear();
+        DatosSistema.Entregas.Clear();
+
+        var estudiante = new Estudiante
+        {
+            Nombre = "Ana",
+            Apellido = "Lopez",
+            Legajo = "H7-001",
+            Comision = "Comisión A"
+        };
+
+        var trabajo1 = new Trabajo
+        {
+            Id = 1,
+            Nombre = "TP1"
+        };
+
+        var trabajo2 = new Trabajo
+        {
+            Id = 2,
+            Nombre = "TP2"
+        };
+
+        // Asistencia: 2 ausencias = 100 % de riesgo
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = estudiante,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 7)
+            },
+            Estado = EstadoAsistencia.Ausente
+        });
+
+        DatosSistema.Asistencias.Add(new Asistencia
+        {
+            Estudiante = estudiante,
+            Clase = new Clase
+            {
+                Fecha = new DateTime(2026, 10, 8)
+            },
+            Estado = EstadoAsistencia.Ausente
+        });
+
+        // Entregas: 1 no entregado + 1 fuera de término
+        DatosSistema.Entregas.Add(new Entrega
+        {
+            Estudiante = estudiante,
+            Trabajo = trabajo1,
+            Estado = EstadoEntrega.NoEntregado
+        });
+
+        DatosSistema.Entregas.Add(new Entrega
+        {
+            Estudiante = estudiante,
+            Trabajo = trabajo2,
+            Estado = EstadoEntrega.EntregadoFueraDeTermino
+        });
+
+        var riesgoService = new RiesgoService();
+
+        // Con los valores por defecto:
+        // entregas = (100 + 50) / 2 = 75 %
+        // riesgo final = (100 + 75) / 2 = 87,5 %
+        Assert.Equal(
+            87.5m,
+            riesgoService.CalcularRiesgo(estudiante));
+
+        var viewModel = new ConfiguracionViewModel
+        {
+            PesoAsistenciaTexto = "70",
+            RiesgoFueraDeTerminoTexto = "20",
+            RiesgoNoEntregadoTexto = "80"
+        };
+
+        try
+        {
+            // Act
+            viewModel.GuardarUmbralesCommand.Execute(null);
+
+            // Assert - se guardaron
+            Assert.Equal(
+                "Umbrales guardados correctamente",
+                viewModel.Mensaje);
+
+            Assert.Equal(70m, DatosSistema.Umbrales.PesoAsistencia);
+            Assert.Equal(20m, DatosSistema.Umbrales.RiesgoFueraDeTermino);
+            Assert.Equal(80m, DatosSistema.Umbrales.RiesgoNoEntregado);
+
+            // Assert - el nuevo cálculo usa los valores configurados
+            // entregas = (80 + 20) / 2 = 50 %
+            // riesgo final = (100 * 70 + 50 * 30) / 100 = 85 %
+            Assert.Equal(
+                85m,
+                riesgoService.CalcularRiesgo(estudiante));
+
+            // Assert - el nivel usa los cortes configurados (medio 30, alto 60)
+            Assert.Equal("Alto", riesgoService.ObtenerNivel(85m, 4));
+            Assert.Equal("Sin datos", riesgoService.ObtenerNivel(0m, 0));
+
+            // Act - se suben los cortes sin tocar el código
+            viewModel.RiesgoMedioTexto = "40";
+            viewModel.RiesgoAltoTexto = "90";
+            viewModel.GuardarUmbralesCommand.Execute(null);
+
+            // Assert - el mismo riesgo ahora es de nivel medio
+            Assert.Equal("Medio", riesgoService.ObtenerNivel(85m, 4));
+        }
+        finally
+        {
+            DatosSistema.RestablecerUmbrales();
+        }
+    }
+    //Prueba H7 - CA2 y CA4
+    [Fact]
+    public void GuardarUmbrales_ConValorInvalido_NoDeberiaGuardarse()
+    {
+        // Arrange
+        DatosSistema.GuardarUmbrales(new UmbralesRiesgo
+        {
+            PesoAsistencia = 60,
+            RiesgoFueraDeTermino = 30,
+            RiesgoNoEntregado = 90
+        });
+
+        try
+        {
+            var viewModel = new ConfiguracionViewModel();
+
+            // Assert - muestra los valores actualmente establecidos
+            Assert.Equal("60", viewModel.PesoAsistenciaTexto);
+            Assert.Equal("30", viewModel.RiesgoFueraDeTerminoTexto);
+            Assert.Equal("90", viewModel.RiesgoNoEntregadoTexto);
+
+            // Act - valor fuera de rango
+            viewModel.RiesgoNoEntregadoTexto = "150";
+            viewModel.GuardarUmbralesCommand.Execute(null);
+
+            // Assert
+            Assert.Contains("no es válido", viewModel.Mensaje);
+            Assert.Equal(90m, DatosSistema.Umbrales.RiesgoNoEntregado);
+
+            // Act - texto que no es un número
+            viewModel.Mensaje = "";
+            viewModel.RiesgoNoEntregadoTexto = "abc";
+            viewModel.GuardarUmbralesCommand.Execute(null);
+
+            // Assert - tampoco se guardó
+            Assert.Contains("no es válido", viewModel.Mensaje);
+            Assert.Equal(60m, DatosSistema.Umbrales.PesoAsistencia);
+            Assert.Equal(30m, DatosSistema.Umbrales.RiesgoFueraDeTermino);
+            Assert.Equal(90m, DatosSistema.Umbrales.RiesgoNoEntregado);
+
+            // Act - corte medio mayor que el alto
+            viewModel.Mensaje = "";
+            viewModel.RiesgoNoEntregadoTexto = "90";
+            viewModel.RiesgoMedioTexto = "70";
+            viewModel.RiesgoAltoTexto = "50";
+            viewModel.GuardarUmbralesCommand.Execute(null);
+
+            // Assert - tampoco se guardó
+            Assert.Contains("no es válido", viewModel.Mensaje);
+            Assert.Equal(30m, DatosSistema.Umbrales.RiesgoMedio);
+            Assert.Equal(60m, DatosSistema.Umbrales.RiesgoAlto);
+        }
+        finally
+        {
+            DatosSistema.RestablecerUmbrales();
+        }
+    }
+    //Prueba H11 - CA1, CA2 y CA3
+    [Fact]
+    public void CargarRiesgos_DeberiaIndicarQuienFueContactadoYCuando()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Asistencias.Clear();
+        DatosSistema.Entregas.Clear();
+        DatosSistema.Contactos.Clear();
+
+        var contactada = new Estudiante
+        {
+            Nombre = "Ana",
+            Apellido = "Lopez",
+            Legajo = "H11-001",
+            Comision = "Comisión A"
+        };
+
+        var sinContactar = new Estudiante
+        {
+            Nombre = "Juan",
+            Apellido = "Perez",
+            Legajo = "H11-002",
+            Comision = "Comisión A"
+        };
+
+        DatosSistema.Estudiantes.Add(contactada);
+        DatosSistema.Estudiantes.Add(sinContactar);
+
+        DatosSistema.Contactos.Add(new ContactoEstudiante
+        {
+            Estudiante = contactada,
+            Fecha = new DateTime(2026, 10, 20),
+            Resultado = "Respondió el mensaje"
+        });
+
+        // Act
+        var viewModel = new RiesgoViewModel();
+
+        // Assert
+        ResultadoRiesgo ana =
+            Assert.Single(
+                viewModel.Resultados,
+                r => r.Estudiante.Legajo == "H11-001");
+
+        ResultadoRiesgo juan =
+            Assert.Single(
+                viewModel.Resultados,
+                r => r.Estudiante.Legajo == "H11-002");
+
+        Assert.True(ana.Contactado);
+        Assert.Equal("Contactado", ana.EstadoContacto);
+        Assert.Equal(
+            new DateTime(2026, 10, 20),
+            ana.UltimoContacto);
+
+        Assert.False(juan.Contactado);
+        Assert.Equal("Sin contactar", juan.EstadoContacto);
+        Assert.Null(juan.UltimoContacto);
+
+        Assert.Equal(
+            "Contactados: 1 de 2",
+            viewModel.ResumenContactos);
+
+        // Filtro: solo los contactados
+        viewModel.FiltroContactoSeleccionado =
+            RiesgoViewModel.FiltroSoloContactados;
+
+        ResultadoRiesgo soloContactada =
+            Assert.Single(viewModel.Resultados);
+
+        Assert.Equal("H11-001", soloContactada.Estudiante.Legajo);
+
+        Assert.Equal(
+            "Mostrando 1 de 2 estudiantes",
+            viewModel.ResumenMostrados);
+
+        // Filtro: solo los que todavía no fueron contactados
+        viewModel.FiltroContactoSeleccionado =
+            RiesgoViewModel.FiltroSoloSinContactar;
+
+        ResultadoRiesgo soloSinContactar =
+            Assert.Single(viewModel.Resultados);
+
+        Assert.Equal("H11-002", soloSinContactar.Estudiante.Legajo);
+
+        // Filtro: todos los alumnos
+        viewModel.FiltroContactoSeleccionado =
+            RiesgoViewModel.FiltroTodos;
+
+        Assert.Equal(2, viewModel.Resultados.Count);
+    }
+    //Prueba H11 - CA4
+    [Fact]
+    public void CargarRiesgos_ConVariosContactos_DeberiaMostrarTodosLosDelEstudiante()
+    {
+        // Arrange
+        DatosSistema.Estudiantes.Clear();
+        DatosSistema.Asistencias.Clear();
+        DatosSistema.Entregas.Clear();
+        DatosSistema.Contactos.Clear();
+
+        var ana = new Estudiante
+        {
+            Nombre = "Ana",
+            Apellido = "Lopez",
+            Legajo = "H11-003",
+            Comision = "Comisión A"
+        };
+
+        var juan = new Estudiante
+        {
+            Nombre = "Juan",
+            Apellido = "Perez",
+            Legajo = "H11-004",
+            Comision = "Comisión A"
+        };
+
+        DatosSistema.Estudiantes.Add(ana);
+        DatosSistema.Estudiantes.Add(juan);
+
+        DatosSistema.Contactos.Add(new ContactoEstudiante
+        {
+            Estudiante = ana,
+            Fecha = new DateTime(2026, 10, 10),
+            Resultado = "No respondió"
+        });
+
+        DatosSistema.Contactos.Add(new ContactoEstudiante
+        {
+            Estudiante = ana,
+            Fecha = new DateTime(2026, 10, 20),
+            Resultado = "Respondió y se comprometió a entregar el TP1"
+        });
+
+        DatosSistema.Contactos.Add(new ContactoEstudiante
+        {
+            Estudiante = juan,
+            Fecha = new DateTime(2026, 10, 15),
+            Resultado = "Respondió el mensaje"
+        });
+
+        // Act
+        var viewModel = new RiesgoViewModel();
+
+        // Assert
+        ResultadoRiesgo resultadoAna =
+            Assert.Single(
+                viewModel.Resultados,
+                r => r.Estudiante.Legajo == "H11-003");
+
+        Assert.Equal(2, resultadoAna.CantidadContactos);
+
+        Assert.Equal(
+            new DateTime(2026, 10, 20),
+            resultadoAna.UltimoContacto);
+
+        // Del más reciente al más antiguo
+        Assert.Equal(
+            "Respondió y se comprometió a entregar el TP1",
+            resultadoAna.Contactos[0].Resultado);
+
+        Assert.Equal(
+            "No respondió",
+            resultadoAna.Contactos[1].Resultado);
+
+        // Los contactos de Juan no se mezclan con los de Ana
+        ResultadoRiesgo resultadoJuan =
+            Assert.Single(
+                viewModel.Resultados,
+                r => r.Estudiante.Legajo == "H11-004");
+
+        ContactoEstudiante contactoJuan =
+            Assert.Single(resultadoJuan.Contactos);
+
+        Assert.Equal(
+            "Respondió el mensaje",
+            contactoJuan.Resultado);
+    }
+}

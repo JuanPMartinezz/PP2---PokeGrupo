@@ -22,4 +22,25 @@ public class ResultadoRiesgo
 
     // Riesgo
     public decimal PorcentajeRiesgo { get; set; }
+
+    // Nivel según los umbrales de H7: Alto, Medio, Bajo o Sin datos
+    public string NivelRiesgo { get; set; } = string.Empty;
+
+    // Contactos (H11): del más reciente al más antiguo
+    public List<ContactoEstudiante> Contactos { get; set; } = new();
+
+    public int CantidadContactos => Contactos.Count;
+
+    public bool Contactado => Contactos.Count > 0;
+
+    public DateTime? UltimoContacto =>
+        Contactos.Max(c => (DateTime?)c.Fecha);
+
+    public string EstadoContacto =>
+        Contactado ? "Contactado" : "Sin contactar";
+
+    public string UltimoContactoTexto =>
+        UltimoContacto is DateTime fecha
+            ? $"Último contacto: {fecha:dd/MM/yyyy}"
+            : "Todavía no se lo contactó";
 }

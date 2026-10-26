@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.ConfiguracionPage"
+    Title="H7 - Umbrales de riesgo">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="12">
+
+            <Label
+                Text="H7 - Umbrales de riesgo"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="Modificá los valores que usa el cálculo de riesgo sin tocar el código."
+                TextColor="Gray" />
+
+            <!-- VALORES ACTUALES -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="6">
+
+                    <Label
+                        Text="Valores actualmente establecidos"
+                        FontSize="20"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="{Binding ResumenActual}" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- MODIFICAR -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Modificar umbrales"
+                        FontSize="20"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="Peso de la asistencia en el riesgo final (0 a 100 %)"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Ej.: 50"
+                        Keyboard="Numeric"
+                        Text="{Binding PesoAsistenciaTexto, Mode=TwoWay}" />
+
+                    <Label
+                        Text="El peso de las entregas es lo que falta para llegar a 100 %."
+                        FontSize="13"
+                        TextColor="Gray" />
+
+                    <Label
+                        Text="Riesgo de una entrega fuera de término (0 a 100 %)"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Ej.: 50"
+                        Keyboard="Numeric"
+                        Text="{Binding RiesgoFueraDeTerminoTexto, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Riesgo de una entrega no entregada (0 a 100 %)"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Ej.: 100"
+                        Keyboard="Numeric"
+                        Text="{Binding RiesgoNoEntregadoTexto, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Riesgo medio desde (0 a 100 %)"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Ej.: 30"
+                        Keyboard="Numeric"
+                        Text="{Binding RiesgoMedioTexto, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Riesgo alto desde (0 a 100 %)"
+                        FontAttributes="Bold" />
+
+                    <Entry
+                        Placeholder="Ej.: 60"
+                        Keyboard="Numeric"
+                        Text="{Binding RiesgoAltoTexto, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Con estos dos valores el panel marca a cada estudiante como Bajo, Medio o Alto. El riesgo medio no puede superar al alto."
+                        FontSize="13"
+                        TextColor="Gray" />
+
+                    <Button
+                        Text="Guardar umbrales"
+                        Command="{Binding GuardarUmbralesCommand}"
+                        BackgroundColor="LightGreen"
+                        TextColor="Black" />
+
+                    <Button
+                        Text="Restablecer valores predeterminados"
+                        Command="{Binding RestablecerValoresCommand}"
+                        BackgroundColor="Orange"
+                        TextColor="Black" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- MENSAJE -->
+
+            <Label
+                Text="{Binding Mensaje}"
+                FontAttributes="Bold"
+                TextColor="DarkRed" />
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>

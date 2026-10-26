@@ -115,6 +115,12 @@
                         HorizontalTextAlignment="Center" />
 
                     <Label
+                        Text="{Binding NivelRiesgo,
+                        StringFormat='Nivel de riesgo: {0}'}"
+                        FontAttributes="Bold"
+                        HorizontalTextAlignment="Center" />
+
+                    <Label
                         Text="Calculado según asistencias y entregas."
                         TextColor="Gray"
                         HorizontalTextAlignment="Center" />
@@ -418,6 +424,66 @@
                                     VerticalOptions="Center" />
 
                             </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <!-- HISTORIAL DE CONTACTOS -->
+
+            <Label
+                Text="Historial de contactos"
+                FontSize="19"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="{Binding TotalContactos,
+                StringFormat='Total de contactos: {0}'}"
+                TextColor="Gray" />
+
+            <CollectionView
+                ItemsSource="{Binding HistorialContactos}"
+                HeightRequest="250">
+
+                <CollectionView.EmptyView>
+
+                    <Label
+                        Text="El estudiante no tiene contactos registrados."
+                        TextColor="Gray"
+                        HorizontalTextAlignment="Center" />
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,4"
+                            Padding="12"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <VerticalStackLayout Spacing="4">
+
+                                <Label
+                                    Text="{Binding Fecha,
+                                    StringFormat='Fecha: {0:dd/MM/yyyy}'}"
+                                    FontAttributes="Bold" />
+
+                                <Label
+                                    Text="{Binding Resultado,
+                                    StringFormat='Resultado: {0}'}" />
+
+                            </VerticalStackLayout>
 
                         </Border>
 

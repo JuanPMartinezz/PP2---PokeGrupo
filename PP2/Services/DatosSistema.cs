@@ -26,6 +26,15 @@ public static class DatosSistema
     public static ObservableCollection<Entrega> Entregas { get; }
         = new();
 
+    public static ObservableCollection<ActividadCalendario> Calendario { get; }
+        = new();
+
+    public static ObservableCollection<ContactoEstudiante> Contactos { get; }
+        = new();
+
+    public static UmbralesRiesgo Umbrales { get; private set; }
+        = new();
+
     public static void Inicializar()
     {
         if (_baseDatos is not null)
@@ -76,6 +85,31 @@ public static class DatosSistema
         {
             Entregas.Add(entrega);
         }
+
+        // Cargar calendario
+
+        Calendario.Clear();
+
+        foreach (ActividadCalendario actividad
+                 in _baseDatos.ObtenerActividadesCalendario())
+        {
+            Calendario.Add(actividad);
+        }
+
+        // Cargar contactos
+
+        Contactos.Clear();
+
+        foreach (ContactoEstudiante contacto
+                 in _baseDatos.ObtenerContactos(
+                     Estudiantes))
+        {
+            Contactos.Add(contacto);
+        }
+
+        // Cargar umbrales de riesgo
+
+        Umbrales = _baseDatos.ObtenerUmbrales();
     }
 
     // Estudiantes
@@ -264,6 +298,135 @@ public static class DatosSistema
         return entregaActualizada;
     }
 
+    // Calendario (H2)
+
+    public static bool ExisteActividadCalendario(
+        string comision,
+        string cuatrimestre,
+        DateTime fecha,
+        TipoActividad tipo,
+        string descripcion)
+    {
+        return Calendario.Any(a =>
+            a.Comision == comision &&
+            a.Cuatrimestre == cuatrimestre &&
+            a.Fecha.Date == fecha.Date &&
+            a.Tipo == tipo &&
+            a.Descripcion.Equals(
+                descripcion.Trim(),
+                StringComparison.OrdinalIgnoreCase));
+    }
+
+    public static void AgregarActividadCalendario(
+        ActividadCalendario actividad)
+    {
+        if (string.IsNullOrWhiteSpace(actividad.Comision))
+        {
+            throw new InvalidOperationException(
+                "La actividad debe pertenecer a una comisión.");
+        }
+
+        if (string.IsNullOrWhiteSpace(actividad.Cuatrimestre))
+        {
+            throw new InvalidOperationException(
+                "La actividad debe pertenecer a un cuatrimestre.");
+        }
+
+        if (string.IsNullOrWhiteSpace(actividad.Descripcion))
+        {
+            throw new InvalidOperationException(
+                "La actividad debe tener una descripción.");
+        }
+
+        actividad.Descripcion =
+            actividad.Descripcion.Trim();
+
+        if (ExisteActividadCalendario(
+                actividad.Comision,
+                actividad.Cuatrimestre,
+                actividad.Fecha,
+                actividad.Tipo,
+                actividad.Descripcion))
+        {
+            throw new InvalidOperationException(
+                "Ya existe esa actividad en el calendario para esa fecha.");
+        }
+
+        if (_baseDatos is not null)
+        {
+            _baseDatos.GuardarActividadCalendario(actividad);
+        }
+
+        Calendario.Add(actividad);
+    }
+
+    // Contactos (H10)
+
+    public static void AgregarContacto(
+        ContactoEstudiante contacto)
+    {
+        if (string.IsNullOrWhiteSpace(
+                contacto.Estudiante.Legajo))
+        {
+            throw new InvalidOperationException(
+                "El contacto debe estar asociado a un estudiante.");
+        }
+
+        if (string.IsNullOrWhiteSpace(contacto.Resultado))
+        {
+            throw new InvalidOperationException(
+                "El contacto debe tener un resultado.");
+        }
+
+        contacto.Resultado =
+            contacto.Resultado.Trim();
+
+        if (_baseDatos is not null)
+        {
+            _baseDatos.GuardarContacto(contacto);
+        }
+
+        Contactos.Add(contacto);
+    }
+
+    // Umbrales de riesgo (H7)
+
+    public static void GuardarUmbrales(
+        UmbralesRiesgo umbrales)
+    {
+        string? error = umbrales.Validar();
+
+        if (error is not null)
+        {
+            throw new InvalidOperationException(error);
+        }
+
+        /*
+         * Se guarda una copia: si alguien modifica después el objeto
+         * recibido, la configuración no cambia sin pasar por la validación.
+         */
+        var copia = new UmbralesRiesgo
+        {
+            PesoAsistencia = umbrales.PesoAsistencia,
+            RiesgoFueraDeTermino = umbrales.RiesgoFueraDeTermino,
+            RiesgoNoEntregado = umbrales.RiesgoNoEntregado,
+            RiesgoMedio = umbrales.RiesgoMedio,
+            RiesgoAlto = umbrales.RiesgoAlto
+        };
+
+        if (_baseDatos is not null)
+        {
+            _baseDatos.GuardarUmbrales(copia);
+        }
+
+        Umbrales = copia;
+    }
+
+    public static void RestablecerUmbrales()
+    {
+        GuardarUmbrales(new UmbralesRiesgo());
+    }
+
     // Borrado general
 
     public static void BorrarTodosLosRegistros()
@@ -273,6 +436,8 @@ public static class DatosSistema
             _baseDatos.BorrarTodosLosRegistros();
         }
 
+        Contactos.Clear();
+        Calendario.Clear();
         Entregas.Clear();
         Asistencias.Clear();
         Trabajos.Clear();

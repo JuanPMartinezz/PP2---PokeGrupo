@@ -21,7 +21,7 @@ public partial class MainPage : ContentPage
 
     private async void BorrarTodo_Clicked(object sender, EventArgs e)
     {
-        bool confirmar = await DisplayAlert( "Confirmar eliminación","Se eliminarán TODOS los alumnos y TODAS las asistencias. Esta acción no se puede deshacer. ¿Continuar?","Sí, borrar todo","Cancelar");
+        bool confirmar = await DisplayAlert( "Confirmar eliminación","Se eliminarán TODOS los alumnos, asistencias, trabajos, entregas, calendario y contactos. Los umbrales de riesgo se conservan. Esta acción no se puede deshacer. ¿Continuar?","Sí, borrar todo","Cancelar");
 
         if (!confirmar)
             return;

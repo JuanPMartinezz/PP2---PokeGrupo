@@ -33,6 +33,49 @@ public class RiesgoViewModel : ObservableObject
         }
     }
 
+    // Filtro por contacto (H11)
+    public const string FiltroTodos = "Todos los alumnos";
+    public const string FiltroSoloContactados = "Solo contactados";
+    public const string FiltroSoloSinContactar = "Solo sin contactar";
+
+    public ObservableCollection<string> FiltrosContacto { get; } = new()
+    {
+        FiltroTodos,
+        FiltroSoloContactados,
+        FiltroSoloSinContactar
+    };
+
+    private string filtroContactoSeleccionado = FiltroTodos;
+
+    public string FiltroContactoSeleccionado
+    {
+        get => filtroContactoSeleccionado;
+
+        set
+        {
+            if (SetProperty(ref filtroContactoSeleccionado, value))
+            {
+                CargarRiesgos();
+            }
+        }
+    }
+
+    private string resumenMostrados = "";
+
+    public string ResumenMostrados
+    {
+        get => resumenMostrados;
+        private set => SetProperty(ref resumenMostrados, value);
+    }
+
+    private string resumenContactos = "";
+
+    public string ResumenContactos
+    {
+        get => resumenContactos;
+        private set => SetProperty(ref resumenContactos, value);
+    }
+
     public RiesgoViewModel()
     {
         _riesgoService = new RiesgoService();
@@ -89,6 +132,13 @@ public class RiesgoViewModel : ObservableObject
                     e.Estado ==
                     EstadoEntrega.EntregadoFueraDeTermino);
 
+            // Contactos del estudiante (H11)
+            var contactosAlumno = DatosSistema.Contactos
+                .Where(c =>
+                    c.Estudiante.Legajo == estudiante.Legajo)
+                .OrderByDescending(c => c.Fecha)
+                .ToList();
+
             // Riesgo combinado de H6
             decimal porcentajeRiesgo =
                 _riesgoService.CalcularRiesgo(estudiante);
@@ -108,7 +158,15 @@ public class RiesgoViewModel : ObservableObject
                     entregadosFueraDeTermino,
 
                 PorcentajeRiesgo =
-                    porcentajeRiesgo
+                    porcentajeRiesgo,
+
+                NivelRiesgo =
+                    _riesgoService.ObtenerNivel(
+                        porcentajeRiesgo,
+                        totalClases + totalEntregas),
+
+                Contactos =
+                    contactosAlumno
             });
         }
 
@@ -118,11 +176,32 @@ public class RiesgoViewModel : ObservableObject
                 r.PorcentajeRiesgo)
             .ToList();
 
+        // El resumen cuenta a toda la comisión, sin importar el filtro
+        int contactados =
+            ordenados.Count(r => r.Contactado);
+
+        ResumenContactos =
+            $"Contactados: {contactados} de {ordenados.Count}";
+
+        IEnumerable<ResultadoRiesgo> visibles = ordenados;
+
+        if (FiltroContactoSeleccionado == FiltroSoloContactados)
+        {
+            visibles = ordenados.Where(r => r.Contactado);
+        }
+        else if (FiltroContactoSeleccionado == FiltroSoloSinContactar)
+        {
+            visibles = ordenados.Where(r => !r.Contactado);
+        }
+
         Resultados.Clear();
 
-        foreach (var item in ordenados)
+        foreach (var item in visibles)
         {
             Resultados.Add(item);
         }
+
+        ResumenMostrados =
+            $"Mostrando {Resultados.Count} de {ordenados.Count} estudiantes";
     }
 }

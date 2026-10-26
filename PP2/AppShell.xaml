@@ -16,6 +16,16 @@
 
     </FlyoutItem>
 
+    <!-- H2 -->
+
+    <FlyoutItem Title="H2 - Calendario">
+
+        <ShellContent
+            Title="Clases y trabajos"
+            ContentTemplate="{DataTemplate views:CalendarioPage}" />
+
+    </FlyoutItem>
+
     <FlyoutItem Title="H3 y H4 - Asistencia">
 
         <ShellContent
@@ -34,6 +44,16 @@
 
     </FlyoutItem>
 
+    <!-- H7 -->
+
+    <FlyoutItem Title="H7 - Umbrales">
+
+        <ShellContent
+            Title="Umbrales de riesgo"
+            ContentTemplate="{DataTemplate views:ConfiguracionPage}" />
+
+    </FlyoutItem>
+
     <FlyoutItem Title="H8 - Riesgo">
 
         <ShellContent
@@ -47,6 +67,16 @@
         <ShellContent
             Title="Ficha"
             ContentTemplate="{DataTemplate views:FichaEstudiantePage}" />
+
+    </FlyoutItem>
+
+    <!-- H10 -->
+
+    <FlyoutItem Title="H10 - Contactos">
+
+        <ShellContent
+            Title="Contactos con estudiantes"
+            ContentTemplate="{DataTemplate views:ContactoPage}" />
 
     </FlyoutItem>
 

@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.CalendarioPage"
+    Title="H2 - Calendario del cuatrimestre">
+
+    <ScrollView>
+
+        <VerticalStackLayout
+            Padding="20"
+            Spacing="12">
+
+            <Label
+                Text="H2 - Calendario del cuatrimestre"
+                FontSize="24"
+                FontAttributes="Bold" />
+
+            <Label
+                Text="Registrá las fechas de las clases y de los trabajos de cada comisión."
+                TextColor="Gray" />
+
+            <!-- COMISIÓN -->
+
+            <Label
+                Text="Comisión"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar comisión"
+                ItemsSource="{Binding Comisiones}"
+                SelectedItem="{Binding ComisionSeleccionada, Mode=TwoWay}" />
+
+            <!-- CUATRIMESTRE -->
+
+            <Label
+                Text="Cuatrimestre"
+                FontAttributes="Bold" />
+
+            <Picker
+                Title="Seleccionar cuatrimestre"
+                ItemsSource="{Binding Cuatrimestres}"
+                SelectedItem="{Binding CuatrimestreSeleccionado, Mode=TwoWay}" />
+
+            <!-- REGISTRAR ACTIVIDAD -->
+
+            <Border
+                Padding="15"
+                Stroke="LightGray"
+                StrokeThickness="1">
+
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="10" />
+                </Border.StrokeShape>
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label
+                        Text="Registrar actividad"
+                        FontSize="20"
+                        FontAttributes="Bold" />
+
+                    <Label
+                        Text="Tipo de actividad"
+                        FontAttributes="Bold" />
+
+                    <Picker
+                        Title="Seleccionar tipo"
+                        ItemsSource="{Binding TiposActividad}"
+                        SelectedItem="{Binding TipoSeleccionado, Mode=TwoWay}" />
+
+                    <Label
+                        Text="Fecha"
+                        FontAttributes="Bold" />
+
+                    <DatePicker
+                        Date="{Binding FechaActividad, Mode=TwoWay}" />
+
+                    <Entry
+                        Placeholder="Descripción (obligatoria para trabajos)"
+                        Text="{Binding Descripcion, Mode=TwoWay}" />
+
+                    <Button
+                        Text="Registrar en el calendario"
+                        Command="{Binding RegistrarActividadCommand}"
+                        BackgroundColor="LightGreen"
+                        TextColor="Black" />
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- MENSAJE -->
+
+            <Label
+                Text="{Binding Mensaje}"
+                FontAttributes="Bold"
+                TextColor="DarkRed" />
+
+            <!-- CALENDARIO -->
+
+            <Label
+                Text="Calendario del cuatrimestre"
+                FontSize="20"
+                FontAttributes="Bold"
+                Margin="0,10,0,0" />
+
+            <Label
+                Text="{Binding ComisionSeleccionada,
+                StringFormat='Comisión: {0}'}"
+                TextColor="Gray" />
+
+            <Label
+                Text="{Binding CuatrimestreSeleccionado,
+                StringFormat='Cuatrimestre: {0}'}"
+                TextColor="Gray" />
+
+            <Label
+                Text="Las actividades se muestran ordenadas cronológicamente."
+                FontSize="13"
+                TextColor="Gray" />
+
+            <CollectionView
+                ItemsSource="{Binding Actividades}"
+                SelectionMode="None"
+                HeightRequest="360">
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout
+                        Padding="20"
+                        Spacing="5">
+
+                        <Label
+                            Text="No hay actividades registradas en este calendario."
+                            FontAttributes="Bold"
+                            HorizontalTextAlignment="Center" />
+
+                        <Label
+                            Text="Registrá la fecha de una clase o de un trabajo."
+                            TextColor="Gray"
+                            HorizontalTextAlignment="Center" />
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+
+                    <DataTemplate>
+
+                        <Border
+                            Margin="0,5"
+                            Padding="12"
+                            Stroke="LightGray"
+                            StrokeThickness="1">
+
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+
+                            <Grid
+                                ColumnDefinitions="*,Auto"
+                                RowDefinitions="Auto,Auto"
+                                ColumnSpacing="15"
+                                RowSpacing="4">
+
+                                <Label
+                                    Grid.Row="0"
+                                    Grid.Column="0"
+                                    Text="{Binding Fecha,
+                                    StringFormat='{0:dd/MM/yyyy}'}"
+                                    FontSize="17"
+                                    FontAttributes="Bold" />
+
+                                <Label
+                                    Grid.Row="1"
+                                    Grid.Column="0"
+                                    Text="{Binding Descripcion}" />
+
+                                <VerticalStackLayout
+                                    Grid.Row="0"
+                                    Grid.RowSpan="2"
+                                    Grid.Column="1"
+                                    VerticalOptions="Center">
+
+                                    <Label
+                                        Text="Tipo"
+                                        FontSize="12"
+                                        TextColor="Gray"
+                                        HorizontalTextAlignment="Center" />
+
+                                    <Label
+                                        Text="{Binding Tipo}"
+                                        FontAttributes="Bold"
+                                        HorizontalTextAlignment="Center" />
+
+                                </VerticalStackLayout>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+
+    </ScrollView>
+
+</ContentPage>
