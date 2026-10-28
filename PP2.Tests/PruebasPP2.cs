@@ -175,6 +175,24 @@ public class PruebasPP2
         Assert.Empty(_e.Almacen.Estudiantes);
     }
 
+    [Theory]
+    [InlineData("Ana3", "Paz")]
+    [InlineData("Luis", "Paz@")]
+    [InlineData("Luis", "ppppppppppppppppppppppppppppppppppppppppp")]
+    public async Task H1_NombreOApellidoInvalidos_SeRechazan(
+        string nombre, string apellido)
+    {
+        AlumnoFormViewModel formulario = NuevoFormulario();
+        formulario.Nombre = nombre;
+        formulario.Apellido = apellido;
+        formulario.Legajo = "12345";
+
+        await formulario.GuardarCommand.ExecuteAsync(null);
+
+        Assert.True(formulario.EsError);
+        Assert.Empty(_e.Almacen.Estudiantes);
+    }
+
     [Fact]
     public async Task H1_AlumnoValido_SeAgregaYElMensajeNoEsDeError()
     {
@@ -209,7 +227,7 @@ public class PruebasPP2
     }
 
     [Fact]
-    public void H2_TrabajoRepetidoConLaMismaFecha_SeRechaza()
+    public void H2_TrabajoConElMismoNombre_SeRechazaAunqueCambieLaFecha()
     {
         var calendario = new CalendarioViewModel(
             ComisionA, _e.ServicioCalendario, _e.Registro)
@@ -218,12 +236,13 @@ public class PruebasPP2
         };
         calendario.AgregarCommand.Execute(null);
         calendario.Descripcion = "TP1";
+        calendario.Fecha = DateTime.Today.AddDays(7);
 
         calendario.AgregarCommand.Execute(null);
 
         Assert.Single(_e.Almacen.Calendario);
         Assert.True(calendario.EsError);
-        Assert.Equal("Ese trabajo ya está cargado con esa fecha", calendario.Mensaje);
+        Assert.Contains("ese nombre", calendario.Mensaje);
     }
 
     // ---------- H3: tomar asistencia ----------
@@ -326,6 +345,22 @@ public class PruebasPP2
     }
 
     [Fact]
+    public async Task H5_NoSeCierraLaEntregaDeUnTrabajoQueTodaviaNoVencio()
+    {
+        Alumno("101", "Gómez");
+        CargarTrabajo("TP1");
+        var planilla = new EntregaViewModel(
+            ComisionA, _navegacion, _e.Nomina, _e.ServicioCalendario, _dialogos, _e.Registro);
+
+        await planilla.CerrarEntregaCommand.ExecuteAsync(null);
+
+        Assert.True(planilla.EsError);
+        Assert.Contains("vence", planilla.Mensaje);
+        Assert.Equal(0, _dialogos.Preguntas);
+        Assert.Empty(_e.Almacen.Entregas);
+    }
+
+    [Fact]
     public void H5_CerrarLaEntrega_MarcaNoEntregadoSoloALosPendientes()
     {
         Estudiante ana = Alumno("101", "Gómez");
@@ -390,6 +425,31 @@ public class PruebasPP2
 
         Assert.Equal(10m, _e.Riesgo.CalcularRiesgo(ana));
         Assert.Equal(100m, _e.Riesgo.CalcularRiesgo(luis));
+    }
+
+    [Fact]
+    public void H6_UnTrabajoNoEntregadoEntreCuatro_SonVeinticincoPorCiento()
+    {
+        Estudiante ana = Alumno("101", "Gómez");
+        Estudiante luis = Alumno("102", "Paz");
+        foreach (string nombre in new[] { "TP1", "TP2", "TP3", "TP4" })
+        {
+            _e.Entregas.Agregar(new Entrega
+            {
+                Estudiante = luis,
+                Trabajo = CargarTrabajo(nombre),
+                Estado = EstadoEntrega.Entregado
+            });
+        }
+        _e.Entregas.Agregar(new Entrega
+        {
+            Estudiante = ana,
+            Trabajo = _e.Entregas.ObtenerOCrearTrabajo("TP1"),
+            Estado = EstadoEntrega.NoEntregado
+        });
+
+        Assert.Equal(25m, _e.Riesgo.CalcularPorcentajeEntregas(ana));
+        Assert.Equal(0m, _e.Riesgo.CalcularPorcentajeEntregas(luis));
     }
 
     [Fact]

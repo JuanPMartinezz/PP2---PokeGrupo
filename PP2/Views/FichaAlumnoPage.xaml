@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:modelos="clr-namespace:RegistroAsistencia.Models"
              x:Class="RegistroAsistencia.Views.FichaAlumnoPage"
              Title="Ficha del alumno">
 
@@ -15,13 +16,13 @@
                    FontAttributes="Bold"
                    TextColor="{StaticResource RiesgoSinDatos}">
                 <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Alto">
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Alto}">
                         <Setter Property="TextColor" Value="{StaticResource RiesgoAlto}" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Medio">
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Medio}">
                         <Setter Property="TextColor" Value="{StaticResource RiesgoMedio}" />
                     </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="Bajo">
+                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Bajo}">
                         <Setter Property="TextColor" Value="{StaticResource RiesgoBajo}" />
                     </DataTrigger>
                 </Label.Triggers>

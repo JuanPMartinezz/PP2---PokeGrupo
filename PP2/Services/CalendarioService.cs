@@ -71,23 +71,37 @@ public class CalendarioService
         DateTime fecha,
         string texto)
     {
-        if (texto.Length == 0)
+        string? invalido = tipo == TipoActividad.Trabajo
+            ? Validaciones.NombreTrabajo(texto)
+            : null;
+
+        if (invalido is not null)
         {
-            return "Escribí el nombre del trabajo";
+            return invalido;
         }
 
-        bool repetida = _calendario.ObtenerDeComision(comision).Any(a =>
-            a.Tipo == tipo &&
-            a.Fecha.Date == fecha.Date &&
-            a.Descripcion.Equals(
-                texto,
-                StringComparison.OrdinalIgnoreCase));
+        if (!EstaRepetida(comision, tipo, fecha, texto))
+        {
+            return null;
+        }
 
-        return repetida
-            ? tipo == TipoActividad.Clase
-                ? "Ya hay una clase cargada para esa fecha"
-                : "Ese trabajo ya está cargado con esa fecha"
-            : null;
+        return tipo == TipoActividad.Clase
+            ? "Ya hay una clase cargada para esa fecha"
+            : "Ya hay un trabajo con ese nombre en esta comisión";
+    }
+
+    // Una clase se repite si es el mismo día; un trabajo, si tiene el
+    // mismo nombre, sea cual sea la fecha
+    private bool EstaRepetida(
+        string comision,
+        TipoActividad tipo,
+        DateTime fecha,
+        string texto)
+    {
+        return _calendario.ObtenerDeComision(comision).Any(a =>
+            a.Tipo == tipo &&
+            a.Descripcion.Equals(texto, StringComparison.OrdinalIgnoreCase) &&
+            (tipo == TipoActividad.Trabajo || a.Fecha.Date == fecha.Date));
     }
 
     private void Guardar(

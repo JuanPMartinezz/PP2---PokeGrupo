@@ -44,6 +44,7 @@ public class RiesgoService
         List<Entrega> Entregas,
         List<ContactoEstudiante> Contactos,
         int ClasesDictadas,
+        int TrabajosDictados,
         UmbralesRiesgo Umbrales);
 
     // Resultado de todos los alumnos de la comisión
@@ -79,13 +80,14 @@ public class RiesgoService
             datos.ClasesDictadas);
     }
 
-    // Promedio del riesgo de cada entrega del estudiante
+    // Riesgo de las entregas sobre los trabajos dictados en la comisión
     public decimal CalcularPorcentajeEntregas(Estudiante estudiante)
     {
         DatosComision datos = Cargar(estudiante.Comision);
 
         return PorcentajeEntregas(
             EntregasDe(estudiante, datos),
+            datos.TrabajosDictados,
             datos.Umbrales);
     }
 
@@ -108,18 +110,34 @@ public class RiesgoService
         List<Asistencia> asistencias =
             _asistencias.ObtenerDeComision(comision);
 
-        // Una clase dictada es una fecha en la que se tomó asistencia
-        int clases = asistencias
-            .Select(a => a.Clase.Fecha.Date)
-            .Distinct()
-            .Count();
+        List<Entrega> entregas = _entregas.ObtenerDeComision(comision);
 
         return new DatosComision(
             asistencias,
-            _entregas.ObtenerDeComision(comision),
+            entregas,
             _contactos.ObtenerDeComision(comision),
-            clases,
+            ClasesDictadas(asistencias),
+            TrabajosDictados(entregas),
             _umbrales.Obtener(comision));
+    }
+
+    // Una clase dictada es una fecha en la que se tomó asistencia
+    private static int ClasesDictadas(List<Asistencia> asistencias)
+    {
+        return asistencias
+            .Select(a => a.Clase.Fecha.Date)
+            .Distinct()
+            .Count();
+    }
+
+    // Un trabajo dictado es uno que ya tiene entregas registradas
+    // en la comisión
+    private static int TrabajosDictados(List<Entrega> entregas)
+    {
+        return entregas
+            .Select(e => e.Trabajo.Id)
+            .Distinct()
+            .Count();
     }
 
     private static ResultadoRiesgo Armar(
@@ -133,7 +151,10 @@ public class RiesgoService
             asistencias.Count > 0,
             PorcentajeAusencias(asistencias, datos.ClasesDictadas),
             entregas.Count > 0,
-            PorcentajeEntregas(entregas, datos.Umbrales),
+            PorcentajeEntregas(
+                entregas,
+                datos.TrabajosDictados,
+                datos.Umbrales),
             datos.Umbrales);
 
         ResultadoRiesgo resultado = Estadisticas(
@@ -163,7 +184,7 @@ public class RiesgoService
             TotalClases = datos.ClasesDictadas,
             Ausencias = Contar(asistencias, EstadoAsistencia.Ausente),
             Presentes = Contar(asistencias, EstadoAsistencia.Presente),
-            TotalEntregas = entregas.Count,
+            TotalEntregas = datos.TrabajosDictados,
             Entregados = Contar(entregas, EstadoEntrega.Entregado),
             NoEntregados = Contar(entregas, EstadoEntrega.NoEntregado),
             EntregadosFueraDeTermino = Contar(
@@ -235,11 +256,17 @@ public class RiesgoService
             2);
     }
 
+    /*
+     * Igual que con la asistencia, el porcentaje se calcula sobre los
+     * trabajos dictados en la comisión y no sobre los registros del
+     * alumno: un trabajo no entregado entre cuatro es 25 %, no 100 %.
+     */
     private static decimal PorcentajeEntregas(
         List<Entrega> entregas,
+        int trabajosDictados,
         UmbralesRiesgo umbrales)
     {
-        if (entregas.Count == 0)
+        if (trabajosDictados == 0)
         {
             return 0;
         }
@@ -247,7 +274,7 @@ public class RiesgoService
         decimal total = entregas.Sum(e =>
             RiesgoDeEntrega(e.Estado, umbrales));
 
-        return Math.Round(total / entregas.Count, 2);
+        return Math.Round(total / trabajosDictados, 2);
     }
 
     private static decimal RiesgoDeEntrega(

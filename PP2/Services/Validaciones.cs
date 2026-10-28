@@ -11,6 +11,10 @@ public static class Validaciones
 
     public const int LegajoMaximo = 8;
 
+    public const int LargoMaximoPersona = 40;
+
+    public const int LargoMaximoNombre = 60;
+
     public static string? Alumno(
         string nombre,
         string apellido,
@@ -24,9 +28,34 @@ public static class Validaciones
             return "Completá nombre, apellido y legajo";
         }
 
-        return string.IsNullOrWhiteSpace(comision)
-            ? "Elegí la comisión del alumno"
-            : null;
+        return Persona(nombre, "El nombre") ??
+               Persona(apellido, "El apellido") ??
+               (string.IsNullOrWhiteSpace(comision)
+                   ? "Elegí la comisión del alumno"
+                   : null);
+    }
+
+    // Nombres y apellidos: letras, espacios, puntos, guiones y apóstrofes,
+    // hasta LargoMaximoPersona caracteres
+    private static string? Persona(string valor, string etiqueta)
+    {
+        string limpio = valor.Trim();
+
+        if (limpio.Length > LargoMaximoPersona)
+        {
+            return $"{etiqueta} no puede tener más de " +
+                   $"{LargoMaximoPersona} caracteres";
+        }
+
+        return limpio.All(EsCaracterDeNombre)
+            ? null
+            : $"{etiqueta} solo puede tener letras, espacios, puntos, " +
+              "guiones y apóstrofes";
+    }
+
+    private static bool EsCaracterDeNombre(char c)
+    {
+        return char.IsLetter(c) || c is ' ' or '.' or '-' or '\'';
     }
 
     // El legajo son solo números, de 3 a 8 dígitos
@@ -46,8 +75,35 @@ public static class Validaciones
 
     public static string? NombreComision(string nombre)
     {
-        return string.IsNullOrWhiteSpace(nombre)
-            ? "Escribí el nombre de la comisión"
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            return "Escribí el nombre de la comisión";
+        }
+
+        return nombre.Trim().Length > LargoMaximoNombre
+            ? $"El nombre de la comisión no puede tener más de {LargoMaximoNombre} caracteres"
+            : null;
+    }
+
+    public static string? NombreTrabajo(string nombre)
+    {
+        if (string.IsNullOrWhiteSpace(nombre))
+        {
+            return "Escribí el nombre del trabajo";
+        }
+
+        return nombre.Trim().Length > LargoMaximoNombre
+            ? $"El nombre del trabajo no puede tener más de {LargoMaximoNombre} caracteres"
+            : null;
+    }
+
+    // La entrega se cierra cuando el trabajo ya venció (o vence hoy):
+    // antes, los alumnos todavía pueden entregarlo
+    public static string? CierreDeEntrega(DateTime fechaDelTrabajo)
+    {
+        return fechaDelTrabajo.Date > DateTime.Today
+            ? $"El trabajo vence el {Formatos.FechaCorta(fechaDelTrabajo)}: " +
+              "todavía no se puede cerrar la entrega"
             : null;
     }
 

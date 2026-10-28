@@ -98,7 +98,7 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
             ? "Entregas: todavía no hay entregas registradas"
             : $"Entregas: {r.Entregados} entregadas, " +
               $"{r.EntregadosFueraDeTermino} fuera de término y " +
-              $"{r.NoEntregados} sin entregar de {r.TotalEntregas}";
+              $"{r.NoEntregados} sin entregar, de {r.TotalEntregas} trabajos";
     }
 
     private void CargarContactos(ResultadoRiesgo r)

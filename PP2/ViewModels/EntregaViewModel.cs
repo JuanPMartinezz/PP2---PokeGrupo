@@ -257,9 +257,8 @@ public partial class EntregaViewModel : PantallaBase, IActualizable
     [RelayCommand]
     private async Task CerrarEntrega()
     {
-        if (!HayTrabajoElegido)
+        if (!PuedeCerrar())
         {
-            Rechazar("Elegí un trabajo o agregá uno nuevo");
             return;
         }
 
@@ -282,6 +281,26 @@ public partial class EntregaViewModel : PantallaBase, IActualizable
 
         Informar($"Entrega cerrada: {cerrados} alumnos quedaron como " +
                  "\"No entregado\"");
+    }
+
+    // Hay un trabajo elegido y ya se puede cerrar su entrega
+    private bool PuedeCerrar()
+    {
+        if (!HayTrabajoElegido)
+        {
+            Rechazar("Elegí un trabajo o agregá uno nuevo");
+            return false;
+        }
+
+        string? error = Validaciones.CierreDeEntrega(
+            TrabajoSeleccionado!.Fecha);
+
+        if (error is not null)
+        {
+            Rechazar(error);
+        }
+
+        return error is null;
     }
 
     // Pregunta solo si se está cambiando algo que ya estaba guardado
