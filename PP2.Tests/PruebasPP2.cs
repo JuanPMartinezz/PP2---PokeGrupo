@@ -762,4 +762,89 @@ public class PruebasPP2
         Assert.Equal(1, _navegacion.VolvioAlInicio);
         Assert.Equal((Destino.Asistencia, ComisionB), _navegacion.Visitas[^1]);
     }
+
+
+    //Pruebas de aceptación de la H8, CA1 y CA2.
+    //H8: Como tutor de una comisión, quiero visualizar a mis estudiantes ordenados según su nivel de riesgo para poder priorizar el seguimiento de aquellos que presentan mayor riesgo.
+    //C1: Dada una comisión con estudiantes que tienen un riesgo calculado, cuando el tutor consulta la comisión, el sistema debe mostrar a los estudiantes ordenados de mayor a menor riesgo.
+    //C2: Dado un estudiante con un riesgo calculado, cuando el tutor consulta su información, el sistema debe mostrar el detalle de los factores que justifican ese valor.
+
+
+    [Fact]
+    public void Given_ComisionConAlumnosDeDistintoRiesgo_When_TutorConsultaLaComision_Then_SeMuestranAlumnosDeMayorAMenorRiesgo()
+    {
+        // Given: una comisión con alumnos de distintos niveles de riesgo
+
+        Estudiante perez = Alumno("1", "Pérez", "Juan");
+        Estudiante gomez = Alumno("2", "Gómez", "Roberto");
+        Estudiante alvarez = Alumno("3", "Álvarez", "Ramiro");
+
+        RegistrarAsistencia(perez, EstadoAsistencia.Ausente, 2);
+        RegistrarAsistencia(perez, EstadoAsistencia.Ausente, 1);
+
+        RegistrarAsistencia(gomez, EstadoAsistencia.Ausente, 2);
+        RegistrarAsistencia(gomez, EstadoAsistencia.Presente, 1);
+
+        RegistrarAsistencia(alvarez, EstadoAsistencia.Presente, 2);
+        RegistrarAsistencia(alvarez, EstadoAsistencia.Presente, 1);
+
+        // When: el tutor consulta la comisión ordenada por mayor riesgo
+        ListaAlumnosViewModel lista = NuevaLista();
+        lista.OrdenIndice = (int)OrdenLista.MayorRiesgo;
+
+        // Then: los alumnos se muestran de mayor a menor riesgo
+        Assert.Equal(
+            new[] { "Pérez, Juan", "Gómez, Roberto", "Álvarez, Ramiro" },
+            lista.Alumnos.Select(a => a.Nombre)
+        );
+    }
+
+    [Fact]
+    public void Given_AlumnoConRiesgoCalculado_When_TutorConsultaSuInformacion_Then_SeMuestranLosFactoresQueJustificanElRiesgo()
+    {
+        // Given: un alumno con asistencias y entregas que influyen en su riesgo
+        Estudiante ana = Alumno("101", "Gómez");
+
+        //Carga de una asistencia y una inasistencia
+        RegistrarAsistencia(ana, EstadoAsistencia.Presente);
+        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 1);
+
+        Trabajo tp1 = CargarTrabajo("TP1");
+        Trabajo tp2 = CargarTrabajo("TP2");
+
+        //Carga de un tp entregado fuera de termino y uno no entregado
+        _e.Entregas.Agregar(new Entrega
+        {
+            Estudiante = ana,
+            Trabajo = tp1,
+            Estado = EstadoEntrega.EntregadoFueraDeTermino
+        });
+
+        _e.Entregas.Agregar(new Entrega
+        {
+            Estudiante = ana,
+            Trabajo = tp2,
+            Estado = EstadoEntrega.NoEntregado
+        });
+
+        // When: el tutor consulta la ficha del alumno
+        FichaAlumnoViewModel ficha = new FichaAlumnoViewModel(
+            "101", _navegacion, _dialogos, _e.Riesgo, _e.Nomina);
+
+        // Then: se muestran los factores que justifican el riesgo
+        Assert.Equal(
+            "Asistencia: 1 presentes y 1 ausencias en 2 clases dictadas",
+            ficha.AsistenciaTexto);
+
+        Assert.Equal(
+            "Entregas: 0 entregadas, 1 fuera de término y 1 sin entregar, de 2 trabajos",
+            ficha.EntregasTexto);
+
+        Assert.False(string.IsNullOrWhiteSpace(ficha.RiesgoTexto));
+        Assert.False(string.IsNullOrWhiteSpace(ficha.Nivel));
+    }
+
+
+
+
 }
