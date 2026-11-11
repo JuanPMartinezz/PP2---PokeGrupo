@@ -7,6 +7,7 @@ public enum Destino
     Asistencia,
     Entrega,
     Lista,
+    ReporteRiesgo,
     Ficha,
     Contacto,
     Calendario,

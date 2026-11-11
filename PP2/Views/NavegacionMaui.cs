@@ -52,6 +52,7 @@ public sealed class NavegacionMaui : INavegacion
             Destino.Asistencia => Armar<AsistenciaPage, AsistenciaViewModel>(dato),
             Destino.Entrega => Armar<EntregaPage, EntregaViewModel>(dato),
             Destino.Lista => Armar<ListaAlumnosPage, ListaAlumnosViewModel>(dato),
+            Destino.ReporteRiesgo => Armar<ReporteRiesgoPage, ReporteRiesgoViewModel>(dato),
             Destino.Ficha => Armar<FichaAlumnoPage, FichaAlumnoViewModel>(dato),
             Destino.Contacto => Armar<ContactoPage, ContactoViewModel>(dato),
             _ => CrearPaginaAuxiliar(destino, dato)

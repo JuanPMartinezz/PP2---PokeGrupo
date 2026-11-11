@@ -23,6 +23,7 @@
 
             <Button Text="Calendario" Command="{Binding CalendarioCommand}" />
             <Button Text="Lista de alumnos" Command="{Binding ListaCommand}" />
+            <Button Text="Reporte de riesgo" Command="{Binding ReporteRiesgoCommand}" />
             <Button Text="Tomar asistencia" Command="{Binding AsistenciaCommand}" />
             <Button Text="Registrar entrega" Command="{Binding EntregaCommand}" />
 
