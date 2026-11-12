@@ -12,7 +12,6 @@
     <Shell.Resources>
         <ResourceDictionary>
 
-            <!-- Estilo de los botones -->
             <Style x:Key="BotonPokedex" TargetType="Button">
                 <Setter Property="BackgroundColor" Value="#FFFFFF" />
                 <Setter Property="TextColor" Value="#30343B" />
@@ -26,7 +25,6 @@
                 <Setter Property="HorizontalOptions" Value="Fill" />
             </Style>
 
-            <!-- Títulos de sección -->
             <Style x:Key="TituloPokedex" TargetType="Label">
                 <Setter Property="TextColor" Value="#30343B" />
                 <Setter Property="FontSize" Value="15" />
@@ -43,7 +41,7 @@
                 Padding="16,0,16,20"
                 Spacing="12">
 
-                <!-- Encabezado Pokédex -->
+                <!-- ENCABEZADO -->
                 <Border
                     BackgroundColor="#D9363E"
                     StrokeThickness="0"
@@ -75,7 +73,7 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <!-- Inicio -->
+                <!-- INICIO -->
                 <Button
                     Text="⌂   Inicio"
                     Command="{Binding InicioCommand}"
@@ -86,7 +84,7 @@
                     CornerRadius="12"
                     HeightRequest="48" />
 
-                <!-- Comisión -->
+                <!-- COMISION -->
                 <Label
                     Text="COMISIÓN"
                     Style="{StaticResource TituloPokedex}"
@@ -106,21 +104,22 @@
                         TitleColor="#858B95" />
                 </Border>
 
-                <!-- Navegación -->
+                <!-- NAVEGACION -->
                 <Label
                     Text="NAVEGACIÓN"
                     Style="{StaticResource TituloPokedex}"
                     Margin="0,8,0,0" />
 
                 <Button
-                    Text="🔥  Calendario"
+                    Text="🔥   Calendario"
                     Command="{Binding CalendarioCommand}"
                     Style="{StaticResource BotonPokedex}" />
 
                 <Button
-                    Text=" ⚡  Lista de alumnos"
+                    Text="⚡   Lista de alumnos"
                     Command="{Binding ListaCommand}"
                     Style="{StaticResource BotonPokedex}" />
+
                 <Button
                     Text="🔮   Reporte de riesgo"
                     Command="{Binding ReporteRiesgoCommand}"
@@ -136,7 +135,7 @@
                     Command="{Binding EntregaCommand}"
                     Style="{StaticResource BotonPokedex}" />
 
-                <!-- Mensajes -->
+                <!-- MENSAJES -->
                 <Label
                     Text="{Binding Mensaje}"
                     TextColor="#D9363E"

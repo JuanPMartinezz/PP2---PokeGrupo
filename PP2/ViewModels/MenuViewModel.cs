@@ -64,6 +64,9 @@ public partial class MenuViewModel : PantallaBase
     private Task Lista() => Abrir(Destino.Lista);
 
     [RelayCommand]
+    private Task ReporteRiesgo() => Abrir(Destino.ReporteRiesgo);
+
+    [RelayCommand]
     private Task Asistencia() => Abrir(Destino.Asistencia);
 
     [RelayCommand]
