@@ -1,34 +1,293 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="RegistroAsistencia.Views.ContactoPage"
-             Title="Registrar contacto">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.ContactoPage"
+    Title="Registrar contacto"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#E9EDF3">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
+    <Grid RowDefinitions="Auto,*">
 
-            <Label Text="{Binding Alumno}" Style="{StaticResource TituloPagina}" />
+        <!-- Encabezado -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-            <Label Text="Fecha del contacto" />
-            <DatePicker Date="{Binding Fecha}"
-                        MaximumDate="{Binding FechaMaxima}" />
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-            <Grid ColumnDefinitions="*,Auto">
-                <Label Text="El alumno atendió" VerticalOptions="Center" />
-                <Switch Grid.Column="1" IsToggled="{Binding Atendio}" />
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                </HorizontalStackLayout>
             </Grid>
 
-            <Label Text="¿Qué pasó?" />
-            <Editor Text="{Binding Resultado}"
-                    Placeholder="Ej.: dijo que volvía la semana próxima / sonó y no contestó"
-                    AutoSize="TextChanges"
-                    MinimumHeightRequest="100" />
-
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
-
-            <Button Text="Guardar contacto" Command="{Binding GuardarCommand}" />
-
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
         </VerticalStackLayout>
-    </ScrollView>
 
+        <!-- Contenido -->
+        <Grid Grid.Row="1"
+              BackgroundColor="#E9EDF3">
+
+            <Image Source="pokeball_fondo.png"
+                   HeightRequest="380"
+                   WidthRequest="380"
+                   Aspect="AspectFit"
+                   Opacity="0.5"
+                   HorizontalOptions="End"
+                   VerticalOptions="End"
+                   TranslationX="110"
+                   TranslationY="90"
+                   InputTransparent="True"/>
+
+            <ScrollView>
+                <VerticalStackLayout Padding="24,20,24,28"
+                                     Spacing="16">
+
+                    <!-- Título -->
+                    <HorizontalStackLayout Spacing="12"
+                                           VerticalOptions="Center">
+                        <Image Source="pokeball.png"
+                               HeightRequest="38"
+                               WidthRequest="38"
+                               Aspect="AspectFit"/>
+
+                        <Label Text="Registrar contacto"
+                               FontSize="25"
+                               FontAttributes="Bold"
+                               TextColor="#252B35"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Alumno -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="8">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="ALUMNO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Label Text="{Binding Alumno}"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"/>
+
+                            <Label Text="Registro de seguimiento individual"
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Fecha -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="FECHA DEL CONTACTO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <DatePicker Date="{Binding Fecha}"
+                                        MaximumDate="{Binding FechaMaxima}"
+                                        BackgroundColor="#F4F6F9"
+                                        TextColor="#252B35"
+                                        HeightRequest="48"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Atención -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="12">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="RESULTADO DEL CONTACTO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Border BackgroundColor="#F4F6F9"
+                                    Stroke="#E0E5EC"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 10"
+                                    Padding="12">
+
+                                <Grid ColumnDefinitions="*,Auto"
+                                      ColumnSpacing="10">
+
+                                    <VerticalStackLayout Spacing="4"
+                                                         VerticalOptions="Center">
+                                        <Label Text="¿El alumno atendió?"
+                                               FontSize="15"
+                                               FontAttributes="Bold"
+                                               TextColor="#394454"/>
+
+                                        <Label Text="Indicá si pudiste comunicarte con el estudiante."
+                                               FontSize="12"
+                                               TextColor="#687383"/>
+                                    </VerticalStackLayout>
+
+                                    <Switch Grid.Column="1"
+                                            IsToggled="{Binding Atendio}"
+                                            OnColor="#80D83C"
+                                            ThumbColor="White"
+                                            VerticalOptions="Center"/>
+                                </Grid>
+                            </Border>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Resultado -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="DETALLE DEL CONTACTO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Label Text="¿Qué pasó?"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="#394454"/>
+
+                            <Editor Text="{Binding Resultado}"
+                                    Placeholder="Ej.: dijo que volvía la semana próxima / sonó y no contestó"
+                                    AutoSize="TextChanges"
+                                    MinimumHeightRequest="120"
+                                    BackgroundColor="#F4F6F9"
+                                    TextColor="#252B35"
+                                    PlaceholderColor="#8793A3"/>
+
+                            <Label Text="Podés registrar lo conversado, los acuerdos y los próximos pasos."
+                                   FontSize="12"
+                                   TextColor="#687383"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Mensaje -->
+                   
+                    <Label Text="{Binding Mensaje}"
+                           Style="{StaticResource Mensaje}"
+                           Margin="4,0"/>
+
+                    <!-- Acción -->
+                    <Button Text="Guardar contacto"
+                            Command="{Binding GuardarCommand}"
+                            BackgroundColor="#D9363E"
+                            TextColor="White"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            CornerRadius="10"
+                            HeightRequest="54"
+                            BorderColor="#991F29"
+                            BorderWidth="1"/>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
 </ContentPage>
+

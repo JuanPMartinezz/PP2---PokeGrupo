@@ -262,7 +262,7 @@
                           VerticalOptions="Center" />
 
                         <Label
-                            Text="Entrenadores registrados"
+                            Text="Alumnos registrados"
                             FontSize="21"
                             FontAttributes="Bold"
                             TextColor="#252B35"

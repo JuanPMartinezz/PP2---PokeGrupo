@@ -1,5 +1,4 @@
 ﻿
-
 using CommunityToolkit.Mvvm.ComponentModel;
 using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
@@ -29,6 +28,20 @@ public class ReporteRiesgoViewModel : ObservableObject, IActualizable
     {
         get => estudiantesEnRiesgo;
         set => SetProperty(ref estudiantesEnRiesgo, value);
+    }
+
+    private int estudiantesRiesgoMedio;
+    public int EstudiantesRiesgoMedio
+    {
+        get => estudiantesRiesgoMedio;
+        set => SetProperty(ref estudiantesRiesgoMedio, value);
+    }
+
+    private int estudiantesRiesgoBajo;
+    public int EstudiantesRiesgoBajo
+    {
+        get => estudiantesRiesgoBajo;
+        set => SetProperty(ref estudiantesRiesgoBajo, value);
     }
 
     private decimal porcentajeEnRiesgo;
@@ -84,6 +97,12 @@ public class ReporteRiesgoViewModel : ObservableObject, IActualizable
         EstudiantesEnRiesgo = resultados.Count(r =>
             r.NivelRiesgo == NivelesRiesgo.Alto);
 
+        EstudiantesRiesgoMedio = resultados.Count(r =>
+            r.NivelRiesgo == NivelesRiesgo.Medio);
+
+        EstudiantesRiesgoBajo = resultados.Count(r =>
+            r.NivelRiesgo == NivelesRiesgo.Bajo);
+
         PorcentajeEnRiesgo = TotalEstudiantes == 0 || SinDatos
             ? 0
             : Math.Round(
@@ -97,4 +116,5 @@ public class ReporteRiesgoViewModel : ObservableObject, IActualizable
                 : $"{EstudiantesEnRiesgo} de {TotalEstudiantes} estudiantes tienen riesgo alto.";
     }
 }
+
 
