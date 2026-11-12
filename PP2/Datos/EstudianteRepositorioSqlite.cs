@@ -42,6 +42,17 @@ public sealed class EstudianteRepositorioSqlite : IEstudianteRepositorio
         _db.Conexion.Insert(Fila(estudiante));
     }
 
+    public void AgregarVarios(IEnumerable<Estudiante> estudiantes)
+    {
+        _db.Conexion.RunInTransaction(() =>
+        {
+            foreach (var estudiante in estudiantes)
+            {
+                _db.Conexion.Insert(Fila(estudiante));
+            }
+        });
+    }
+
     public void Actualizar(Estudiante estudiante)
     {
         _db.Conexion.Update(Fila(estudiante));
@@ -65,7 +76,6 @@ public sealed class EstudianteRepositorioSqlite : IEstudianteRepositorio
         });
     }
 
-    // Por apellido y nombre, respetando los acentos
     private List<Estudiante> Ordenar(List<EstudianteDb> filas)
     {
         Dictionary<int, string> comisiones = _db.NombresPorId();

@@ -5,7 +5,7 @@
              x:Class="RegistroAsistencia.Views.ListaAlumnosPage"
              Title="Alumnos">
 
-    <Grid Padding="20" RowSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto,Auto,*">
+    <Grid Padding="20" RowSpacing="8" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,*">
 
         <Picker Grid.Row="0"
                 Title="Comisión"
@@ -27,11 +27,15 @@
                 ItemsSource="{Binding FiltrosNivel}"
                 SelectedIndex="{Binding NivelIndice}" />
 
-        <Label Grid.Row="4"
+        <Button Grid.Row="4"
+                Text="Importar desde CSV"
+                Command="{Binding ImportarAlumnosCommand}" />
+
+        <Label Grid.Row="5"
                Text="{Binding Resumen}"
                Style="{StaticResource TextoSecundario}" />
 
-        <CollectionView Grid.Row="5" ItemsSource="{Binding Alumnos}">
+        <CollectionView Grid.Row="6" ItemsSource="{Binding Alumnos}">
             <CollectionView.ItemTemplate>
                 <DataTemplate>
                     <Border Style="{StaticResource Tarjeta}" Margin="0,4">
@@ -69,7 +73,5 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-
     </Grid>
-
 </ContentPage>

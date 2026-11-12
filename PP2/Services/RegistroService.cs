@@ -45,8 +45,6 @@ public class RegistroService
         _entregas = entregas;
     }
 
-    // Las clases dictadas de la comisión son los días en que se tomó
-    // asistencia. De la más reciente a la más vieja.
     public List<ResumenClase> ClasesDe(string comision)
     {
         return _asistencias.ObtenerDeComision(comision)
@@ -59,19 +57,16 @@ public class RegistroService
             .ToList();
     }
 
-    // Lo que hay guardado para el alumno en esa fecha; nulo si nada
     public EstadoAsistencia? AsistenciaDe(string legajo, DateTime fecha)
     {
         return _asistencias.Buscar(legajo, fecha)?.Estado;
     }
 
-    // Lo que hay guardado para el alumno en ese trabajo; nulo si nada
     public EstadoEntrega? EntregaDe(string legajo, int trabajoId)
     {
         return _entregas.Buscar(legajo, trabajoId)?.Estado;
     }
 
-    // Verdadero si ya se tomó asistencia a algún alumno de la comisión
     public bool HayAsistencia(string comision, DateTime fecha)
     {
         return _asistencias.ObtenerDeComision(comision)
@@ -100,10 +95,6 @@ public class RegistroService
         return Resumir(cambios);
     }
 
-    /*
-     * Cierra la entrega de un trabajo: los alumnos que no tienen ningún
-     * registro quedan como "No entregado". Devuelve cuántos son.
-     */
     public int CerrarEntrega(
         Trabajo trabajo,
         IEnumerable<Estudiante> estudiantes)
@@ -177,7 +168,6 @@ public class RegistroService
         return cambio;
     }
 
-    // Sin nada guardado es nuevo; con lo mismo guardado no hay cambio
     private static Cambio Decidir<T>(T? guardado, T estado)
         where T : struct
     {

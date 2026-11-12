@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 
 namespace RegistroAsistencia.ViewModels;
 
-// Un alumno en la lista: solo nombre y riesgo; al tocarlo se abre su ficha
 public sealed class ItemAlumno
 {
     public ItemAlumno(ResultadoRiesgo resultado, IAsyncRelayCommand abrir)
@@ -17,7 +16,6 @@ public sealed class ItemAlumno
 
     public ResultadoRiesgo Resultado { get; }
 
-    // Riesgo alto y sin contacto reciente: hay que llamarlo
     public bool Llamar => Resultado.ParaLlamar(DateTime.Today);
 
     public string Nombre =>
@@ -30,16 +28,19 @@ public sealed class ItemAlumno
     public IAsyncRelayCommand Abrir { get; }
 }
 
-/// <summary>
-/// Lista de alumnos de una comisión (H8 y H11): se puede cambiar de
-/// comisión, ordenar por apellido o por riesgo, y filtrar por contacto
-/// y por nivel de riesgo.
-/// </summary>
 public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
 {
     private readonly INavegacion _navegacion;
 
     private readonly RiesgoService _riesgo;
+
+    private readonly NominaService _nomina;
+
+    private readonly IDialogos _dialogos;
+
+    private readonly RegistroService _registro;
+
+    private readonly CalendarioService _calendario;
 
     public ObservableCollection<string> Comisiones { get; }
 
@@ -87,10 +88,19 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
         string comision,
         INavegacion navegacion,
         RiesgoService riesgo,
-        ComisionService comisiones)
+        ComisionService comisiones,
+        NominaService nomina,
+        IDialogos dialogos,
+        RegistroService registro,
+        CalendarioService calendario)
     {
         _navegacion = navegacion;
         _riesgo = riesgo;
+        _nomina = nomina;
+        _dialogos = dialogos;
+        _registro = registro;
+        _calendario = calendario;
+
         Comisiones = new ObservableCollection<string>(comisiones.Todas());
         comisionSeleccionada = comision;
 
@@ -131,6 +141,58 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
         }
 
         Resumen = TextoResumen(mostrados.Count, todos.Count);
+    }
+
+    [RelayCommand]
+    private async Task ImportarAlumnosAsync()
+    {
+        try
+        {
+            var opciones = new PickOptions
+            {
+                PickerTitle = "Seleccionar archivo CSV",
+                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+                {
+                    { DevicePlatform.Android, new[] { "text/comma-separated-values", "text/csv", "text/plain" } },
+                    { DevicePlatform.WinUI, new[] { ".csv" } },
+                    { DevicePlatform.iOS, new[] { "public.comma-separated-values-text" } }
+                })
+            };
+
+            FileResult? archivo = await FilePicker.Default.PickAsync(opciones);
+            if (archivo is null) return;
+
+            using Stream stream = await archivo.OpenReadAsync();
+            var (alumnosNuevos, registros, errores) = await _nomina.ImportarDesdeCsvCompletoAsync(
+                stream,
+                _registro,
+                _calendario);
+
+            Actualizar();
+
+            string mensaje = $"• Alumnos nuevos: {alumnosNuevos}\n• Asistencias y entregas cargadas: {registros}";
+            if (errores.Count > 0)
+            {
+                mensaje += $"\n\nFilas con observaciones ({errores.Count}):\n" +
+                           string.Join("\n", errores.Take(5));
+                if (errores.Count > 5)
+                {
+                    mensaje += $"\n... y {errores.Count - 5} errores más.";
+                }
+            }
+
+            if (Application.Current?.Windows.FirstOrDefault()?.Page is Page pagina)
+            {
+                await pagina.DisplayAlertAsync("Resultado de importación", mensaje, "Aceptar");
+            }
+        }
+        catch (Exception ex)
+        {
+            if (Application.Current?.Windows.FirstOrDefault()?.Page is Page pagina)
+            {
+                await pagina.DisplayAlertAsync("Error", $"No se pudo leer el archivo: {ex.Message}", "Aceptar");
+            }
+        }
     }
 
     private ItemAlumno CrearItem(ResultadoRiesgo resultado)
