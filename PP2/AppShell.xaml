@@ -6,29 +6,145 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:local="clr-namespace:RegistroAsistencia"
     FlyoutBehavior="Flyout"
+    FlyoutBackgroundColor="#EEF1F5"
     Title="Registro de asistencia">
 
+    <Shell.Resources>
+        <ResourceDictionary>
+
+            <!-- Estilo de los botones -->
+            <Style x:Key="BotonPokedex" TargetType="Button">
+                <Setter Property="BackgroundColor" Value="#FFFFFF" />
+                <Setter Property="TextColor" Value="#30343B" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="FontAttributes" Value="Bold" />
+                <Setter Property="CornerRadius" Value="12" />
+                <Setter Property="HeightRequest" Value="48" />
+                <Setter Property="Padding" Value="14,8" />
+                <Setter Property="BorderColor" Value="#E0E3E8" />
+                <Setter Property="BorderWidth" Value="1" />
+                <Setter Property="HorizontalOptions" Value="Fill" />
+            </Style>
+
+            <!-- Títulos de sección -->
+            <Style x:Key="TituloPokedex" TargetType="Label">
+                <Setter Property="TextColor" Value="#30343B" />
+                <Setter Property="FontSize" Value="15" />
+                <Setter Property="FontAttributes" Value="Bold" />
+            </Style>
+
+        </ResourceDictionary>
+    </Shell.Resources>
+
     <Shell.FlyoutContent>
-        <VerticalStackLayout x:Name="PanelMenu" Padding="20" Spacing="10">
+        <ScrollView>
+            <VerticalStackLayout
+                x:Name="PanelMenu"
+                Padding="16,0,16,20"
+                Spacing="12">
 
-            <Label Text="Menú" Style="{StaticResource TituloPagina}" />
+                <!-- Encabezado Pokédex -->
+                <Border
+                    BackgroundColor="#D9363E"
+                    StrokeThickness="0"
+                    Padding="12,24"
+                    Margin="-16,0,-16,8">
 
-            <Button Text="Inicio" Command="{Binding InicioCommand}" />
+                    <VerticalStackLayout Spacing="8">
 
-            <Label Text="Comisión" Style="{StaticResource TextoSecundario}" />
+                        <Image
+                            Source="pokeball.png"
+                            HeightRequest="75"
+                            WidthRequest="75"
+                            Aspect="AspectFit"
+                            HorizontalOptions="Center" />
 
-            <Picker Title="Elegí la comisión"
-                    ItemsSource="{Binding Comisiones}"
-                    SelectedItem="{Binding ComisionSeleccionada}" />
+                        <Label
+                            Text="Registro de asistencia"
+                            FontSize="21"
+                            FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalTextAlignment="Center" />
 
-            <Button Text="Calendario" Command="{Binding CalendarioCommand}" />
-            <Button Text="Lista de alumnos" Command="{Binding ListaCommand}" />
-            <Button Text="Tomar asistencia" Command="{Binding AsistenciaCommand}" />
-            <Button Text="Registrar entrega" Command="{Binding EntregaCommand}" />
+                        <Label
+                            Text="P O K E G R U P O"
+                            FontSize="11"
+                            TextColor="#FFE1E1"
+                            HorizontalTextAlignment="Center" />
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
+                    </VerticalStackLayout>
+                </Border>
 
-        </VerticalStackLayout>
+                <!-- Inicio -->
+                <Button
+                    Text="⌂   Inicio"
+                    Command="{Binding InicioCommand}"
+                    BackgroundColor="#D9363E"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    FontSize="16"
+                    CornerRadius="12"
+                    HeightRequest="48" />
+
+                <!-- Comisión -->
+                <Label
+                    Text="COMISIÓN"
+                    Style="{StaticResource TituloPokedex}"
+                    Margin="0,8,0,0" />
+
+                <Border
+                    BackgroundColor="White"
+                    Stroke="#DDE1E7"
+                    StrokeThickness="1"
+                    Padding="8,2">
+
+                    <Picker
+                        Title="Elegí la comisión"
+                        ItemsSource="{Binding Comisiones}"
+                        SelectedItem="{Binding ComisionSeleccionada}"
+                        TextColor="#30343B"
+                        TitleColor="#858B95" />
+                </Border>
+
+                <!-- Navegación -->
+                <Label
+                    Text="NAVEGACIÓN"
+                    Style="{StaticResource TituloPokedex}"
+                    Margin="0,8,0,0" />
+
+                <Button
+                    Text="🔥  Calendario"
+                    Command="{Binding CalendarioCommand}"
+                    Style="{StaticResource BotonPokedex}" />
+
+                <Button
+                    Text=" ⚡  Lista de alumnos"
+                    Command="{Binding ListaCommand}"
+                    Style="{StaticResource BotonPokedex}" />
+                <Button
+                    Text="🔮   Reporte de riesgo"
+                    Command="{Binding ReporteRiesgoCommand}"
+                    Style="{StaticResource BotonPokedex}" />
+
+                <Button
+                    Text="💧   Tomar asistencia"
+                    Command="{Binding AsistenciaCommand}"
+                    Style="{StaticResource BotonPokedex}" />
+
+                <Button
+                    Text="🌿   Registrar entrega"
+                    Command="{Binding EntregaCommand}"
+                    Style="{StaticResource BotonPokedex}" />
+
+                <!-- Mensajes -->
+                <Label
+                    Text="{Binding Mensaje}"
+                    TextColor="#D9363E"
+                    FontSize="12"
+                    Margin="0,8,0,0" />
+
+            </VerticalStackLayout>
+        </ScrollView>
     </Shell.FlyoutContent>
 
     <ShellContent
