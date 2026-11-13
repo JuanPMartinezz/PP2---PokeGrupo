@@ -24,12 +24,13 @@ public class ContactoService
     public string? Registrar(
         string legajo,
         DateTime fecha,
+        MedioContacto? medio,
         bool atendio,
         string resultado)
     {
         Estudiante? estudiante = _estudiantes.Buscar(legajo);
 
-        string? error = Validar(estudiante, fecha, atendio, resultado);
+        string? error = Validar(estudiante, fecha, medio, atendio, resultado);
 
         if (error is null)
         {
@@ -37,6 +38,7 @@ public class ContactoService
             {
                 Estudiante = estudiante!,
                 Fecha = fecha.Date,
+                Medio = medio!.Value,
                 Atendio = atendio,
                 Resultado = resultado.Trim()
             });
@@ -48,12 +50,18 @@ public class ContactoService
     private static string? Validar(
         Estudiante? estudiante,
         DateTime fecha,
+        MedioContacto? medio,
         bool atendio,
         string resultado)
     {
         if (estudiante is null)
         {
             return "No se encontró al alumno";
+        }
+
+        if (medio is null)
+        {
+            return "Elegí el medio del contacto";
         }
 
         if (!string.IsNullOrWhiteSpace(resultado))

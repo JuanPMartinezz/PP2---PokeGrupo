@@ -42,6 +42,11 @@ public partial class AlumnoFormViewModel : PantallaBase
     [ObservableProperty]
     private string? comisionSeleccionada;
 
+    [ObservableProperty]
+    private DateTime fechaIncorporacion = DateTime.Today;
+
+    public DateTime FechaMaxima => DateTime.Today;
+
     public AlumnoFormViewModel(
         INavegacion navegacion,
         NominaService nomina,
@@ -70,15 +75,18 @@ public partial class AlumnoFormViewModel : PantallaBase
             Nombre = _original.Nombre;
             Apellido = _original.Apellido;
             Legajo = _original.Legajo;
+
+            if (_original.FechaIncorporacion != default)
+            {
+                FechaIncorporacion = _original.FechaIncorporacion;
+            }
         }
     }
 
     [RelayCommand]
     private async Task Guardar()
     {
-        string? error = EsEdicion
-            ? _nomina.Actualizar(Legajo, Nombre, Apellido, ComisionSeleccionada)
-            : _nomina.Agregar(Nombre, Apellido, Legajo, ComisionSeleccionada);
+        string? error = GuardarEnNomina();
 
         if (error is not null)
         {
@@ -95,6 +103,17 @@ public partial class AlumnoFormViewModel : PantallaBase
         AvisarAltaYLimpiar();
     }
 
+    private string? GuardarEnNomina()
+    {
+        return EsEdicion
+            ? _nomina.Actualizar(
+                Legajo, Nombre, Apellido, ComisionSeleccionada,
+                FechaIncorporacion)
+            : _nomina.Agregar(
+                Nombre, Apellido, Legajo, ComisionSeleccionada,
+                FechaIncorporacion);
+    }
+
     private void AvisarAltaYLimpiar()
     {
         Informar($"{Apellido.Trim()}, {Nombre.Trim()} agregado a " +
@@ -103,5 +122,6 @@ public partial class AlumnoFormViewModel : PantallaBase
         Nombre = "";
         Apellido = "";
         Legajo = "";
+        FechaIncorporacion = DateTime.Today;
     }
 }

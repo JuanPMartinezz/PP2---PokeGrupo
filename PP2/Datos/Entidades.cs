@@ -18,6 +18,9 @@ public class EstudianteDb
 
     [Indexed]
     public int ComisionId { get; set; }
+
+    // Vacía en los alumnos cargados antes de este dato
+    public string FechaIncorporacion { get; set; } = string.Empty;
 }
 
 [Table("Asistencias")]
@@ -83,6 +86,9 @@ public class ContactoDb
 
     public string Fecha { get; set; } = string.Empty;
 
+    // Valor del enum MedioContacto; 0 (llamada) en los contactos anteriores
+    public int Medio { get; set; }
+
     // Nulo en los contactos anteriores a este dato
     public bool? Atendio { get; set; }
 
@@ -145,7 +151,10 @@ public static class Conversiones
             Legajo = fila.Legajo,
             Nombre = fila.Nombre,
             Apellido = fila.Apellido,
-            Comision = comision
+            Comision = comision,
+            FechaIncorporacion = string.IsNullOrEmpty(fila.FechaIncorporacion)
+                ? default
+                : LeerFecha(fila.FechaIncorporacion)
         };
     }
 

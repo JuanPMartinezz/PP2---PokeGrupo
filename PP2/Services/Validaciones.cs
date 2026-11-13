@@ -114,6 +114,13 @@ public static class Validaciones
             : null;
     }
 
+    public static string? FechaIncorporacion(DateTime fecha)
+    {
+        return fecha.Date > DateTime.Today
+            ? "La fecha de incorporación no puede ser futura"
+            : null;
+    }
+
     public static string? FechaAsistencia(DateTime fecha)
     {
         return fecha.Date > DateTime.Today

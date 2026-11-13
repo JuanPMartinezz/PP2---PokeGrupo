@@ -35,10 +35,12 @@ public class NominaService
         string nombre,
         string apellido,
         string legajo,
-        string? comision)
+        string? comision,
+        DateTime fechaIncorporacion)
     {
         string? error = Validaciones.Alumno(nombre, apellido, legajo, comision)
                         ?? Validaciones.Legajo(legajo)
+                        ?? Validaciones.FechaIncorporacion(fechaIncorporacion)
                         ?? ControlarComision(comision!)
                         ?? ControlarLegajoLibre(legajo);
 
@@ -49,7 +51,8 @@ public class NominaService
                 Nombre = nombre.Trim(),
                 Apellido = apellido.Trim(),
                 Legajo = legajo.Trim(),
-                Comision = comision!
+                Comision = comision!,
+                FechaIncorporacion = fechaIncorporacion.Date
             });
         }
 
@@ -61,11 +64,13 @@ public class NominaService
         string legajo,
         string nombre,
         string apellido,
-        string? comision)
+        string? comision,
+        DateTime fechaIncorporacion)
     {
         Estudiante? estudiante = Buscar(legajo);
 
         string? error = Validaciones.Alumno(nombre, apellido, legajo, comision)
+                        ?? Validaciones.FechaIncorporacion(fechaIncorporacion)
                         ?? ControlarComision(comision!);
 
         if (error is null && estudiante is null)
@@ -78,6 +83,7 @@ public class NominaService
             estudiante!.Nombre = nombre.Trim();
             estudiante.Apellido = apellido.Trim();
             estudiante.Comision = comision!;
+            estudiante.FechaIncorporacion = fechaIncorporacion.Date;
 
             _estudiantes.Actualizar(estudiante);
         }

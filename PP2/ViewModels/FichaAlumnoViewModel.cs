@@ -74,7 +74,8 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
         ResultadoRiesgo r = _riesgo.ObtenerResultado(estudiante);
 
         NombreCompleto = $"{estudiante.Apellido}, {estudiante.Nombre}";
-        Datos = $"Legajo {estudiante.Legajo} · {estudiante.Comision}";
+        Datos = $"Legajo {estudiante.Legajo} · {estudiante.Comision}" +
+                IncorporacionTexto(estudiante);
         RiesgoTexto = r.RiesgoTexto;
         Nivel = r.NivelRiesgo;
         AsistenciaTexto = TextoAsistencia(r);
@@ -101,6 +102,13 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
               $"{r.NoEntregados} sin entregar, de {r.TotalEntregas} trabajos";
     }
 
+    private static string IncorporacionTexto(Estudiante estudiante)
+    {
+        return estudiante.FechaIncorporacion == default
+            ? ""
+            : $" · Desde el {Formatos.FechaCorta(estudiante.FechaIncorporacion)}";
+    }
+
     private void CargarContactos(ResultadoRiesgo r)
     {
         Contactos.Clear();
@@ -109,7 +117,8 @@ public partial class FichaAlumnoViewModel : ObservableObject, IActualizable
                      .OrderByDescending(c => c.Fecha))
         {
             Contactos.Add(
-                $"{Formatos.FechaCorta(c.Fecha)} · {c.EstadoTexto}: {c.Resultado}");
+                $"{Formatos.FechaCorta(c.Fecha)} · {c.Medio.Texto()} · " +
+                $"{c.EstadoTexto}: {c.Resultado}");
         }
     }
 

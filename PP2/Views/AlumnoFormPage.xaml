@@ -244,6 +244,20 @@
                                 TextColor="#252B35"
                                 TitleColor="#718092"/>
 
+                        <Label Text="FECHA DE INCORPORACIÓN"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               TextColor="#536779"/>
+
+                        <Label Text="Desde cuándo cursa. Las clases anteriores no cuentan para su riesgo."
+                               FontSize="13"
+                               TextColor="#647184"/>
+
+                        <DatePicker Date="{Binding FechaIncorporacion}"
+                                    MaximumDate="{Binding FechaMaxima}"
+                                    TextColor="#252B35"/>
+
                     </VerticalStackLayout>
 
                 </Border>

@@ -39,6 +39,7 @@ public sealed class ContactoRepositorioSqlite : IContactoRepositorio
         {
             LegajoEstudiante = contacto.Estudiante.Legajo,
             Fecha = Conversiones.GuardarFecha(contacto.Fecha),
+            Medio = (int)contacto.Medio,
             Atendio = contacto.Atendio,
             Resultado = contacto.Resultado
         });
@@ -52,6 +53,7 @@ public sealed class ContactoRepositorioSqlite : IContactoRepositorio
         {
             Estudiante = estudiante,
             Fecha = Conversiones.LeerFecha(fila.Fecha),
+            Medio = (MedioContacto)fila.Medio,
 
             // Los contactos anteriores no guardaban este dato:
             // se los considera atendidos

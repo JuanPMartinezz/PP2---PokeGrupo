@@ -94,7 +94,10 @@ public sealed class EstudianteRepositorioSqlite : IEstudianteRepositorio
             Legajo = estudiante.Legajo,
             Nombre = estudiante.Nombre,
             Apellido = estudiante.Apellido,
-            ComisionId = _db.IdObligatorio(estudiante.Comision)
+            ComisionId = _db.IdObligatorio(estudiante.Comision),
+            FechaIncorporacion = estudiante.FechaIncorporacion == default
+                ? string.Empty
+                : Conversiones.GuardarFecha(estudiante.FechaIncorporacion)
         };
     }
 }

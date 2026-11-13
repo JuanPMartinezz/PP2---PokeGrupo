@@ -43,7 +43,7 @@ public class RiesgoService
         List<Asistencia> Asistencias,
         List<Entrega> Entregas,
         List<ContactoEstudiante> Contactos,
-        int ClasesDictadas,
+        List<DateTime> FechasDeClase,
         int TrabajosDictados,
         UmbralesRiesgo Umbrales);
 
@@ -77,7 +77,7 @@ public class RiesgoService
 
         return PorcentajeAusencias(
             AsistenciasDe(estudiante, datos),
-            datos.ClasesDictadas);
+            ClasesDe(estudiante, datos));
     }
 
     // Riesgo de las entregas sobre los trabajos dictados en la comisión
@@ -116,18 +116,26 @@ public class RiesgoService
             asistencias,
             entregas,
             _contactos.ObtenerDeComision(comision),
-            ClasesDictadas(asistencias),
+            FechasDeClase(asistencias),
             TrabajosDictados(entregas),
             _umbrales.Obtener(comision));
     }
 
     // Una clase dictada es una fecha en la que se tomó asistencia
-    private static int ClasesDictadas(List<Asistencia> asistencias)
+    private static List<DateTime> FechasDeClase(List<Asistencia> asistencias)
     {
         return asistencias
             .Select(a => a.Clase.Fecha.Date)
             .Distinct()
-            .Count();
+            .ToList();
+    }
+
+    // Las clases que cuentan para el alumno son las dictadas desde que
+    // se incorporó
+    private static int ClasesDe(Estudiante estudiante, DatosComision datos)
+    {
+        return datos.FechasDeClase
+            .Count(fecha => fecha >= estudiante.FechaIncorporacion.Date);
     }
 
     // Un trabajo dictado es uno que ya tiene entregas registradas
@@ -149,7 +157,7 @@ public class RiesgoService
 
         decimal riesgo = Combinar(
             asistencias.Count > 0,
-            PorcentajeAusencias(asistencias, datos.ClasesDictadas),
+            PorcentajeAusencias(asistencias, ClasesDe(estudiante, datos)),
             entregas.Count > 0,
             PorcentajeEntregas(
                 entregas,
@@ -181,7 +189,7 @@ public class RiesgoService
         return new ResultadoRiesgo
         {
             Estudiante = estudiante,
-            TotalClases = datos.ClasesDictadas,
+            TotalClases = ClasesDe(estudiante, datos),
             Ausencias = Contar(asistencias, EstadoAsistencia.Ausente),
             Presentes = Contar(asistencias, EstadoAsistencia.Presente),
             TotalEntregas = datos.TrabajosDictados,
@@ -199,7 +207,8 @@ public class RiesgoService
         DatosComision datos)
     {
         return datos.Asistencias
-            .Where(a => a.Estudiante.Legajo == estudiante.Legajo)
+            .Where(a => a.Estudiante.Legajo == estudiante.Legajo &&
+                        a.Clase.Fecha.Date >= estudiante.FechaIncorporacion.Date)
             .ToList();
     }
 

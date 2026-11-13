@@ -169,6 +169,28 @@
                         </VerticalStackLayout>
                     </Border>
 
+                    <!-- Medio -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="12">
+
+                            <Label Text="MEDIO DEL CONTACTO"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Picker ItemsSource="{Binding Medios}"
+                                    SelectedIndex="{Binding MedioIndice}"
+                                    TextColor="#252B35"
+                                    BackgroundColor="#F4F6F9"/>
+                        </VerticalStackLayout>
+                    </Border>
+
                     <!-- Atención -->
                     <Border BackgroundColor="White"
                             Stroke="#D5DCE5"

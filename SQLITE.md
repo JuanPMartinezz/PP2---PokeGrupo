@@ -22,12 +22,14 @@ La primera vez se crean las comisiones "Comisión A" y "Comisión B". Los alumno
 ## Tablas
 
 - `Comisiones`: `Id` (clave autoincremental) y `Nombre` (único). Es el único lugar donde se escribe el nombre de una comisión. Si la tabla está vacía se cargan "Comisión A" y "Comisión B".
-- `Estudiantes`: `Legajo` (clave primaria), `Nombre`, `Apellido` y `ComisionId` (la comisión a la que pertenece).
+- `Estudiantes`: `Legajo` (clave primaria), `Nombre`, `Apellido`, `ComisionId` (la comisión a la que pertenece) y `FechaIncorporacion` (`yyyy-MM-dd`; vacía en los alumnos cargados antes de este dato, que se toman como incorporados desde el comienzo de la cursada).
 - `Asistencias`: `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`) y `Estado` (valor numérico del enum `EstadoAsistencia`: Presente = 0, Ausente = 1).
 
 - `ActividadesCalendario` (H2): `Id` (clave autoincremental), `ComisionId`, `Cuatrimestre`, `Fecha` (`yyyy-MM-dd`), `Tipo` (valor numérico del enum `TipoActividad`: Clase = 0, Trabajo = 1) y `Descripcion`.
 - `UmbralesComision` (H7): una fila por comisión (`ComisionId` es la clave primaria) con `PesoAsistencia`, `RiesgoFueraDeTermino`, `RiesgoNoEntregado`, `RiesgoMedio` y `RiesgoAlto`. Si una comisión no tiene fila se usan los valores por defecto (50, 50, 100, 30 y 60). La tabla anterior `UmbralesRiesgo` (una sola fila para todos) ya no se usa: los umbrales de cada comisión vuelven a los valores por defecto.
-- `Contactos` (H10): `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`), `Atendio` (verdadero si el alumno atendió; en contactos viejos, sin valor, se toma como verdadero) y `Resultado`.
+- `Contactos` (H10): `Id` (clave autoincremental), `LegajoEstudiante`, `Fecha` (`yyyy-MM-dd`), `Medio` (valor numérico del enum `MedioContacto`: Llamada = 0, Mensaje = 1, Correo = 2, Presencial = 3; los contactos viejos quedan como llamada), `Atendio` (verdadero si el alumno atendió; en contactos viejos, sin valor, se toma como verdadero) y `Resultado`.
+
+Las columnas nuevas (`FechaIncorporacion` y `Medio`) se agregan solas a una base existente, porque `CreateTable` de sqlite-net suma las columnas que faltan sin tocar los datos.
 
 El legajo conecta una asistencia (y un contacto) con su estudiante. Al abrir la app, las asistencias se reconstruyen vinculándolas con los objetos de estudiante cargados en memoria. Se impide registrar más de una asistencia para el mismo alumno y fecha.
 

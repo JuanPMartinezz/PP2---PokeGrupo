@@ -21,4 +21,15 @@ public static class EstadoTextos
             _ => "No entregado"
         };
     }
+
+    public static string Texto(this MedioContacto medio)
+    {
+        return medio switch
+        {
+            MedioContacto.Llamada => "Llamada",
+            MedioContacto.Mensaje => "Mensaje",
+            MedioContacto.Correo => "Correo electrónico",
+            _ => "En persona"
+        };
+    }
 }

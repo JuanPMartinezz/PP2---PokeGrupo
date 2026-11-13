@@ -207,6 +207,24 @@ public class PruebasPP2
         Assert.Equal("20458", Assert.Single(_e.Almacen.Estudiantes).Legajo);
     }
 
+    [Fact]
+    public async Task H1_FechaDeIncorporacionFutura_SeRechaza()
+    {
+        AlumnoFormViewModel formulario = NuevoFormulario();
+        formulario.Nombre = "Luis";
+        formulario.Apellido = "Paz";
+        formulario.Legajo = "20458";
+        formulario.FechaIncorporacion = DateTime.Today.AddDays(1);
+
+        await formulario.GuardarCommand.ExecuteAsync(null);
+
+        Assert.True(formulario.EsError);
+        Assert.Equal(
+            "La fecha de incorporación no puede ser futura",
+            formulario.Mensaje);
+        Assert.Empty(_e.Almacen.Estudiantes);
+    }
+
     // ---------- H2: calendario ----------
 
     [Fact]
@@ -403,6 +421,27 @@ public class PruebasPP2
 
         // Ana faltó a una de las 10 clases dictadas, no a "todas las suyas"
         Assert.Equal(10m, _e.Riesgo.CalcularPorcentajeAusencias(ana));
+    }
+
+    [Fact]
+    public void H6_ElAlumnoIncorporadoTarde_SoloCuentaLasClasesDesdeQueSeIncorporo()
+    {
+        Estudiante luis = Alumno("102", "Paz");
+        for (int i = 0; i < 10; i++)
+        {
+            RegistrarAsistencia(luis, EstadoAsistencia.Presente, i);
+        }
+
+        Estudiante ana = Alumno("101", "Gómez");
+        ana.FechaIncorporacion = DateTime.Today.AddDays(-1);
+        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 0);
+        RegistrarAsistencia(ana, EstadoAsistencia.Presente, 1);
+        // Una marca anterior a su incorporación no le corresponde
+        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 5);
+
+        // Faltó a 1 de las 2 clases dictadas desde que se incorporó
+        Assert.Equal(50m, _e.Riesgo.CalcularPorcentajeAusencias(ana));
+        Assert.Equal(2, _e.Riesgo.ObtenerResultado(ana).TotalClases);
     }
 
     [Fact]
@@ -637,6 +676,35 @@ public class PruebasPP2
         Assert.NotEqual("", sinResultado);
         Assert.True(contacto.EsError);
         Assert.Equal("La fecha del contacto no puede ser futura", contacto.Mensaje);
+        Assert.Empty(_e.Almacen.Contactos);
+    }
+
+    [Fact]
+    public async Task H10_ElContactoGuardaElMedioElegido()
+    {
+        Alumno("101", "Gómez");
+        ContactoViewModel contacto = NuevoContacto();
+        contacto.MedioIndice = (int)MedioContacto.Correo;
+        contacto.Resultado = "Se le escribió por el campus";
+
+        await contacto.GuardarCommand.ExecuteAsync(null);
+
+        Assert.Equal(
+            MedioContacto.Correo, Assert.Single(_e.Almacen.Contactos).Medio);
+    }
+
+    [Fact]
+    public async Task H10_SinMedioElegido_SeRechaza()
+    {
+        Alumno("101", "Gómez");
+        ContactoViewModel contacto = NuevoContacto();
+        contacto.MedioIndice = -1;
+        contacto.Resultado = "Llamada";
+
+        await contacto.GuardarCommand.ExecuteAsync(null);
+
+        Assert.True(contacto.EsError);
+        Assert.Equal("Elegí el medio del contacto", contacto.Mensaje);
         Assert.Empty(_e.Almacen.Contactos);
     }
 

@@ -11,6 +11,9 @@ public class ContactoEstudiante
 
     public DateTime Fecha { get; set; }
 
+    // Los contactos anteriores a este dato eran llamadas
+    public MedioContacto Medio { get; set; } = MedioContacto.Llamada;
+
     // Si el estudiante atendió o no atendió la llamada
     public bool Atendio { get; set; } = true;
 

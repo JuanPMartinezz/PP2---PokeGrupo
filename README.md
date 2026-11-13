@@ -1,69 +1,112 @@
-🎓 PP2 - Sistema de Seguimiento de Riesgo Académico
-Aplicación desarrollada en .NET MAUI con el patrón MVVM para gestionar estudiantes por comisión, tomar asistencia, registrar entregas de trabajos y detectar estudiantes con riesgo académico.
+# PP2 PokeGrupo — Seguimiento de riesgo académico
 
-🚀 Tecnologías utilizadas
-.NET MAUI, C#, XAML, MVVM con CommunityToolkit.Mvvm, SQLite (sqlite-net-pcl), xUnit, Git y GitHub.
+Aplicación para quien sigue una o más comisiones de cursada: permite tomar asistencia, registrar entregas de trabajos y ver a qué estudiantes conviene contactar porque están en riesgo de abandonar o desaprobar.
 
-🧭 Cómo se usa
-Inicio
-Un botón por comisión (con la cantidad de alumnos), "Agregar otra comisión", "Agregar alumno nuevo" y, al final, "Administrar datos".
-Las comisiones son datos: arrancan "Comisión A" y "Comisión B" y se pueden agregar, renombrar, vaciar o eliminar.
+Está hecha en **.NET MAUI** con el patrón **MVVM** (C#, XAML, CommunityToolkit.Mvvm), persistencia en **SQLite** (`sqlite-net-pcl`) y pruebas con **xUnit**.
 
-Pantalla de una comisión
-Muestra la fecha de hoy y ofrece:
-- Tomar asistencia de hoy.
-- Registrar entrega.
-- Ver la lista de alumnos.
-- Calendario de clases y trabajos.
-- Configurar el cálculo de riesgo de esa comisión.
+## Cómo correrlo
 
-Tomar asistencia
-Lista de alumnos de la comisión con un check de "presente". La primera vez que se guarda una fecha no se pregunta nada; si se corrige algo que ya estaba guardado, se pide confirmación. Se puede elegir otra fecha (nunca futura).
+Requisitos:
 
-Registrar entrega
-Se elige el trabajo del calendario (figura como Abierto o Vencido según su fecha) y se marca a cada alumno como Entregado, Fuera de término o No entregado. "Cerrar entrega" deja como No entregado a quienes no tienen ningún registro.
+- Windows 10/11
+- Visual Studio 2022 o 2026 con la carga de trabajo **Desarrollo de la interfaz de usuario multiplataforma de .NET (MAUI)**
+- .NET 10 SDK
 
-Lista de alumnos
-Cambio de comisión, orden (apellido A-Z, Z-A o mayor riesgo), filtro por contacto (todos, sin contactar, sin contacto hace más de 7 días, para llamar) y filtro por nivel de riesgo. Cada fila muestra "Apellido, Nombre" y el riesgo, con la marca "Llamar" si corresponde; al tocarla se abre la ficha completa.
+Pasos:
 
-Ficha del alumno
-Datos, riesgo, asistencia, entregas y contactos. Desde ahí se registra un contacto (fecha, si atendió o no y qué pasó), se editan los datos o se elimina al alumno.
+```bash
+git clone https://github.com/JuanPMartinezz/PP2---PokeGrupo.git
+cd PP2---PokeGrupo
+dotnet build PP2/PP2.csproj -f net10.0-windows10.0.19041.0
+dotnet run --project PP2/PP2.csproj -f net10.0-windows10.0.19041.0
+```
 
-Administrar datos
-Renombrar, vaciar o eliminar una comisión y borrar todos los datos. Todo pide confirmación.
+También se puede abrir `PP2.slnx` en Visual Studio, elegir **Windows Machine** como destino y presionar F5.
 
-✅ Historias de usuario
-H1 - Nómina: alta de alumnos con su comisión, legajo único (si se repite se informa a quién pertenece), edición y baja con sus registros.
-H2 - Calendario: clases y trabajos por comisión y cuatrimestre, sin duplicados.
-H3 - Asistencia: una asistencia por alumno y fecha.
-H4 - Corrección: se corrige sobre el mismo registro, con confirmación.
-H5 - Entregas: un registro por alumno y trabajo; estados Entregado, Fuera de término y No entregado.
-H6 - Riesgo: ausencias sobre el total de clases y promedio del riesgo de las entregas, combinados según los pesos de la comisión (por defecto 50 % y 50 %). Sin registros no hay datos y el riesgo es 0 %. La lógica está en RiesgoService.
-H7 - Configuración: cada comisión tiene sus propios pesos, riesgos por estado de entrega y cortes de nivel (por defecto 30 % medio y 60 % alto). Se valida todo y se explica el motivo si algo no sirve.
-H8 - Lista de alumnos con orden y niveles de riesgo.
-H9 - Ficha del alumno.
-H10 - Contactos: fecha, "Atendió" o "No atendió" y el texto de lo que pasó (obligatorio, fecha no futura).
-H11 - Contactos en la lista: filtros "Sin contactar" y "Sin contacto hace más de 7 días", que se combinan con el filtro de nivel.
+La base SQLite (`registro_asistencia_v2.db3`) se crea sola en el primer arranque, dentro del directorio de datos privado de la aplicación. No hay que configurar nada más.
 
-📁 Estructura
-PP2
-├── Models         datos del dominio y textos de los estados
-├── Repositorios   interfaces para guardar y leer datos (sin SQLite)
-├── Services       reglas del negocio: riesgo, listado, registro, nómina, comisiones, calendario, contactos
-├── Datos          SQLite: conexión y un repositorio por tema
-├── ViewModels     una clase por pantalla, sin tipos de MAUI
-├── Views          páginas XAML con código mínimo; NavegacionMaui y DialogosMaui
-└── PP2.Tests      pruebas xUnit por historia (PruebasPP2) con repositorios en memoria
+## Datos de ejemplo y base vacía
 
-Cómo se conectan las capas
+La primera vez se crean las comisiones "Comisión A" y "Comisión B", sin alumnos. Los alumnos, la asistencia y las entregas se cargan desde la aplicación.
+
+Para volver a una base vacía: **Inicio → Administrar datos → Borrar todos los datos**, o eliminar el archivo `registro_asistencia_v2.db3` con la aplicación cerrada.
+
+## Pruebas
+
+```bash
+dotnet test PP2.Tests/PP2.Tests.csproj
+```
+
+O desde Visual Studio: **Ver → Explorador de pruebas → Ejecutar todas**. Las pruebas usan repositorios en memoria, así que no necesitan base de datos ni pantallas.
+
+## Qué hace
+
+| Pantalla | Para qué sirve |
+|---|---|
+| Inicio | Un botón por comisión (con su cantidad de alumnos), alta de comisiones, alta de alumnos y administración de datos. |
+| Comisión | Atajos de la comisión: tomar asistencia, registrar entrega, lista de alumnos, calendario y configuración del riesgo. |
+| Tomar asistencia | Planilla de la comisión con un check de "presente". Se puede elegir otra fecha (nunca futura). Corregir una fecha ya guardada pide confirmación. |
+| Registrar entrega | Se elige el trabajo del calendario y se marca a cada alumno como Entregado, Fuera de término o No entregado. "Cerrar entrega" deja como No entregado a quien no tiene registro (solo cuando el trabajo ya venció). |
+| Calendario | Las clases salen solas de la asistencia tomada; los trabajos se cargan a mano, con nombre único por comisión. |
+| Lista de alumnos | Orden por apellido o por mayor riesgo; filtros por contacto (sin contactar, sin contacto hace más de 7 días, para llamar) y por nivel de riesgo. |
+| Ficha del alumno | Datos, fecha de incorporación, riesgo, asistencia, entregas y contactos. Desde acá se registra un contacto, se edita o se elimina al alumno. |
+| Configuración del riesgo | Pesos y cortes propios de cada comisión. |
+
+Se navega con el menú hamburguesa: comisión A o B, calendario, lista de alumnos, tomar asistencia y registrar entrega.
+
+## Reglas del negocio
+
+**Riesgo de un alumno** (`Services/RiesgoService.cs`):
+
+- **Ausencias** = ausencias del alumno ÷ clases dictadas × 100. Una clase dictada es una fecha en la que se tomó asistencia en la comisión; no se usan solo los registros del alumno.
+- **Entregas** = suma del riesgo de cada entrega del alumno ÷ trabajos dictados × 100. Riesgo por estado: Entregado 0, Fuera de término 50, No entregado 100 (configurable). Un trabajo dictado es uno con entregas registradas en la comisión.
+- **Riesgo total** = promedio ponderado de ambos con los pesos de la comisión (por defecto 50 % y 50 %).
+- **Nivel**: Bajo, Medio (desde 30 %) o Alto (desde 60 %); los cortes también son de cada comisión.
+- Un alumno sin ningún registro figura como **Sin datos**, no como riesgo bajo.
+- **Alumno incorporado tarde**: solo cuentan las clases dictadas desde su fecha de incorporación.
+- **Para llamar**: riesgo alto y sin contacto en los últimos 7 días.
+
+**Validaciones** (`Services/Validaciones.cs`):
+
+- Legajo numérico de 3 a 8 dígitos, único (si se repite se informa a quién pertenece).
+- Nombre y apellido solo con letras, hasta 40 caracteres. Nombres de comisión y de trabajo hasta 60.
+- Ninguna fecha de asistencia, contacto ni incorporación puede ser futura.
+- No se puede cerrar la entrega de un trabajo que todavía no venció.
+- Cada contacto lleva fecha, medio (llamada, mensaje, correo o en persona), si el alumno atendió y un resultado obligatorio.
+
+Los mensajes de las pantallas son verdes si salió bien y rojos si es un error.
+
+## Cómo está organizado
+
+```text
+PP2.slnx
+├── PP2/                 aplicación MAUI
+│   ├── Models/          dominio: Estudiante, Asistencia, Entrega, Contacto, niveles de riesgo
+│   ├── Repositorios/    interfaces para guardar y leer datos (sin SQLite)
+│   ├── Services/        reglas del negocio: riesgo, nómina, registro, calendario, contactos, validaciones
+│   ├── Datos/           SQLite: conexión, entidades de tabla y un repositorio por tema
+│   ├── ViewModels/      una clase por pantalla, sin tipos de MAUI
+│   ├── Views/           páginas XAML con código mínimo, navegación y diálogos
+│   └── MauiProgram.cs   arma las dependencias
+├── PP2.Tests/           pruebas xUnit por historia, con repositorios en memoria
+└── SQLITE.md            detalle de la base: tablas y flujo
+```
+
+Cómo se conectan las capas:
+
+```text
+Views ──► ViewModels ──► Services ──► interfaces de Repositorios ◄── Datos (SQLite)
+```
+
 - Los servicios reciben las interfaces de los repositorios por constructor y no conocen SQLite ni MAUI.
-- Los ViewModels reciben los servicios por constructor y piden ir a otra pantalla o confirmar algo a través de INavegacion e IDialogos.
-- MauiProgram arma todo con el contenedor de dependencias.
-- Por eso las pruebas usan repositorios en memoria y no necesitan base de datos ni pantallas.
+- Los ViewModels reciben los servicios por constructor y piden ir a otra pantalla o confirmar algo a través de `INavegacion` e `IDialogos`.
+- `MauiProgram` arma todo con el contenedor de dependencias. La base depende del dominio, no al revés.
 
-Reglas que conviene saber
-- Una clase dictada es una fecha en la que se tomó asistencia en la comisión. El porcentaje de ausencias se calcula sobre esas clases, no sobre los registros de cada alumno.
-- Un alumno sin ningún registro figura como "Sin datos", no como riesgo bajo.
-- "Para llamar" es un alumno de riesgo alto (según los umbrales de su comisión) sin contacto en los últimos 7 días.
-- El legajo son solo números, de 3 a 8 dígitos. No se puede tomar asistencia ni registrar un contacto en una fecha futura.
-- Los mensajes de las pantallas son verdes si salió bien y rojos si es un error.
+> El diagrama de arquitectura (contexto y componentes) y las decisiones de diseño van en `docs/` y los están preparando otros integrantes del equipo. Se enlazan acá cuando estén.
+
+## Cómo se trabaja
+
+- La rama principal es `main`; el trabajo se integra a `main` y se sube desde Visual Studio.
+- Cada integrante trabaja sus historias y deja sus propios commits. Cuando una tarea se hace en pareja, el commit lleva un `Co-authored-by` real de quien participó.
+- Las tareas se siguen en el tablero del equipo.
+- Integrantes: completar con los nombres del grupo.

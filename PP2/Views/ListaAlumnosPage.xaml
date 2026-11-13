@@ -221,6 +221,18 @@
                                 TextColor="#252B35"
                                 BackgroundColor="#F5F6F8"/>
 
+                            <BoxView
+                                HeightRequest="1"
+                                BackgroundColor="#E0E3E8"/>
+
+                            <!-- CARGA MASIVA -->
+                            <Button
+                                Text="Importar alumnos desde CSV"
+                                Command="{Binding ImportarAlumnosCommand}"
+                                BackgroundColor="#C92532"
+                                TextColor="White"
+                                CornerRadius="12"/>
+
                         </VerticalStackLayout>
 
                     </Border>

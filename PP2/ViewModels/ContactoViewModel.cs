@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
 
 namespace RegistroAsistencia.ViewModels;
@@ -19,6 +20,14 @@ public partial class ContactoViewModel : PantallaBase
     public string Alumno { get; }
 
     public DateTime FechaMaxima => DateTime.Today;
+
+    public List<string> Medios { get; } = Enum
+        .GetValues<MedioContacto>()
+        .Select(m => m.Texto())
+        .ToList();
+
+    [ObservableProperty]
+    private int medioIndice;
 
     [ObservableProperty]
     private DateTime fecha = DateTime.Today;
@@ -42,12 +51,22 @@ public partial class ContactoViewModel : PantallaBase
         Alumno = nomina.Buscar(legajo)?.ToString() ?? "";
     }
 
+    private MedioContacto? MedioElegido()
+    {
+        MedioContacto[] medios = Enum.GetValues<MedioContacto>();
+
+        return MedioIndice >= 0 && MedioIndice < medios.Length
+            ? medios[MedioIndice]
+            : null;
+    }
+
     [RelayCommand]
     private async Task Guardar()
     {
         string? error = _contactos.Registrar(
             _legajo,
             Fecha,
+            MedioElegido(),
             Atendio,
             Resultado);
 
