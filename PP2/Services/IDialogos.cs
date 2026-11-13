@@ -17,4 +17,10 @@ public interface IDialogos
         string titulo,
         string mensaje,
         string ejemplo);
+
+    // Deja elegir un archivo de texto y devuelve su contenido, o null si
+    // el usuario canceló
+    Task<string?> ElegirArchivoDeTextoAsync(string titulo);
+
+    Task AvisarAsync(string titulo, string mensaje);
 }

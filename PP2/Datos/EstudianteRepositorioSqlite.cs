@@ -42,17 +42,6 @@ public sealed class EstudianteRepositorioSqlite : IEstudianteRepositorio
         _db.Conexion.Insert(Fila(estudiante));
     }
 
-    public void AgregarVarios(IEnumerable<Estudiante> estudiantes)
-    {
-        _db.Conexion.RunInTransaction(() =>
-        {
-            foreach (var estudiante in estudiantes)
-            {
-                _db.Conexion.Insert(Fila(estudiante));
-            }
-        });
-    }
-
     public void Actualizar(Estudiante estudiante)
     {
         _db.Conexion.Update(Fila(estudiante));

@@ -34,13 +34,9 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
 
     private readonly RiesgoService _riesgo;
 
-    private readonly NominaService _nomina;
+    private readonly ImportacionService _importacion;
 
     private readonly IDialogos _dialogos;
-
-    private readonly RegistroService _registro;
-
-    private readonly CalendarioService _calendario;
 
     public ObservableCollection<string> Comisiones { get; }
 
@@ -89,17 +85,13 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
         INavegacion navegacion,
         RiesgoService riesgo,
         ComisionService comisiones,
-        NominaService nomina,
-        IDialogos dialogos,
-        RegistroService registro,
-        CalendarioService calendario)
+        ImportacionService importacion,
+        IDialogos dialogos)
     {
         _navegacion = navegacion;
         _riesgo = riesgo;
-        _nomina = nomina;
+        _importacion = importacion;
         _dialogos = dialogos;
-        _registro = registro;
-        _calendario = calendario;
 
         Comisiones = new ObservableCollection<string>(comisiones.Todas());
         comisionSeleccionada = comision;
@@ -146,53 +138,33 @@ public partial class ListaAlumnosViewModel : ObservableObject, IActualizable
     [RelayCommand]
     private async Task ImportarAlumnosAsync()
     {
+        string? contenido;
+
         try
         {
-            var opciones = new PickOptions
-            {
-                PickerTitle = "Seleccionar archivo CSV",
-                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
-                {
-                    { DevicePlatform.Android, new[] { "text/comma-separated-values", "text/csv", "text/plain" } },
-                    { DevicePlatform.WinUI, new[] { ".csv" } },
-                    { DevicePlatform.iOS, new[] { "public.comma-separated-values-text" } }
-                })
-            };
-
-            FileResult? archivo = await FilePicker.Default.PickAsync(opciones);
-            if (archivo is null) return;
-
-            using Stream stream = await archivo.OpenReadAsync();
-            var (alumnosNuevos, registros, errores) = await _nomina.ImportarDesdeCsvCompletoAsync(
-                stream,
-                _registro,
-                _calendario);
-
-            Actualizar();
-
-            string mensaje = $"• Alumnos nuevos: {alumnosNuevos}\n• Asistencias y entregas cargadas: {registros}";
-            if (errores.Count > 0)
-            {
-                mensaje += $"\n\nFilas con observaciones ({errores.Count}):\n" +
-                           string.Join("\n", errores.Take(5));
-                if (errores.Count > 5)
-                {
-                    mensaje += $"\n... y {errores.Count - 5} errores más.";
-                }
-            }
-
-            if (Application.Current?.Windows.FirstOrDefault()?.Page is Page pagina)
-            {
-                await pagina.DisplayAlertAsync("Resultado de importación", mensaje, "Aceptar");
-            }
+            contenido = await _dialogos.ElegirArchivoDeTextoAsync(
+                "Seleccionar archivo CSV");
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
-            if (Application.Current?.Windows.FirstOrDefault()?.Page is Page pagina)
-            {
-                await pagina.DisplayAlertAsync("Error", $"No se pudo leer el archivo: {ex.Message}", "Aceptar");
-            }
+            await _dialogos.AvisarAsync(
+                "Error", $"No se pudo leer el archivo: {ex.Message}");
+            return;
         }
+
+        if (contenido is null)
+        {
+            return;
+        }
+
+        // En otro hilo para que la pantalla no se congele con archivos grandes
+        ResultadoImportacion resultado =
+            await Task.Run(() => _importacion.Importar(contenido));
+
+        Actualizar();
+
+        await _dialogos.AvisarAsync(
+            "Resultado de la importación", resultado.Texto());
     }
 
     private ItemAlumno CrearItem(ResultadoRiesgo resultado)

@@ -19,14 +19,8 @@ public sealed class EntregaRepositorioSqlite : IEntregaRepositorio
             return new();
         }
 
-        var estudiantes = _db.Conexion.Table<EstudianteDb>()
-            .Where(e => e.ComisionId == id)
-            .ToList()
-            .ToDictionary(e => e.Legajo, e => e.AEstudiante(comision));
-
-        var trabajos = _db.Conexion.Table<TrabajoDb>()
-            .ToList()
-            .ToDictionary(t => t.Id, ATrabajo);
+        var estudiantes = EstudiantesPorLegajo(id, comision);
+        var trabajos = TrabajosPorId();
 
         return _db.Conexion.Query<EntregaDb>(
                 "SELECT n.* FROM Entregas n " +
@@ -39,6 +33,23 @@ public sealed class EntregaRepositorioSqlite : IEntregaRepositorio
                 estudiantes[fila.LegajoEstudiante],
                 trabajos[fila.TrabajoId]))
             .ToList();
+    }
+
+    private Dictionary<string, Estudiante> EstudiantesPorLegajo(
+        int comisionId,
+        string comision)
+    {
+        return _db.Conexion.Table<EstudianteDb>()
+            .Where(e => e.ComisionId == comisionId)
+            .ToList()
+            .ToDictionary(e => e.Legajo, e => e.AEstudiante(comision));
+    }
+
+    private Dictionary<int, Trabajo> TrabajosPorId()
+    {
+        return _db.Conexion.Table<TrabajoDb>()
+            .ToList()
+            .ToDictionary(t => t.Id, ATrabajo);
     }
 
     public Entrega? Buscar(string legajo, int trabajoId)

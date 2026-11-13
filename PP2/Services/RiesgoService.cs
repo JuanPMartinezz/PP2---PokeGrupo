@@ -64,6 +64,27 @@ public class RiesgoService
         return Armar(estudiante, Cargar(estudiante.Comision));
     }
 
+    // Estudiantes de la comisión en cada nivel (H12). Parte de los mismos
+    // resultados que la lista, así el reporte y el panel siempre coinciden
+    public ResumenComision ObtenerResumen(string comision)
+    {
+        List<ResultadoRiesgo> resultados = ObtenerResultados(comision);
+
+        return new ResumenComision(
+            resultados.Count,
+            CantidadEnNivel(resultados, NivelesRiesgo.Alto),
+            CantidadEnNivel(resultados, NivelesRiesgo.Medio),
+            CantidadEnNivel(resultados, NivelesRiesgo.Bajo),
+            CantidadEnNivel(resultados, NivelesRiesgo.SinDatos));
+    }
+
+    private static int CantidadEnNivel(
+        List<ResultadoRiesgo> resultados,
+        string nivel)
+    {
+        return resultados.Count(r => r.NivelRiesgo == nivel);
+    }
+
     // Riesgo académico combinado
     public decimal CalcularRiesgo(Estudiante estudiante)
     {
@@ -155,7 +176,32 @@ public class RiesgoService
         var asistencias = AsistenciasDe(estudiante, datos);
         var entregas = EntregasDe(estudiante, datos);
 
-        decimal riesgo = Combinar(
+        ResultadoRiesgo resultado = Estadisticas(
+            estudiante,
+            asistencias,
+            entregas,
+            datos);
+
+        resultado.PorcentajeRiesgo = RiesgoCombinado(
+            estudiante,
+            asistencias,
+            entregas,
+            datos);
+        resultado.NivelRiesgo = Nivel(
+            datos.Umbrales,
+            resultado.PorcentajeRiesgo,
+            asistencias.Count + entregas.Count);
+
+        return resultado;
+    }
+
+    private static decimal RiesgoCombinado(
+        Estudiante estudiante,
+        List<Asistencia> asistencias,
+        List<Entrega> entregas,
+        DatosComision datos)
+    {
+        return Combinar(
             asistencias.Count > 0,
             PorcentajeAusencias(asistencias, ClasesDe(estudiante, datos)),
             entregas.Count > 0,
@@ -164,20 +210,6 @@ public class RiesgoService
                 datos.TrabajosDictados,
                 datos.Umbrales),
             datos.Umbrales);
-
-        ResultadoRiesgo resultado = Estadisticas(
-            estudiante,
-            asistencias,
-            entregas,
-            datos);
-
-        resultado.PorcentajeRiesgo = riesgo;
-        resultado.NivelRiesgo = Nivel(
-            datos.Umbrales,
-            riesgo,
-            asistencias.Count + entregas.Count);
-
-        return resultado;
     }
 
     private static ResultadoRiesgo Estadisticas(

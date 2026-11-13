@@ -51,6 +51,7 @@ namespace RegistroAsistencia
             servicios.AddSingleton<ICalendarioRepositorio, CalendarioRepositorioSqlite>();
             servicios.AddSingleton<IContactoRepositorio, ContactoRepositorioSqlite>();
             servicios.AddSingleton<IAdministracionRepositorio, AdministracionRepositorioSqlite>();
+            servicios.AddSingleton<IUnidadDeTrabajo, UnidadDeTrabajoSqlite>();
         }
 
         private static void RegistrarServicios(IServiceCollection servicios)
@@ -61,6 +62,7 @@ namespace RegistroAsistencia
             servicios.AddSingleton<CalendarioService>();
             servicios.AddSingleton<ContactoService>();
             servicios.AddSingleton<RegistroService>();
+            servicios.AddSingleton<ImportacionService>();
             servicios.AddSingleton<RiesgoService>();
 
             servicios.AddSingleton<IDialogos, DialogosMaui>();

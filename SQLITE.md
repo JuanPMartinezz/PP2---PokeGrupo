@@ -17,7 +17,7 @@ El archivo se llama `registro_asistencia_v2.db3` (la versión anterior, `registr
 
 ## Datos iniciales
 
-La primera vez se crean las comisiones "Comisión A" y "Comisión B". Los alumnos, asistencias y demás datos se cargan desde la aplicación. Para empezar de cero: Inicio → Administrar datos → Borrar todos los datos, o eliminá `registro_asistencia_v2.db3` del almacenamiento de la app.
+La primera vez se crean las comisiones "Comisión A" y "Comisión B". Los alumnos, asistencias y demás datos se cargan desde la aplicación. Para cargar datos de ejemplo se importa `datos-ejemplo/alumnos-demo.csv` desde la Lista de alumnos. Para empezar de cero: Inicio → Administrar datos → Borrar todos los datos, o eliminá `registro_asistencia_v2.db3` del almacenamiento de la app.
 
 ## Tablas
 
@@ -41,5 +41,3 @@ Renombrar una comisión cambia una sola fila de `Comisiones`: alumnos, calendari
 2. Cada pantalla pide los datos a un servicio; el servicio los pide al repositorio y el repositorio los lee de SQLite.
 3. Al guardar, el servicio valida y recién después el repositorio escribe en SQLite.
 4. Al reiniciar la app, todo sigue en la base.
-
-> Nota: en este entorno no pude ejecutar `dotnet build` ni las pruebas porque el SDK de .NET no está instalado. Hay que restaurar paquetes y compilar el proyecto en Visual Studio con la carga de trabajo de .NET MAUI instalada.

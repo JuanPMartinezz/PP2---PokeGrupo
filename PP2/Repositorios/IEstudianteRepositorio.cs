@@ -12,8 +12,6 @@ public interface IEstudianteRepositorio
 
     void Agregar(Estudiante estudiante);
 
-    void AgregarVarios(IEnumerable<Estudiante> estudiantes);
-
     void Actualizar(Estudiante estudiante);
 
     void Eliminar(string legajo);

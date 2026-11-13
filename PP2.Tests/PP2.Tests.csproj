@@ -35,6 +35,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Include="..\datos-ejemplo\alumnos-demo.csv" Link="datos-ejemplo\alumnos-demo.csv" CopyToOutputDirectory="PreserveNewest" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Using Include="Xunit" />
 	</ItemGroup>
 

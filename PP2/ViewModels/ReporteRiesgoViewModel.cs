@@ -1,4 +1,3 @@
-﻿
 using CommunityToolkit.Mvvm.ComponentModel;
 using RegistroAsistencia.Models;
 using RegistroAsistencia.Services;
@@ -6,75 +5,36 @@ using RegistroAsistencia.Services;
 namespace RegistroAsistencia.ViewModels;
 
 /// <summary>
-/// Reporte general de riesgo de una comisión (H12).
-/// Reutiliza los resultados calculados por RiesgoService.
+/// Reporte de riesgo de una comisión (H12). No calcula nada: muestra el
+/// resumen que arma RiesgoService con los mismos resultados del panel.
 /// </summary>
 public class ReporteRiesgoViewModel : ObservableObject, IActualizable
 {
     private readonly RiesgoService _riesgo;
+
     private readonly string _comision;
+
+    private ResumenComision _datos = new(0, 0, 0, 0, 0);
 
     public string Comision => _comision;
 
-    private int totalEstudiantes;
-    public int TotalEstudiantes
-    {
-        get => totalEstudiantes;
-        set => SetProperty(ref totalEstudiantes, value);
-    }
+    public int TotalEstudiantes => _datos.Total;
 
-    private int estudiantesEnRiesgo;
-    public int EstudiantesEnRiesgo
-    {
-        get => estudiantesEnRiesgo;
-        set => SetProperty(ref estudiantesEnRiesgo, value);
-    }
+    public int EstudiantesEnRiesgo => _datos.Alto;
 
-    private int estudiantesRiesgoMedio;
-    public int EstudiantesRiesgoMedio
-    {
-        get => estudiantesRiesgoMedio;
-        set => SetProperty(ref estudiantesRiesgoMedio, value);
-    }
+    public int EstudiantesRiesgoMedio => _datos.Medio;
 
-    private int estudiantesRiesgoBajo;
-    public int EstudiantesRiesgoBajo
-    {
-        get => estudiantesRiesgoBajo;
-        set => SetProperty(ref estudiantesRiesgoBajo, value);
-    }
+    public int EstudiantesRiesgoBajo => _datos.Bajo;
 
-    private decimal porcentajeEnRiesgo;
-    public decimal PorcentajeEnRiesgo
-    {
-        get => porcentajeEnRiesgo;
-        set => SetProperty(ref porcentajeEnRiesgo, value);
-    }
+    public decimal PorcentajeEnRiesgo => _datos.PorcentajeEnRiesgo;
 
-    private bool sinEstudiantes;
-    public bool SinEstudiantes
-    {
-        get => sinEstudiantes;
-        set => SetProperty(ref sinEstudiantes, value);
-    }
+    public bool SinEstudiantes => _datos.SinEstudiantes;
 
-    private bool sinDatos;
-    public bool SinDatos
-    {
-        get => sinDatos;
-        set => SetProperty(ref sinDatos, value);
-    }
+    public bool SinDatos => _datos.SinDatosSuficientes;
 
-    private string resumen = "";
-    public string Resumen
-    {
-        get => resumen;
-        set => SetProperty(ref resumen, value);
-    }
+    public string Resumen => TextoResumen();
 
-    public ReporteRiesgoViewModel(
-        string comision,
-        RiesgoService riesgo)
+    public ReporteRiesgoViewModel(string comision, RiesgoService riesgo)
     {
         _comision = comision;
         _riesgo = riesgo;
@@ -84,37 +44,21 @@ public class ReporteRiesgoViewModel : ObservableObject, IActualizable
 
     public void Actualizar()
     {
-        List<ResultadoRiesgo> resultados =
-            _riesgo.ObtenerResultados(_comision);
+        _datos = _riesgo.ObtenerResumen(_comision);
 
-        TotalEstudiantes = resultados.Count;
-        SinEstudiantes = TotalEstudiantes == 0;
+        // Una cadena vacía avisa que cambiaron todas las propiedades
+        OnPropertyChanged(string.Empty);
+    }
 
-        SinDatos = !SinEstudiantes &&
-            resultados.All(r =>
-                r.NivelRiesgo == NivelesRiesgo.SinDatos);
+    private string TextoResumen()
+    {
+        if (_datos.SinEstudiantes)
+        {
+            return "Esta comisión todavía no tiene estudiantes.";
+        }
 
-        EstudiantesEnRiesgo = resultados.Count(r =>
-            r.NivelRiesgo == NivelesRiesgo.Alto);
-
-        EstudiantesRiesgoMedio = resultados.Count(r =>
-            r.NivelRiesgo == NivelesRiesgo.Medio);
-
-        EstudiantesRiesgoBajo = resultados.Count(r =>
-            r.NivelRiesgo == NivelesRiesgo.Bajo);
-
-        PorcentajeEnRiesgo = TotalEstudiantes == 0 || SinDatos
-            ? 0
-            : Math.Round(
-                (decimal)EstudiantesEnRiesgo / TotalEstudiantes * 100,
-                1);
-
-        Resumen = SinEstudiantes
-            ? "Esta comisión todavía no tiene estudiantes."
-            : SinDatos
-                ? "Todavía no hay datos suficientes para calcular el riesgo."
-                : $"{EstudiantesEnRiesgo} de {TotalEstudiantes} estudiantes tienen riesgo alto.";
+        return _datos.SinDatosSuficientes
+            ? "Todavía no hay datos suficientes para calcular el riesgo."
+            : $"{_datos.Alto} de {_datos.Total} estudiantes tienen riesgo alto.";
     }
 }
-
-

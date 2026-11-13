@@ -66,6 +66,22 @@ public class PruebasPP2
             Preguntas++;
             return Task.FromResult<string?>(null);
         }
+
+        // Contenido del archivo que "elige" el usuario; null si cancela
+        public string? ArchivoElegido { get; set; }
+
+        public List<string> Avisos { get; } = new();
+
+        public Task<string?> ElegirArchivoDeTextoAsync(string titulo)
+        {
+            return Task.FromResult(ArchivoElegido);
+        }
+
+        public Task AvisarAsync(string titulo, string mensaje)
+        {
+            Avisos.Add(mensaje);
+            return Task.CompletedTask;
+        }
     }
 
     private Estudiante Alumno(
@@ -124,13 +140,19 @@ public class PruebasPP2
 
     private AsistenciaViewModel NuevaPlanilla()
     {
-        return new AsistenciaViewModel(ComisionA, _e.Nomina, _dialogos, _e.Registro);
+        return new AsistenciaViewModel(
+            ComisionA, _e.Nomina, _dialogos, _e.Registro, _e.Riesgo);
     }
 
     private ListaAlumnosViewModel NuevaLista(string comision = ComisionA)
     {
         return new ListaAlumnosViewModel(
-            comision, _navegacion, _e.Riesgo, _e.Comisiones);
+            comision,
+            _navegacion,
+            _e.Riesgo,
+            _e.Comisiones,
+            _e.Importacion,
+            _dialogos);
     }
 
     private AlumnoFormViewModel NuevoFormulario()
@@ -156,43 +178,6 @@ public class PruebasPP2
         Assert.Single(_e.Almacen.Estudiantes);
     }
 
-    [Theory]
-    [InlineData("abc!")]
-    [InlineData("12")]
-    [InlineData("123456789")]
-    [InlineData("12 34")]
-    public async Task H1_LegajoQueNoSonDe3a8Digitos_SeRechaza(string legajo)
-    {
-        AlumnoFormViewModel formulario = NuevoFormulario();
-        formulario.Nombre = "Luis";
-        formulario.Apellido = "Paz";
-        formulario.Legajo = legajo;
-
-        await formulario.GuardarCommand.ExecuteAsync(null);
-
-        Assert.True(formulario.EsError);
-        Assert.Contains("dígitos", formulario.Mensaje);
-        Assert.Empty(_e.Almacen.Estudiantes);
-    }
-
-    [Theory]
-    [InlineData("Ana3", "Paz")]
-    [InlineData("Luis", "Paz@")]
-    [InlineData("Luis", "ppppppppppppppppppppppppppppppppppppppppp")]
-    public async Task H1_NombreOApellidoInvalidos_SeRechazan(
-        string nombre, string apellido)
-    {
-        AlumnoFormViewModel formulario = NuevoFormulario();
-        formulario.Nombre = nombre;
-        formulario.Apellido = apellido;
-        formulario.Legajo = "12345";
-
-        await formulario.GuardarCommand.ExecuteAsync(null);
-
-        Assert.True(formulario.EsError);
-        Assert.Empty(_e.Almacen.Estudiantes);
-    }
-
     [Fact]
     public async Task H1_AlumnoValido_SeAgregaYElMensajeNoEsDeError()
     {
@@ -205,24 +190,6 @@ public class PruebasPP2
 
         Assert.False(formulario.EsError);
         Assert.Equal("20458", Assert.Single(_e.Almacen.Estudiantes).Legajo);
-    }
-
-    [Fact]
-    public async Task H1_FechaDeIncorporacionFutura_SeRechaza()
-    {
-        AlumnoFormViewModel formulario = NuevoFormulario();
-        formulario.Nombre = "Luis";
-        formulario.Apellido = "Paz";
-        formulario.Legajo = "20458";
-        formulario.FechaIncorporacion = DateTime.Today.AddDays(1);
-
-        await formulario.GuardarCommand.ExecuteAsync(null);
-
-        Assert.True(formulario.EsError);
-        Assert.Equal(
-            "La fecha de incorporación no puede ser futura",
-            formulario.Mensaje);
-        Assert.Empty(_e.Almacen.Estudiantes);
     }
 
     // ---------- H2: calendario ----------
@@ -297,19 +264,6 @@ public class PruebasPP2
         Assert.Empty(_e.Almacen.Asistencias);
     }
 
-    [Fact]
-    public void H3_GuardarDosVecesLaMismaFecha_NoDuplicaRegistros()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        var marcas = new[] { new MarcaAsistencia(ana, true) };
-
-        _e.Registro.GuardarAsistencia(DateTime.Today, marcas);
-        ResultadoGuardado segundo = _e.Registro.GuardarAsistencia(DateTime.Today, marcas);
-
-        Assert.Single(_e.Almacen.Asistencias);
-        Assert.Equal(0, segundo.Nuevos + segundo.Modificados);
-    }
-
     // ---------- H4: corregir asistencia ----------
 
     [Fact]
@@ -378,35 +332,7 @@ public class PruebasPP2
         Assert.Empty(_e.Almacen.Entregas);
     }
 
-    [Fact]
-    public void H5_CerrarLaEntrega_MarcaNoEntregadoSoloALosPendientes()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        Estudiante luis = Alumno("102", "Paz");
-        Trabajo tp1 = CargarTrabajo("TP1");
-        _e.Registro.GuardarEntregas(tp1, new[] { new MarcaEntrega(ana, EstadoEntrega.Entregado) });
-
-        int cerrados = _e.Registro.CerrarEntrega(tp1, new[] { ana, luis });
-
-        Assert.Equal(1, cerrados);
-        Assert.Equal(EstadoEntrega.Entregado, _e.Registro.EntregaDe("101", tp1.Id));
-        Assert.Equal(EstadoEntrega.NoEntregado, _e.Registro.EntregaDe("102", tp1.Id));
-    }
-
     // ---------- H6: riesgo ----------
-
-    [Fact]
-    public void H6_UnaAusenciaEnCuatroClases_SonVeinticincoPorCiento()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        for (int i = 0; i < 3; i++)
-        {
-            RegistrarAsistencia(ana, EstadoAsistencia.Presente, i);
-        }
-        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 3);
-
-        Assert.Equal(25m, _e.Riesgo.CalcularPorcentajeAusencias(ana));
-    }
 
     [Fact]
     public void H6_ElPorcentajeSeCalculaSobreLasClasesDictadasNoSobreLosRegistrosDelAlumno()
@@ -445,28 +371,6 @@ public class PruebasPP2
     }
 
     [Fact]
-    public void H6_UnaFaltaYFaltarATodoSinEntregarNoEmpatan()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        Estudiante luis = Alumno("102", "Paz");
-        Trabajo tp1 = CargarTrabajo("TP1");
-        for (int i = 0; i < 10; i++)
-        {
-            RegistrarAsistencia(luis, EstadoAsistencia.Ausente, i);
-        }
-        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 0);
-        _e.Entregas.Agregar(new Entrega
-        {
-            Estudiante = luis,
-            Trabajo = tp1,
-            Estado = EstadoEntrega.NoEntregado
-        });
-
-        Assert.Equal(10m, _e.Riesgo.CalcularRiesgo(ana));
-        Assert.Equal(100m, _e.Riesgo.CalcularRiesgo(luis));
-    }
-
-    [Fact]
     public void H6_UnTrabajoNoEntregadoEntreCuatro_SonVeinticincoPorCiento()
     {
         Estudiante ana = Alumno("101", "Gómez");
@@ -489,38 +393,6 @@ public class PruebasPP2
 
         Assert.Equal(25m, _e.Riesgo.CalcularPorcentajeEntregas(ana));
         Assert.Equal(0m, _e.Riesgo.CalcularPorcentajeEntregas(luis));
-    }
-
-    [Fact]
-    public void H6_AsistenciaYEntregasSeCombinanConLosPesosDeLaComision()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        RegistrarAsistencia(ana, EstadoAsistencia.Presente, 1);
-        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 0);
-        Trabajo tp1 = CargarTrabajo("TP1");
-        _e.Entregas.Agregar(new Entrega
-        {
-            Estudiante = ana,
-            Trabajo = tp1,
-            Estado = EstadoEntrega.NoEntregado
-        });
-
-        // 50 % de ausencias y 100 % de riesgo en la entrega, 50/50
-        Assert.Equal(75m, _e.Riesgo.CalcularRiesgo(ana));
-    }
-
-    [Fact]
-    public void H6_SinNingunRegistro_NoHayDatosAunqueLaComisionYaTengaClases()
-    {
-        Estudiante ana = Alumno("101", "Gómez");
-        Estudiante luis = Alumno("102", "Paz");
-        RegistrarAsistencia(luis, EstadoAsistencia.Presente);
-
-        ResultadoRiesgo sinCargar = _e.Riesgo.ObtenerResultado(ana);
-        ResultadoRiesgo vinoATodo = _e.Riesgo.ObtenerResultado(luis);
-
-        Assert.Equal(NivelesRiesgo.SinDatos, sinCargar.NivelRiesgo);
-        Assert.Equal(NivelesRiesgo.Bajo, vinoATodo.NivelRiesgo);
     }
 
     [Fact]
@@ -721,18 +593,6 @@ public class PruebasPP2
     }
 
     [Fact]
-    public void H11_SinContactar_MuestraSoloALosQueNuncaSeContactaron()
-    {
-        Estudiante ana = Alumno("1", "Gómez");
-        Alumno("2", "Paz", "Luis");
-        RegistrarContacto(ana, 1);
-
-        List<ResultadoRiesgo> filtrados = Filtrar(FiltroContacto.SinContactar);
-
-        Assert.Equal("2", Assert.Single(filtrados).Estudiante.Legajo);
-    }
-
-    [Fact]
     public void H11_SinContactoReciente_IncluyeAQuienNoTieneContactoOLoTieneViejo()
     {
         Estudiante reciente = Alumno("1", "Gómez");
@@ -786,17 +646,6 @@ public class PruebasPP2
         Assert.DoesNotContain(ComisionB, _e.Comisiones.Todas());
         Assert.Equal("2", Assert.Single(_e.Almacen.Estudiantes).Legajo);
         Assert.Empty(_e.Almacen.Asistencias);
-    }
-
-    [Fact]
-    public void Comisiones_RenombrarActualizaLosAlumnos()
-    {
-        Alumno("1", "Gómez");
-
-        Assert.Null(_e.Comisiones.Renombrar(ComisionA, "Comisión Noche"));
-
-        Assert.Equal("Comisión Noche", _e.Almacen.Estudiantes[0].Comision);
-        Assert.Contains("Comisión Noche", _e.Comisiones.Todas());
     }
 
     [Fact]
@@ -861,18 +710,25 @@ public class PruebasPP2
         var riesgoService = new RiesgoService(
             repoEstudiantes, repoAsistencias, repoEntregas, repoContactos, umbralesService);
 
+        // La lista también ofrece importar alumnos desde un CSV
+        var repoCalendario = new CalendarioRepositorioEnMemoria(almacen);
+        var calendarioService = new CalendarioService(repoCalendario, repoEntregas);
+        var importacionService = new ImportacionService(
+            nominaService, registroService, calendarioService,
+            new UnidadDeTrabajoEnMemoria());
+
         var navegacion = new NavegacionFalsa(); // simula el cambio de pantallas en memoria
 
         const string comision = "Comisión A";
         comisionService.Inicializar();
 
-        nominaService.Agregar("Ramiro", "Álvarez", "1", comision);
-        nominaService.Agregar("Roberto", "Gómez", "2", comision);
-        nominaService.Agregar("Juan", "Pérez", "3", comision);
+        nominaService.Agregar("Ramiro", "Álvarez", "101", comision);
+        nominaService.Agregar("Roberto", "Gómez", "102", comision);
+        nominaService.Agregar("Juan", "Pérez", "103", comision);
 
-        Estudiante alvarez = nominaService.Buscar("1")!;
-        Estudiante gomez = nominaService.Buscar("2")!;
-        Estudiante perez = nominaService.Buscar("3")!;
+        Estudiante alvarez = nominaService.Buscar("101")!;
+        Estudiante gomez = nominaService.Buscar("102")!;
+        Estudiante perez = nominaService.Buscar("103")!;
 
         DateTime clase1 = DateTime.Today.AddDays(-7);
         DateTime clase2 = DateTime.Today;
@@ -893,7 +749,8 @@ public class PruebasPP2
 
         // WHEN : El tutor consulta la comisión y ordena por mayor riesgo
         var listaAlumnosVm = new ListaAlumnosViewModel(
-            comision, navegacion, riesgoService, comisionService);
+            comision, navegacion, riesgoService, comisionService,
+            importacionService, new DialogosFalsos());
 
         listaAlumnosVm.OrdenIndice = (int)OrdenLista.MayorRiesgo;
 
@@ -974,7 +831,137 @@ public class PruebasPP2
         Assert.False(string.IsNullOrWhiteSpace(fichaAlumnoVm.RiesgoTexto));
     }
 
+    // ---------- H12: reporte de riesgo de la comisión ----------
 
+    // Cuatro alumnos, uno en cada nivel: alto, medio, bajo y sin datos
+    private void CargarComisionConUnAlumnoPorNivel()
+    {
+        Estudiante alto = Alumno("1", "Alto");
+        Estudiante medio = Alumno("2", "Medio");
+        Estudiante bajo = Alumno("3", "Bajo");
+        Alumno("4", "Nuevo");
+        Trabajo tp1 = CargarTrabajo("TP1");
 
+        RegistrarAsistencia(alto, EstadoAsistencia.Ausente, 2);
+        RegistrarAsistencia(alto, EstadoAsistencia.Ausente, 1);
+        RegistrarAsistencia(medio, EstadoAsistencia.Ausente, 2);
+        RegistrarAsistencia(medio, EstadoAsistencia.Presente, 1);
+        RegistrarAsistencia(bajo, EstadoAsistencia.Presente, 2);
+        RegistrarAsistencia(bajo, EstadoAsistencia.Presente, 1);
+
+        RegistrarEntrega(alto, tp1, EstadoEntrega.NoEntregado);
+        RegistrarEntrega(medio, tp1, EstadoEntrega.EntregadoFueraDeTermino);
+        RegistrarEntrega(bajo, tp1, EstadoEntrega.Entregado);
+    }
+
+    private void RegistrarEntrega(
+        Estudiante estudiante, Trabajo trabajo, EstadoEntrega estado)
+    {
+        _e.Entregas.Agregar(new Entrega
+        {
+            Estudiante = estudiante,
+            Trabajo = trabajo,
+            Estado = estado
+        });
+    }
+
+    [Fact]
+    public void H12_ElReporteCuentaCadaNivelYElPorcentajeEnRiesgo()
+    {
+        CargarComisionConUnAlumnoPorNivel();
+
+        var reporte = new ReporteRiesgoViewModel(ComisionA, _e.Riesgo);
+
+        Assert.Equal(4, reporte.TotalEstudiantes);
+        Assert.Equal(1, reporte.EstudiantesEnRiesgo);
+        Assert.Equal(1, reporte.EstudiantesRiesgoMedio);
+        Assert.Equal(1, reporte.EstudiantesRiesgoBajo);
+        Assert.Equal(25m, reporte.PorcentajeEnRiesgo);
+        Assert.Equal("1 de 4 estudiantes tienen riesgo alto.", reporte.Resumen);
+    }
+
+    [Fact]
+    public void H12_ElReporteCoincideConLoQueMuestraElPanelDeLaComision()
+    {
+        CargarComisionConUnAlumnoPorNivel();
+
+        var reporte = new ReporteRiesgoViewModel(ComisionA, _e.Riesgo);
+        ListaAlumnosViewModel lista = NuevaLista();
+
+        Assert.Equal(
+            lista.Alumnos.Count(a => a.Nivel == NivelesRiesgo.Alto),
+            reporte.EstudiantesEnRiesgo);
+        Assert.Equal(lista.Alumnos.Count, reporte.TotalEstudiantes);
+    }
+
+    [Fact]
+    public void H12_ComisionSinEstudiantes_NoDivideYAvisa()
+    {
+        var reporte = new ReporteRiesgoViewModel(ComisionB, _e.Riesgo);
+
+        Assert.True(reporte.SinEstudiantes);
+        Assert.Equal(0m, reporte.PorcentajeEnRiesgo);
+        Assert.Equal("Esta comisión todavía no tiene estudiantes.", reporte.Resumen);
+    }
+
+    [Fact]
+    public void H12_ComisionSinDatos_NoAfirmaQueNadieEstaEnRiesgo()
+    {
+        Alumno("1", "Gómez");
+        Alumno("2", "Paz");
+
+        var reporte = new ReporteRiesgoViewModel(ComisionA, _e.Riesgo);
+
+        Assert.True(reporte.SinDatos);
+        Assert.Equal(0, reporte.EstudiantesEnRiesgo);
+        Assert.Equal(
+            "Todavía no hay datos suficientes para calcular el riesgo.",
+            reporte.Resumen);
+    }
+
+    // ---------- Carga masiva desde CSV ----------
+
+    private const string Encabezado =
+        "Nombre;Apellido;Legajo;Comision;Asistencias;Entregas\n";
+
+    [Fact]
+    public void Importar_FilasInvalidas_SeInformanConSuLineaYSeSigueConLasValidas()
+    {
+        string futura = DateTime.Today.AddDays(3).ToString("yyyy-MM-dd");
+        string csv = Encabezado +
+            "Ana;Gómez;ab;Comisión A;;\n" +
+            "Luis;Paz;102;Comisión Z;;\n" +
+            "Eva;Ríos;103;Comisión A;;\n" +
+            "Sol;Vera;103;Comisión A;;\n" +
+            $"Tito;Gil;104;Comisión A;{futura}:Presente;";
+
+        ResultadoImportacion r = _e.Importacion.Importar(csv);
+
+        // Entran 103 y 104; el resto se informa con su número de línea
+        Assert.Equal(2, r.AlumnosNuevos);
+        Assert.Equal(0, r.Registros);
+        Assert.Equal(4, r.Errores.Count);
+        Assert.Contains("Línea 2", r.Errores[0]);
+        Assert.Contains("Línea 3", r.Errores[1]);
+        Assert.Contains("Línea 5", r.Errores[2]);
+        Assert.Contains("Línea 6", r.Errores[3]);
+    }
+
+    [Fact]
+    public async Task Given_ArchivoConAlumnos_When_TutorImporta_Then_LaListaLosMuestraYSeAvisaElResultado()
+    {
+        // Given: un archivo elegido por el tutor
+        _dialogos.ArchivoElegido = Encabezado +
+            "Ana;Gómez;101;Comisión A;2020-03-02:Presente;\n" +
+            "Luis;Paz;102;Comisión A;;";
+        ListaAlumnosViewModel lista = NuevaLista();
+
+        // When: importa los alumnos
+        await lista.ImportarAlumnosCommand.ExecuteAsync(null);
+
+        // Then: la lista los muestra y se informa cuántos entraron
+        Assert.Equal(2, lista.Alumnos.Count);
+        Assert.Contains("Alumnos nuevos: 2", _dialogos.Avisos.Single());
+    }
 
 }

@@ -272,6 +272,12 @@ public sealed class AdministracionRepositorioEnMemoria : IAdministracionReposito
 /// comisiones iniciales ya cargadas. Es lo mismo que hace la aplicación,
 /// pero con listas en lugar de SQLite.
 /// </summary>
+// Sin base de datos no hay nada que deshacer: ejecuta la operación y listo
+public sealed class UnidadDeTrabajoEnMemoria : IUnidadDeTrabajo
+{
+    public T EnTransaccion<T>(Func<T> operacion) => operacion();
+}
+
 public sealed class Escenario
 {
     public AlmacenEnMemoria Almacen { get; } = new();
@@ -298,6 +304,8 @@ public sealed class Escenario
 
     public RegistroService Registro { get; }
 
+    public ImportacionService Importacion { get; }
+
     public RiesgoService Riesgo { get; }
 
     public Escenario()
@@ -319,6 +327,11 @@ public sealed class Escenario
         ServicioCalendario = new CalendarioService(Calendario, Entregas);
         ServicioContactos = new ContactoService(Contactos, Estudiantes);
         Registro = new RegistroService(Asistencias, Entregas);
+        Importacion = new ImportacionService(
+            Nomina,
+            Registro,
+            ServicioCalendario,
+            new UnidadDeTrabajoEnMemoria());
         Riesgo = new RiesgoService(
             Estudiantes,
             Asistencias,
