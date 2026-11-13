@@ -121,11 +121,11 @@ Views ──► ViewModels ──► Services ──► interfaces de Repositori
 - Los ViewModels reciben los servicios por constructor y piden ir a otra pantalla o confirmar algo a través de `INavegacion` e `IDialogos`.
 - `MauiProgram` arma todo con el contenedor de dependencias. La base depende del dominio, no al revés.
 
-Diagrama de arquitectura (contexto y componentes): [docs/arquitectura.md](docs/arquitectura.md) · Decisiones de diseño y reglas de negocio: [docs/decisiones/](docs/decisiones/)
+Diagrama de arquitectura (componentes): [docs/arquitectura.md](docs/arquitectura.md) · Decisiones de diseño y reglas de negocio: [docs/decisiones/](docs/decisiones/)
 
 ## Cómo se trabaja
 
 - La rama principal es `main`; el trabajo se integra a `main` y se sube desde Visual Studio.
 - Cada integrante trabaja sus historias y deja sus propios commits. Cuando una tarea se hace en pareja, el commit lleva un `Co-authored-by` real de quien participó.
 - Las tareas se siguen en el tablero del equipo.
-- Integrantes: completar con los nombres del grupo.
+- Integrantes: Agustina Gomez, Gabriel Palladini, Juan Martinez, Paola Clemente.

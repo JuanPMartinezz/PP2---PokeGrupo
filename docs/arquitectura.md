@@ -1,24 +1,8 @@
 # Arquitectura
 
-Descripción del sistema **tal como está construido hoy**. Dos niveles de zoom: contexto y componentes.
+Descripción del sistema **tal como está construido hoy**. Lo usa una sola persona (quien sigue una o más comisiones), sin conexión de red: todo se guarda en un archivo SQLite local.
 
-## 1. Contexto
-
-Una sola persona usa el sistema: quien sigue una o más comisiones de cursada. No hay integraciones con otros sistemas ni conexión de red; todo se guarda en un archivo SQLite local.
-
-```mermaid
-flowchart LR
-    T["Tutor / docente<br/>sigue una o más comisiones"]
-    S["PP2 PokeGrupo<br/>aplicación .NET MAUI"]
-    B[("Archivo SQLite local<br/>registro_asistencia_v2.db3")]
-    C["Archivo CSV<br/>(opcional, carga masiva)"]
-
-    T -- "toma asistencia, registra entregas y contactos,<br/>consulta a quién llamar" --> S
-    S -- "lee y guarda" --> B
-    C -- "se importa desde la pantalla<br/>Lista de alumnos" --> S
-```
-
-## 2. Componentes
+## Componentes
 
 El sistema es un único proyecto MAUI (`PP2/`) organizado en carpetas, más un proyecto de pruebas (`PP2.Tests/`) que referencia a `PP2`. Las capas son carpetas, no proyectos separados (ver [ADR-005](decisiones/ADR-005-capas-y-direccion-de-dependencias.md)).
 
