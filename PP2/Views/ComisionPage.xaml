@@ -1,32 +1,283 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="RegistroAsistencia.Views.ComisionPage"
-             Title="{Binding Comision}">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.Views.ComisionPage"
+    Title="{Binding Comision}"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#E9EDF3">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
+    <Grid RowDefinitions="Auto,*">
 
-            <Label Text="{Binding FechaHoy}" Style="{StaticResource TituloPagina}" />
-            <Label Text="{Binding ResumenAlumnos}" Style="{StaticResource TextoSecundario}" />
+        <!-- Encabezado -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-            <Button Text="Tomar asistencia de hoy"
-                    Command="{Binding TomarAsistenciaCommand}" />
-            <Label Text="{Binding EstadoAsistencia}" Style="{StaticResource TextoSecundario}" />
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-            <Button Text="Registrar entrega"
-                    Command="{Binding RegistrarEntregaCommand}" />
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+                </VerticalStackLayout>
 
-            <Button Text="Ver lista de alumnos"
-                    Command="{Binding VerListaCommand}" />
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                </HorizontalStackLayout>
+            </Grid>
 
-            <Button Text="Calendario de clases y trabajos"
-                    Command="{Binding VerCalendarioCommand}" />
-
-            <Button Text="Configurar el cálculo de riesgo"
-                    Command="{Binding ConfigurarRiesgoCommand}" />
-
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
         </VerticalStackLayout>
-    </ScrollView>
 
+        <!-- Contenido -->
+        <Grid Grid.Row="1" BackgroundColor="#E9EDF3">
+
+            <Image Source="pokeball_fondo.png"
+                   HeightRequest="380"
+                   WidthRequest="380"
+                   Aspect="AspectFit"
+                   Opacity="0.5"
+                   HorizontalOptions="End"
+                   VerticalOptions="End"
+                   TranslationX="110"
+                   TranslationY="90"
+                   InputTransparent="True"/>
+
+            <ScrollView>
+                <VerticalStackLayout Padding="24,20,24,28"
+                                     Spacing="16">
+
+                    <!-- Comisión -->
+                    <HorizontalStackLayout Spacing="12"
+                                           VerticalOptions="Center">
+                        <Image Source="pokeball.png"
+                               HeightRequest="38"
+                               WidthRequest="38"
+                               Aspect="AspectFit"/>
+
+                        <Label Text="{Binding Comision}"
+                               FontSize="26"
+                               FontAttributes="Bold"
+                               TextColor="#252B35"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Fecha -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="6">
+                            <Label Text=" CLASE DE HOY"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="#C92532"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="{Binding FechaHoy}"
+                                   Style="{StaticResource TituloPagina}"
+                                   TextColor="#252B35"/>
+
+                            <Label Text="{Binding ResumenAlumnos}"
+                                   Style="{StaticResource TextoSecundario}"
+                                   TextColor="#687383"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Asistencia -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="💧  ASISTENCIA"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="Registrá quiénes asistieron a la clase de hoy."
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+
+                            <Button Text="Tomar asistencia de hoy"
+                                    Command="{Binding TomarAsistenciaCommand}"
+                                    BackgroundColor="#C92532"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"/>
+
+                            <Label Text="{Binding EstadoAsistencia}"
+                                   Style="{StaticResource TextoSecundario}"
+                                   TextColor="#687383"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Entregas -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="🌿  ENTREGAS"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="Registrá los trabajos y consultá el progreso de los estudiantes."
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+
+                            <Button Text="Registrar entrega"
+                                    Command="{Binding RegistrarEntregaCommand}"
+                                    BackgroundColor="#D9363E"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Alumnos -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="⚡  ESTUDIANTES"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="Consultá la nómina de alumnos de esta comisión."
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+
+                            <Button Text="Ver lista de alumnos"
+                                    Command="{Binding VerListaCommand}"
+                                    BackgroundColor="#D9363E"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Calendario -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text=" 🔥 CALENDARIO"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="Revisá las fechas de clases y trabajos del cuatrimestre."
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+
+                            <Button Text="Calendario de clases y trabajos"
+                                    Command="{Binding VerCalendarioCommand}"
+                                    BackgroundColor="#D9363E"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Riesgo -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+                            <Label Text="🔮  SEGUIMIENTO DE RIESGO"
+                                   FontSize="13"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   CharacterSpacing="1"/>
+
+                            <Label Text="Configurá los parámetros utilizados para evaluar el riesgo académico."
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+
+                            <Button Text="Configurar el cálculo de riesgo"
+                                   Command="{Binding ConfigurarRiesgoCommand}"
+                                   BackgroundColor="#D9363E"
+                                   TextColor="White"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   CornerRadius="10"
+                                   HeightRequest="50"
+                                   BorderColor="#991F29"
+                                   BorderWidth="1"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
 </ContentPage>

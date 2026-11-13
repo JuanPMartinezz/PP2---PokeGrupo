@@ -1,3 +1,4 @@
+
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using RegistroAsistencia.Models;
@@ -7,12 +8,19 @@ using System.Collections.ObjectModel;
 namespace RegistroAsistencia.ViewModels;
 
 // Una fila de la planilla: el alumno y su check de presente
-public partial class FilaAsistencia : ObservableObject
+
+public class FilaAsistencia : ObservableObject
 {
-    public FilaAsistencia(Estudiante estudiante, bool? guardado)
+    private bool presente;
+
+    public FilaAsistencia(
+        Estudiante estudiante,
+        bool? guardado,
+        string nivelRiesgo)
     {
         Estudiante = estudiante;
         Guardado = guardado;
+        NivelRiesgo = nivelRiesgo;
         presente = guardado ?? false;
     }
 
@@ -20,42 +28,51 @@ public partial class FilaAsistencia : ObservableObject
 
     public string Nombre => $"{Estudiante.Apellido}, {Estudiante.Nombre}";
 
-    // Lo que hay guardado: nulo si todavía no se tomó asistencia
     public bool? Guardado { get; private set; }
 
-    [ObservableProperty]
-    private bool presente;
+    public string NivelRiesgo { get; }
 
-    // Ya había un registro y el check quedó distinto
+    public string IconoRiesgo => NivelRiesgo switch
+    {
+        NivelesRiesgo.Alto => "🔴",
+        NivelesRiesgo.Medio => "🟡",
+        NivelesRiesgo.Bajo => "🟢",
+        NivelesRiesgo.SinDatos => "⚪",
+        _ => "❔"
+    };
+
+    public bool Presente
+    {
+        get => presente;
+        set
+        {
+            if (SetProperty(ref presente, value))
+                OnPropertyChanged(nameof(Modifica));
+        }
+    }
+
     public bool Modifica => Guardado is bool g && g != Presente;
 
     public void Confirmar()
     {
         Guardado = Presente;
-
-        OnPropertyChanged(nameof(Modifica));
-    }
-
-    partial void OnPresenteChanged(bool value)
-    {
         OnPropertyChanged(nameof(Modifica));
     }
 }
 
 /// <summary>
 /// Planilla de asistencia de una comisión para una fecha (H3 y H4).
-/// La primera vez se guarda sin preguntar; si se corrige algo que ya
-/// estaba guardado, se pide confirmación.
 /// </summary>
-public partial class AsistenciaViewModel : PantallaBase
+public class AsistenciaViewModel : PantallaBase
 {
     private readonly string _comision;
-
     private readonly NominaService _nomina;
-
     private readonly IDialogos _dialogos;
-
     private readonly RegistroService _registro;
+    private readonly RiesgoService _riesgo;
+
+    private DateTime fecha = DateTime.Today;
+    private string resumen = "";
 
     public string Comision => _comision;
 
@@ -63,45 +80,75 @@ public partial class AsistenciaViewModel : PantallaBase
 
     public DateTime FechaMaxima => DateTime.Today;
 
-    [ObservableProperty]
-    private DateTime fecha = DateTime.Today;
+    public DateTime Fecha
+    {
+        get => fecha;
+        set
+        {
+            if (SetProperty(ref fecha, value))
+            {
+                CargarFilas();
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private string resumen = "";
+    public string Resumen
+    {
+        get => resumen;
+        set => SetProperty(ref resumen, value);
+    }
+
+    public IRelayCommand MarcarTodosCommand { get; }
+
+    public IAsyncRelayCommand GuardarCommand { get; }
 
     public AsistenciaViewModel(
         string comision,
         NominaService nomina,
         IDialogos dialogos,
-        RegistroService registro)
+        RegistroService registro,
+        RiesgoService riesgo)
     {
         _comision = comision;
         _nomina = nomina;
         _dialogos = dialogos;
         _registro = registro;
+        _riesgo = riesgo;
+
+        MarcarTodosCommand = new RelayCommand(MarcarTodos);
+        GuardarCommand = new AsyncRelayCommand(Guardar);
 
         CargarFilas();
     }
 
-    partial void OnFechaChanged(DateTime value)
-    {
-        CargarFilas();
-    }
 
     private void CargarFilas()
     {
         Filas.Clear();
         LimpiarMensaje();
 
+        List<ResultadoRiesgo> resultados =
+            _riesgo.ObtenerResultados(_comision);
+
         foreach (Estudiante e in _nomina.DeComision(_comision))
         {
-            Filas.Add(CrearFila(e));
+            ResultadoRiesgo? resultado = resultados.FirstOrDefault(
+                r => r.Estudiante.Legajo == e.Legajo);
+
+            string nivel = resultado?.NivelRiesgo
+                ?? NivelesRiesgo.SinDatos;
+
+            Filas.Add(CrearFila(e, nivel));
         }
 
         ActualizarResumen();
     }
 
-    private FilaAsistencia CrearFila(Estudiante estudiante)
+
+
+    private FilaAsistencia CrearFila(
+        Estudiante estudiante,
+        string nivel)
     {
         EstadoAsistencia? guardada = _registro.AsistenciaDe(
             estudiante.Legajo,
@@ -111,7 +158,10 @@ public partial class AsistenciaViewModel : PantallaBase
             ? null
             : guardada == EstadoAsistencia.Presente;
 
-        var fila = new FilaAsistencia(estudiante, presente);
+        var fila = new FilaAsistencia(
+            estudiante,
+            presente,
+            nivel);
 
         fila.PropertyChanged += (_, _) => ActualizarResumen();
 
@@ -125,7 +175,6 @@ public partial class AsistenciaViewModel : PantallaBase
         Resumen = $"Presentes: {presentes} de {Filas.Count}";
     }
 
-    [RelayCommand]
     private void MarcarTodos()
     {
         foreach (FilaAsistencia fila in Filas)
@@ -134,7 +183,6 @@ public partial class AsistenciaViewModel : PantallaBase
         }
     }
 
-    [RelayCommand]
     private async Task Guardar()
     {
         string? error = Validaciones.FechaAsistencia(Fecha);
@@ -155,7 +203,6 @@ public partial class AsistenciaViewModel : PantallaBase
         Informar(TextoResultado(resultado));
     }
 
-    // Pregunta solo si se está cambiando algo que ya estaba guardado
     private async Task<bool> ConfirmarCorrecciones()
     {
         int cambios = Filas.Count(f => f.Modifica);

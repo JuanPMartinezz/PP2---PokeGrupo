@@ -1,62 +1,318 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:vm="clr-namespace:RegistroAsistencia.ViewModels"
              x:Class="RegistroAsistencia.Views.EntregaPage"
-             Title="Entregas">
+             Title="Entregas"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#E9EDF5">
 
-    <Grid Padding="20" RowSpacing="10" RowDefinitions="Auto,Auto,Auto,Auto,*,Auto,Auto,Auto">
+    <Grid RowDefinitions="Auto,*">
 
-        <Label Grid.Row="0"
-               Text="{Binding Comision}"
-               Style="{StaticResource TituloPagina}" />
+        <!-- ENCABEZADO -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
 
-        <Picker Grid.Row="1"
-                Title="Trabajo"
-                ItemsSource="{Binding Trabajos}"
-                ItemDisplayBinding="{Binding Texto}"
-                SelectedItem="{Binding TrabajoSeleccionado}"
-                IsVisible="{Binding HayTrabajos}" />
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-        <Label Grid.Row="1"
-               Text="Todavía no hay trabajos cargados en esta comisión."
-               Style="{StaticResource TextoSecundario}"
-               IsVisible="{Binding NoHayTrabajos}" />
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-        <Button Grid.Row="2"
-                Text="Agregar trabajo"
-                Command="{Binding AgregarTrabajoCommand}" />
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
 
-        <Label Grid.Row="3"
-               Text="{Binding Resumen}"
-               Style="{StaticResource TextoSecundario}" />
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
 
-        <CollectionView Grid.Row="4" ItemsSource="{Binding Filas}">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Grid ColumnDefinitions="*,170" Padding="0,4">
-                        <Label Text="{Binding Nombre}"
-                               VerticalOptions="Center" />
-                        <Picker Grid.Column="1"
-                                ItemsSource="{x:Static vm:FilaEntrega.Opciones}"
-                                SelectedItem="{Binding EstadoTexto}" />
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                </HorizontalStackLayout>
+
+            </Grid>
+
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
+
+        </VerticalStackLayout>
+
+        <!-- CONTENIDO -->
+        <Grid Grid.Row="1"
+              Padding="20"
+              RowDefinitions="Auto,Auto,Auto,*,Auto,Auto"
+              RowSpacing="14">
+
+            <!-- TITULO -->
+            <HorizontalStackLayout Grid.Row="0"
+                                   Spacing="10"
+                                   VerticalOptions="Center">
+
+                <Label Text="🌿"
+                       FontSize="25"
+                       VerticalOptions="Center"/>
+
+                <Label Text="Entregas"
+                       FontSize="25"
+                       FontAttributes="Bold"
+                       TextColor="#252B35"
+                       VerticalOptions="Center"/>
+
+            </HorizontalStackLayout>
+
+            <!-- MISION -->
+            <Border Grid.Row="1"
+                    BackgroundColor="#DCE5EC"
+                    Stroke="#AAB9C8"
+                    StrokeThickness="2"
+                    StrokeShape="RoundRectangle 16"
+                    Padding="17">
+
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      RowSpacing="10">
+
+                    <Grid ColumnDefinitions="*,Auto">
+
+                        <Label Text="MISIÓN ACTUAL"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               TextColor="#536779"/>
+
+                        <Border Grid.Column="1"
+                                BackgroundColor="#252B35"
+                                Stroke="#171717"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="9,4">
+
+                            <Label Text="{Binding Comision}"
+                                   FontSize="11"
+                                   FontAttributes="Bold"
+                                   TextColor="White"/>
+
+                        </Border>
+
                     </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
 
-        <Label Grid.Row="5"
-               Text="{Binding Mensaje}"
-               Style="{StaticResource Mensaje}" />
+                    <VerticalStackLayout Grid.Row="1"
+                                         Spacing="5">
 
-        <Button Grid.Row="6"
-                Text="Guardar entregas"
-                Command="{Binding GuardarCommand}" />
+                        <Picker ItemsSource="{Binding Trabajos}"
+                                ItemDisplayBinding="{Binding Texto}"
+                                SelectedItem="{Binding TrabajoSeleccionado}"
+                                IsVisible="{Binding HayTrabajos}"
+                                Title="Seleccionar trabajo"
+                                FontSize="17"
+                                TextColor="#252B35"
+                                TitleColor="#718092"/>
 
-        <Button Grid.Row="7"
-                Text="Cerrar entrega (los que faltan quedan como No entregado)"
-                Command="{Binding CerrarEntregaCommand}" />
+                        <Label Text="Todavía no hay trabajos cargados en esta comisión."
+                               FontSize="13"
+                               TextColor="#647184"
+                               IsVisible="{Binding NoHayTrabajos}"/>
+
+                    </VerticalStackLayout>
+
+                    <Button Grid.Row="2"
+                            Text="＋  Agregar trabajo"
+                            Command="{Binding AgregarTrabajoCommand}"
+                            BackgroundColor="#C92532"
+                            TextColor="White"
+                            CornerRadius="10"
+                            HeightRequest="45"
+                            FontAttributes="Bold"/>
+
+                </Grid>
+
+            </Border>
+
+            <!-- PROGRESO -->
+            <Border Grid.Row="2"
+                    BackgroundColor="White"
+                    Stroke="#C8D1DD"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 14"
+                    Padding="14">
+
+                <VerticalStackLayout Spacing="10">
+
+                    <Label Text="PROGRESO DE LA MISIÓN"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           CharacterSpacing="1"
+                           TextColor="#647184"/>
+
+                    <Label Text="{Binding Resumen}"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#252B35"/>
+
+                    <Label Text="REGISTRO DE ESTUDIANTES"
+                           FontSize="10"
+                           TextColor="#718092"/>
+
+                </VerticalStackLayout>
+
+            </Border>
+
+            <!-- ESTUDIANTES -->
+            <CollectionView Grid.Row="3"
+                            ItemsSource="{Binding Filas}"
+                            SelectionMode="None">
+
+                <CollectionView.EmptyView>
+
+                    <VerticalStackLayout Padding="25"
+                                         Spacing="10"
+                                         HorizontalOptions="Center"
+                                         VerticalOptions="Center">
+
+                        <Label Text="Todavía no hay estudiantes para registrar."
+                               FontSize="14"
+                               TextColor="#718092"
+                               HorizontalTextAlignment="Center"/>
+
+                    </VerticalStackLayout>
+
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+
+                        <Border BackgroundColor="White"
+                                Stroke="#C8D1DD"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 14"
+                                Padding="13"
+                                Margin="0,4">
+
+                            <Grid ColumnDefinitions="Auto,*,155"
+                                  ColumnSpacing="12">
+
+                                <!-- POKEBOLA -->
+                                <Border WidthRequest="43"
+                                        HeightRequest="43"
+                                        BackgroundColor="#DCE5EC"
+                                        Stroke="#252B35"
+                                        StrokeThickness="2"
+                                        StrokeShape="Ellipse"
+                                        VerticalOptions="Center">
+
+                                    <Image Source="pokeball.png"
+                                           WidthRequest="30"
+                                           HeightRequest="30"
+                                           Aspect="AspectFit"/>
+
+                                </Border>
+
+                                <!-- ESTUDIANTE -->
+                                <VerticalStackLayout Grid.Column="1"
+                                                     VerticalOptions="Center"
+                                                     Spacing="4">
+
+                                    <Label Text="{Binding Nombre}"
+                                           FontSize="15"
+                                           FontAttributes="Bold"
+                                           TextColor="#252B35"
+                                           LineBreakMode="WordWrap"/>
+
+                                    <Label Text="REGISTRO DE MISIÓN"
+                                           FontSize="9"
+                                           CharacterSpacing="1"
+                                           TextColor="#718092"/>
+
+                                </VerticalStackLayout>
+
+                                <!-- ESTADO -->
+                                <Picker Grid.Column="2"
+                                        ItemsSource="{x:Static vm:FilaEntrega.Opciones}"
+                                        SelectedItem="{Binding EstadoTexto}"
+                                        FontSize="12"
+                                        TextColor="#252B35"
+                                        VerticalOptions="Center"/>
+
+                            </Grid>
+
+                        </Border>
+
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+            <!-- MENSAJE -->
+            <Label Grid.Row="4"
+                   Text="{Binding Mensaje}"
+                   Style="{StaticResource Mensaje}"
+                   HorizontalTextAlignment="Center"/>
+
+            <!-- ACCIONES -->
+            <VerticalStackLayout Grid.Row="5"
+                                 Spacing="9">
+
+                <Button Text="✓  Guardar entregas"
+                        Command="{Binding GuardarCommand}"
+                        BackgroundColor="#C92532"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="50"
+                        FontAttributes="Bold"/>
+
+                <Button Text="Cerrar entrega"
+                        Command="{Binding CerrarEntregaCommand}"
+                        BackgroundColor="#252B35"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="46"
+                        FontAttributes="Bold"/>
+
+            </VerticalStackLayout>
+
+        </Grid>
 
     </Grid>
 
 </ContentPage>
+

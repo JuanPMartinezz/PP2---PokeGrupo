@@ -1,48 +1,319 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="RegistroAsistencia.MainPage"
-             Title="Registro de asistencia">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Class="RegistroAsistencia.MainPage"
+    Title="Registro de asistencia"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#E9EDF3">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="12">
+    <Grid RowDefinitions="Auto,*">
 
-            <Label Text="Comisiones" Style="{StaticResource TituloPagina}" />
+        <!-- ENCABEZADO POKEDEX -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
 
-            <Label Text="Todavía no hay comisiones. Agregá una para empezar."
-                   Style="{StaticResource TextoSecundario}"
-                   IsVisible="{Binding SinComisiones}" />
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Comisiones}" Spacing="10">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <Border Style="{StaticResource Tarjeta}">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding Abrir}" />
-                            </Border.GestureRecognizers>
-                            <VerticalStackLayout Spacing="2">
-                                <Label Text="{Binding Nombre}" FontSize="20" FontAttributes="Bold" />
-                                <Label Text="{Binding Detalle}" Style="{StaticResource TextoSecundario}" />
-                            </VerticalStackLayout>
-                        </Border>
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                <!-- POKEBALL -->
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-            <Button Text="Agregar otra comisión"
-                    Margin="0,10,0,0"
-                    Command="{Binding NuevaComisionCommand}" />
+                <!-- TITULO -->
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
 
-            <Button Text="Agregar alumno nuevo"
-                    Command="{Binding NuevoAlumnoCommand}" />
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
 
-            <Button Text="Administrar datos"
-                    Margin="0,40,0,0"
-                    BackgroundColor="Transparent"
-                    TextColor="{StaticResource Gray500}"
-                    Command="{Binding AdministrarCommand}" />
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+
+                </VerticalStackLayout>
+
+                <!-- LUCES -->
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                </HorizontalStackLayout>
+
+            </Grid>
+
+            <!-- TERMINACION -->
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
 
         </VerticalStackLayout>
-    </ScrollView>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <Grid Grid.Row="1"
+              BackgroundColor="#E9EDF3">
+
+            <!-- FONDO -->
+            <Image Source="pokeball_fondo.png"
+                   HeightRequest="380"
+                   WidthRequest="380"
+                   Aspect="AspectFit"
+                   Opacity="1"
+                   HorizontalOptions="Start"
+                   VerticalOptions="End"
+                   TranslationX="-110"
+                   TranslationY="90"
+                   InputTransparent="True"/>
+
+            <Image Source="pokeball_fondo.png"
+                   HeightRequest="380"
+                   WidthRequest="380"
+                   Aspect="AspectFit"
+                   Opacity="1"
+                   HorizontalOptions="End"
+                   VerticalOptions="End"
+                   TranslationX="110"
+                   TranslationY="90"
+                   InputTransparent="True"/>
+
+            <!-- CONTENIDO -->
+            <ScrollView>
+
+                <VerticalStackLayout Padding="24,20,24,24"
+                                     Spacing="16">
+
+                    <!-- TITULO COMISIONES -->
+                    <HorizontalStackLayout Spacing="12"
+                                           VerticalOptions="Center">
+
+                        <Image Source="pokeball.png"
+                               HeightRequest="34"
+                               WidthRequest="34"
+                               Aspect="AspectFit"/>
+
+                        <Label Text="Comisiones"
+                               FontSize="25"
+                               FontAttributes="Bold"
+                               TextColor="#252B35"
+                               VerticalOptions="Center"/>
+
+                    </HorizontalStackLayout>
+
+                    <Label Text="Seleccioná una comisión para gestionar sus alumnos, tomar asistencia, registrar entregas y consultar sus actividades."
+                           FontSize="14"
+                           TextColor="#687383"
+                           LineBreakMode="WordWrap"/>
+
+                    <!-- SIN COMISIONES -->
+                    <Border IsVisible="{Binding SinComisiones}"
+                            BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="16">
+
+                        <Label Text="Todavía no hay comisiones. Creá una para empezar a organizar los grupos de estudiantes."
+                               TextColor="#697381"
+                               FontSize="14"/>
+
+                    </Border>
+
+                    <!-- TARJETAS DE COMISIONES -->
+                    <VerticalStackLayout
+                        BindableLayout.ItemsSource="{Binding Comisiones}"
+                        Spacing="12">
+
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate>
+
+                                <Border BackgroundColor="White"
+                                        Stroke="#AEB8C5"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 13"
+                                        Padding="0">
+
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding Abrir}"/>
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="6,82,*"
+                                          MinimumHeightRequest="100">
+
+                                        <!-- FRANJA -->
+                                        <BoxView Grid.Column="0"
+                                                 BackgroundColor="#D9363E"/>
+
+                                        <!-- POKEBALL -->
+                                        <Image Grid.Column="1"
+                                               Source="pokeball.png"
+                                               HeightRequest="58"
+                                               WidthRequest="58"
+                                               Aspect="AspectFit"
+                                               VerticalOptions="Center"
+                                               HorizontalOptions="Center"/>
+
+                                        <!-- DATOS -->
+                                        <VerticalStackLayout Grid.Column="2"
+                                                             VerticalOptions="Center"
+                                                             Padding="12"
+                                                             Spacing="5">
+
+                                            <Label Text="{Binding Nombre}"
+                                                   FontSize="20"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#202735"/>
+
+                                            <Label Text="{Binding Detalle}"
+                                                   FontSize="15"
+                                                   TextColor="#687383"/>
+
+                                            <Label Text="Tocá para ingresar y gestionar esta comisión"
+                                                   FontSize="12"
+                                                   TextColor="#8793A3"/>
+
+                                        </VerticalStackLayout>
+
+                                    </Grid>
+
+                                </Border>
+
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+
+                    </VerticalStackLayout>
+
+                    <!-- CREAR COMISION -->
+                    <VerticalStackLayout Spacing="5">
+
+                        <Button Text="＋   Crear nueva comisión"
+                                Margin="0,8,0,0"
+                                Command="{Binding NuevaComisionCommand}"
+                                BackgroundColor="#D9363E"
+                                TextColor="White"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                CornerRadius="12"
+                                HeightRequest="52"
+                                BorderColor="#991F29"
+                                BorderWidth="1"/>
+
+                        <Label Text="Registrar un nuevo grupo de estudiantes."
+                               FontSize="12"
+                               TextColor="#687383"
+                               HorizontalTextAlignment="Center"/>
+
+                    </VerticalStackLayout>
+
+                    <!-- REGISTRAR ALUMNO -->
+                    <VerticalStackLayout Spacing="5">
+
+                        <Button Text="＋   Registrar nuevo alumno"
+                                Command="{Binding NuevoAlumnoCommand}"
+                                BackgroundColor="#D9363E"
+                                TextColor="White"
+                                FontSize="16"
+                                FontAttributes="Bold"
+                                CornerRadius="12"
+                                HeightRequest="52"
+                                BorderColor="#991F29"
+                                BorderWidth="1"/>
+
+                        <Label Text="Incorporar un estudiante y asignarlo a una comisión."
+                               FontSize="12"
+                               TextColor="#687383"
+                               HorizontalTextAlignment="Center"/>
+
+                    </VerticalStackLayout>
+
+                    <!-- SEPARADOR -->
+                    <Grid Margin="0,18,0,0"
+                          ColumnDefinitions="*,Auto,*"
+                          ColumnSpacing="12">
+
+                        <BoxView Grid.Column="0"
+                                 HeightRequest="2"
+                                 BackgroundColor="#B8C2CE"
+                                 VerticalOptions="Center"/>
+
+                        <Image Grid.Column="1"
+                               Source="pokeball.png"
+                               HeightRequest="26"
+                               WidthRequest="26"
+                               Aspect="AspectFit"/>
+
+                        <BoxView Grid.Column="2"
+                                 HeightRequest="2"
+                                 BackgroundColor="#B8C2CE"
+                                 VerticalOptions="Center"/>
+
+                    </Grid>
+
+                    <!-- ADMINISTRACION -->
+                    <VerticalStackLayout Spacing="5"
+                                         HorizontalOptions="Center">
+
+                        <Button Text="⚙️   Centro de Datos"
+                                Command="{Binding AdministrarCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="#596575"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                CornerRadius="10"
+                                HeightRequest="46"
+                                HorizontalOptions="Center"
+                                WidthRequest="320"/>
+
+                        <Label Text="Cambiar nombres, vaciar o eliminar comisiones y administrar los datos del sistema."
+                               FontSize="12"
+                               TextColor="#687383"
+                               HorizontalTextAlignment="Center"
+                               HorizontalOptions="Center"
+                               MaximumWidthRequest="380"/>
+
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+
+            </ScrollView>
+
+        </Grid>
+
+    </Grid>
 
 </ContentPage>
+
+

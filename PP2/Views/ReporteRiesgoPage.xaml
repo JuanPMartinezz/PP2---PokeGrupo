@@ -1,0 +1,659 @@
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="RegistroAsistencia.Views.ReporteRiesgoPage"
+             Title="Reporte de riesgo"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#E9EDF5">
+
+    <Grid RowDefinitions="Auto,*">
+
+        <!-- ENCABEZADO -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
+
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
+
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
+
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                </HorizontalStackLayout>
+
+            </Grid>
+
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
+
+        </VerticalStackLayout>
+
+        <!-- CONTENIDO -->
+        <ScrollView Grid.Row="1">
+
+            <VerticalStackLayout Padding="20"
+                                 Spacing="16">
+
+                <HorizontalStackLayout Spacing="10">
+
+                    <Image Source="pokeball.png"
+                           WidthRequest="28"
+                           HeightRequest="28"/>
+
+                    <Label Text="Reporte de riesgo"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="#252B35"
+                           VerticalOptions="Center"/>
+
+                </HorizontalStackLayout>
+
+                <!-- POKEDEX -->
+                <Border HorizontalOptions="Center"
+                        WidthRequest="900"
+                        MaximumWidthRequest="900"
+                        HeightRequest="590"
+                        BackgroundColor="#B9152D"
+                        Stroke="#171717"
+                        StrokeThickness="3"
+                        StrokeShape="RoundRectangle 28"
+                        Padding="12">
+
+                    <Grid ColumnDefinitions="*,20,*"
+                          ColumnSpacing="0">
+
+                        <!-- PANEL IZQUIERDO -->
+                        <Border Grid.Column="0"
+                                BackgroundColor="#D51D38"
+                                Stroke="#171717"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 20"
+                                Padding="18">
+
+                            <Grid RowDefinitions="Auto,Auto,*,Auto"
+                                  RowSpacing="12">
+
+                                <HorizontalStackLayout Grid.Row="0"
+                                                       Spacing="10">
+
+                                    <Border WidthRequest="58"
+                                            HeightRequest="58"
+                                            BackgroundColor="#0875A9"
+                                            Stroke="#171717"
+                                            StrokeThickness="3"
+                                            StrokeShape="Ellipse"
+                                            Padding="5">
+
+                                        <Border BackgroundColor="#35B9F2"
+                                                Stroke="#171717"
+                                                StrokeThickness="2"
+                                                StrokeShape="Ellipse">
+
+                                            <Label Text="●"
+                                                   FontSize="20"
+                                                   TextColor="#BDEEFF"
+                                                   HorizontalTextAlignment="Center"
+                                                   VerticalTextAlignment="Center"/>
+
+                                        </Border>
+
+                                    </Border>
+
+                                    <VerticalStackLayout VerticalOptions="Center"
+                                                         Spacing="3">
+
+                                        <Label Text="{Binding Comision}"
+                                               FontSize="19"
+                                               FontAttributes="Bold"
+                                               TextColor="White"
+                                               LineBreakMode="TailTruncation"/>
+
+                                        <Label Text="INFORME DE RIESGO"
+                                               FontSize="9"
+                                               TextColor="#FFDCE1"/>
+
+                                    </VerticalStackLayout>
+
+                                </HorizontalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="1"
+                                                       Spacing="10"
+                                                       HorizontalOptions="Center">
+
+                                    <Border WidthRequest="14"
+                                            HeightRequest="14"
+                                            BackgroundColor="#E91E45"
+                                            Stroke="#171717"
+                                            StrokeThickness="1"
+                                            StrokeShape="Ellipse"/>
+
+                                    <Border WidthRequest="14"
+                                            HeightRequest="14"
+                                            BackgroundColor="#FFD83D"
+                                            Stroke="#171717"
+                                            StrokeThickness="1"
+                                            StrokeShape="Ellipse"/>
+
+                                    <Border WidthRequest="14"
+                                            HeightRequest="14"
+                                            BackgroundColor="#80D83C"
+                                            Stroke="#171717"
+                                            StrokeThickness="1"
+                                            StrokeShape="Ellipse"/>
+
+                                </HorizontalStackLayout>
+
+                                <!-- PANTALLA -->
+                                <Border Grid.Row="2"
+                                        BackgroundColor="#D8DEE0"
+                                        Stroke="#171717"
+                                        StrokeThickness="3"
+                                        StrokeShape="RoundRectangle 14"
+                                        Padding="14">
+
+                                    <Grid RowDefinitions="Auto,*,Auto"
+                                          RowSpacing="12">
+
+                                        <Label Text="ESTUDIANTES EN RIESGO"
+                                               FontSize="11"
+                                               FontAttributes="Bold"
+                                               TextColor="#34434C"/>
+
+                                        <Border Grid.Row="1"
+                                                BackgroundColor="#202528"
+                                                Stroke="#171717"
+                                                StrokeThickness="2"
+                                                StrokeShape="RoundRectangle 10"
+                                                Padding="8">
+
+                                            <VerticalStackLayout VerticalOptions="Center"
+                                                                 Spacing="4">
+
+                                                <Label Text="{Binding EstudiantesEnRiesgo}"
+                                                       FontSize="76"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#F15B68"
+                                                       HorizontalTextAlignment="Center"/>
+
+                                                <Label Text="RIESGO ALTO"
+                                                       FontSize="13"
+                                                       FontAttributes="Bold"
+                                                       CharacterSpacing="2"
+                                                       TextColor="White"
+                                                       HorizontalTextAlignment="Center"/>
+
+                                            </VerticalStackLayout>
+
+                                        </Border>
+
+                                        <Grid Grid.Row="2"
+                                              ColumnDefinitions="*,*"
+                                              ColumnSpacing="12">
+
+                                            <VerticalStackLayout Spacing="3">
+
+                                                <Label Text="TOTAL"
+                                                       FontSize="11"
+                                                       TextColor="#53636C"/>
+
+                                                <Label Text="{Binding TotalEstudiantes}"
+                                                       FontSize="28"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#252B35"/>
+
+                                            </VerticalStackLayout>
+
+                                            <VerticalStackLayout Grid.Column="1"
+                                                                 Spacing="3">
+
+                                                <Label Text="PORCENTAJE"
+                                                       FontSize="11"
+                                                       TextColor="#53636C"/>
+
+                                                <Label Text="{Binding PorcentajeEnRiesgo, StringFormat='{}{0:0.0}%'}"
+                                                       FontSize="26"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#D51D38"/>
+
+                                            </VerticalStackLayout>
+
+                                        </Grid>
+
+                                    </Grid>
+
+                                </Border>
+
+                                <Label Grid.Row="3"
+                                       Text="DATOS DE LA COMISIÓN"
+                                       FontSize="9"
+                                       FontAttributes="Bold"
+                                       TextColor="#FFE0E4"
+                                       HorizontalTextAlignment="Center"/>
+
+                            </Grid>
+
+                        </Border>
+
+                        <!-- BISAGRA -->
+                        <Grid Grid.Column="1"
+                              BackgroundColor="#8F1025"
+                              RowDefinitions="Auto,*,Auto">
+
+                            <Border BackgroundColor="#E0444C"
+                                    Stroke="#171717"
+                                    StrokeThickness="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="25"/>
+
+                            <Border Grid.Row="1"
+                                    BackgroundColor="#B9152D"
+                                    Stroke="#171717"
+                                    StrokeThickness="1"
+                                    Margin="4,0"/>
+
+                            <Border Grid.Row="2"
+                                    BackgroundColor="#E0444C"
+                                    Stroke="#171717"
+                                    StrokeThickness="2"
+                                    StrokeShape="RoundRectangle 8"
+                                    HeightRequest="25"/>
+
+                        </Grid>
+
+                        <!-- PANEL DERECHO -->
+                        <Border Grid.Column="2"
+                                BackgroundColor="#D51D38"
+                                Stroke="#171717"
+                                StrokeThickness="2"
+                                StrokeShape="RoundRectangle 20"
+                                Padding="18">
+
+                            <Grid RowDefinitions="Auto,Auto,*,Auto,Auto"
+                                  RowSpacing="14">
+
+                                <Label Text="ANÁLISIS"
+                                       FontSize="19"
+                                       FontAttributes="Bold"
+                                       TextColor="White"
+                                       HorizontalTextAlignment="Center"/>
+
+                                <!-- ESTADO -->
+                                <VerticalStackLayout Grid.Row="1"
+                                                     Spacing="8">
+
+                                    <Label Text="ESTADO DE LA COMISIÓN"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           TextColor="#FFE0E4"/>
+
+                                    <Border BackgroundColor="#202528"
+                                            Stroke="#171717"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 10"
+                                            Padding="14">
+
+                                        <VerticalStackLayout Spacing="10">
+
+                                            <Label Text="RESULTADO"
+                                                   FontSize="10"
+                                                   FontAttributes="Bold"
+                                                   TextColor="#63C8F5"/>
+
+                                            <Label Text="{Binding Resumen}"
+                                                   FontSize="15"
+                                                   TextColor="White"
+                                                   LineBreakMode="WordWrap"/>
+
+                                        </VerticalStackLayout>
+
+                                    </Border>
+
+                                </VerticalStackLayout>
+
+                                <!-- DISTRIBUCIÓN DEL RIESGO -->
+                                <VerticalStackLayout Grid.Row="2"
+                                                     Spacing="10">
+
+                                    <Label Text="DISTRIBUCIÓN DEL RIESGO"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           TextColor="#FFE0E4"/>
+
+                                    <Border BackgroundColor="#D8DEE0"
+                                            Stroke="#171717"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 10"
+                                            Padding="15">
+
+                                        <VerticalStackLayout Spacing="14">
+
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  ColumnSpacing="10">
+
+                                                <Border WidthRequest="19"
+                                                        HeightRequest="19"
+                                                        BackgroundColor="#E53945"
+                                                        Stroke="#171717"
+                                                        StrokeThickness="1"
+                                                        StrokeShape="Ellipse"/>
+
+                                                <Label Grid.Column="1"
+                                                       Text="Riesgo alto"
+                                                       FontSize="14"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding EstudiantesEnRiesgo}"
+                                                       FontSize="15"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                            </Grid>
+
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  ColumnSpacing="10">
+
+                                                <Border WidthRequest="19"
+                                                        HeightRequest="19"
+                                                        BackgroundColor="#FFD83D"
+                                                        Stroke="#171717"
+                                                        StrokeThickness="1"
+                                                        StrokeShape="Ellipse"/>
+
+                                                <Label Grid.Column="1"
+                                                       Text="Riesgo medio"
+                                                       FontSize="14"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding EstudiantesRiesgoMedio}"
+                                                       FontSize="15"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                            </Grid>
+
+                                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                                  ColumnSpacing="10">
+
+                                                <Border WidthRequest="19"
+                                                        HeightRequest="19"
+                                                        BackgroundColor="#80D83C"
+                                                        Stroke="#171717"
+                                                        StrokeThickness="1"
+                                                        StrokeShape="Ellipse"/>
+
+                                                <Label Grid.Column="1"
+                                                       Text="Riesgo bajo"
+                                                       FontSize="14"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                                <Label Grid.Column="2"
+                                                       Text="{Binding EstudiantesRiesgoBajo}"
+                                                       FontSize="15"
+                                                       FontAttributes="Bold"
+                                                       TextColor="#252B35"
+                                                       VerticalOptions="Center"/>
+
+                                            </Grid>
+
+                                        </VerticalStackLayout>
+
+                                    </Border>
+
+                                </VerticalStackLayout>
+
+                                <!-- BOTONES -->
+                                <Grid Grid.Row="3"
+                                      ColumnDefinitions="*,*"
+                                      ColumnSpacing="12">
+
+                                    <Border BackgroundColor="#003F36"
+                                            Stroke="#171717"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 8"
+                                            HeightRequest="38"/>
+
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="#003F36"
+                                            Stroke="#171717"
+                                            StrokeThickness="2"
+                                            StrokeShape="RoundRectangle 8"
+                                            HeightRequest="38"/>
+
+                                </Grid>
+
+                                <Label Grid.Row="4"
+                                       Text="POKEGRUPO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       CharacterSpacing="2"
+                                       TextColor="#FFE0E4"
+                                       HorizontalTextAlignment="Center"/>
+
+                            </Grid>
+
+                        </Border>
+
+                    </Grid>
+
+                </Border>
+
+                <!-- RESUMEN DEL REPORTE -->
+                <Border BackgroundColor="White"
+                        Stroke="#C5CFDC"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="20">
+
+                    <VerticalStackLayout Spacing="14">
+
+                        <HorizontalStackLayout Spacing="10">
+
+                            <Image Source="pokeball.png"
+                                   WidthRequest="25"
+                                   HeightRequest="25"/>
+
+                            <Label Text="RESUMEN DEL REPORTE"
+                                   FontSize="17"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"
+                                   VerticalOptions="Center"/>
+
+                        </HorizontalStackLayout>
+
+                        <BoxView HeightRequest="2"
+                                 BackgroundColor="#E0E5EC"/>
+
+                        <!-- DATOS GENERALES -->
+                        <Grid ColumnDefinitions="*,*"
+                              RowDefinitions="Auto,Auto,Auto"
+                              ColumnSpacing="15"
+                              RowSpacing="14">
+
+                            <VerticalStackLayout Spacing="4">
+
+                                <Label Text="COMISIÓN EVALUADA"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding Comision}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"/>
+
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="4">
+
+                                <Label Text="ESTUDIANTES EVALUADOS"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding TotalEstudiantes}"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"/>
+
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="1"
+                                                 Spacing="4">
+
+                                <Label Text="RIESGO ALTO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding EstudiantesEnRiesgo}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="#DC3948"/>
+
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Spacing="4">
+
+                                <Label Text="PORCENTAJE DE RIESGO ALTO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding PorcentajeEnRiesgo, StringFormat='{}{0:0.0}%'}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="#DC3948"/>
+
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="2"
+                                                 Spacing="4">
+
+                                <Label Text="RIESGO MEDIO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding EstudiantesRiesgoMedio}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="#C58A13"/>
+
+                            </VerticalStackLayout>
+
+                            <VerticalStackLayout Grid.Row="2"
+                                                 Grid.Column="1"
+                                                 Spacing="4">
+
+                                <Label Text="RIESGO BAJO"
+                                       FontSize="10"
+                                       FontAttributes="Bold"
+                                       TextColor="#718092"/>
+
+                                <Label Text="{Binding EstudiantesRiesgoBajo}"
+                                       FontSize="20"
+                                       FontAttributes="Bold"
+                                       TextColor="#269B50"/>
+
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                        <BoxView HeightRequest="2"
+                                 BackgroundColor="#E0E5EC"/>
+
+                        <!-- CONCLUSIÓN -->
+                        <VerticalStackLayout Spacing="7">
+
+                            <Label Text="CONCLUSIÓN Y SEGUIMIENTO"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"/>
+
+                            <Label Text="{Binding Resumen}"
+                                   FontSize="14"
+                                   TextColor="#526174"
+                                   LineBreakMode="WordWrap"/>
+
+                            <Label Text="Se recomienda realizar un seguimiento de los estudiantes identificados para evaluar su situación y acompañar su trayectoria académica."
+                                   FontSize="13"
+                                   TextColor="#526174"
+                                   LineBreakMode="WordWrap"/>
+
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <Label Text="El reporte utiliza los resultados del cálculo de riesgo existente."
+                       FontSize="12"
+                       TextColor="#718092"
+                       HorizontalTextAlignment="Center"/>
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+    </Grid>
+
+</ContentPage>

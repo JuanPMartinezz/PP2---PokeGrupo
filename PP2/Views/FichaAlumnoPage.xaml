@@ -1,58 +1,380 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:modelos="clr-namespace:RegistroAsistencia.Models"
-             x:Class="RegistroAsistencia.Views.FichaAlumnoPage"
-             Title="Ficha del alumno">
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:modelos="clr-namespace:RegistroAsistencia.Models"
+    x:Class="RegistroAsistencia.Views.FichaAlumnoPage"
+    Title="Ficha del alumno"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="#E9EDF3">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="10">
+    <Grid RowDefinitions="Auto,*">
 
-            <Label Text="{Binding NombreCompleto}" Style="{StaticResource TituloPagina}" />
-            <Label Text="{Binding Datos}" Style="{StaticResource TextoSecundario}" />
+        <!-- Encabezado -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-            <Label Text="{Binding RiesgoTexto}"
-                   FontSize="20"
-                   FontAttributes="Bold"
-                   TextColor="{StaticResource RiesgoSinDatos}">
-                <Label.Triggers>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Alto}">
-                        <Setter Property="TextColor" Value="{StaticResource RiesgoAlto}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Medio}">
-                        <Setter Property="TextColor" Value="{StaticResource RiesgoMedio}" />
-                    </DataTrigger>
-                    <DataTrigger TargetType="Label" Binding="{Binding Nivel}" Value="{x:Static modelos:NivelesRiesgo.Bajo}">
-                        <Setter Property="TextColor" Value="{StaticResource RiesgoBajo}" />
-                    </DataTrigger>
-                </Label.Triggers>
-            </Label>
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-            <Label Text="{Binding AsistenciaTexto}" />
-            <Label Text="{Binding EntregasTexto}" />
-            <Label Text="{Binding ContactoTexto}" />
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+                </VerticalStackLayout>
 
-            <Label Text="Contactos" FontAttributes="Bold" Margin="0,10,0,0" />
-            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Contactos}" Spacing="4">
-                <BindableLayout.ItemTemplate>
-                    <DataTemplate>
-                        <Label Text="{Binding .}" />
-                    </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+                </HorizontalStackLayout>
+            </Grid>
 
-            <Button Text="Registrar contacto"
-                    Margin="0,10,0,0"
-                    Command="{Binding RegistrarContactoCommand}" />
-
-            <Button Text="Editar datos del alumno"
-                    Command="{Binding EditarCommand}" />
-
-            <Button Text="Eliminar alumno"
-                    Style="{StaticResource BotonPeligro}"
-                    Command="{Binding EliminarCommand}" />
-
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
         </VerticalStackLayout>
-    </ScrollView>
 
+        <!-- Contenido -->
+        <Grid Grid.Row="1" BackgroundColor="#E9EDF3">
+
+            <Image Source="pokeball_fondo.png"
+                   HeightRequest="380"
+                   WidthRequest="380"
+                   Aspect="AspectFit"
+                   Opacity="0.5"
+                   HorizontalOptions="End"
+                   VerticalOptions="End"
+                   TranslationX="110"
+                   TranslationY="90"
+                   InputTransparent="True"/>
+
+            <ScrollView>
+                <VerticalStackLayout Padding="24,20,24,28"
+                                     Spacing="16">
+
+                    <!-- Título -->
+                    <HorizontalStackLayout Spacing="12"
+                                           VerticalOptions="Center">
+                        <Image Source="pokeball.png"
+                               HeightRequest="38"
+                               WidthRequest="38"
+                               Aspect="AspectFit"/>
+
+                        <Label Text="Ficha del alumno"
+                               FontSize="25"
+                               FontAttributes="Bold"
+                               TextColor="#252B35"
+                               VerticalOptions="Center"/>
+                    </HorizontalStackLayout>
+
+                    <!-- Datos -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="10">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="DATOS DEL ALUMNO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Label Text="{Binding NombreCompleto}"
+                                   FontSize="23"
+                                   FontAttributes="Bold"
+                                   TextColor="#252B35"/>
+
+                            <Label Text="{Binding Datos}"
+                                   FontSize="13"
+                                   TextColor="#687383"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Estado académico -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="12">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="ESTADO ACADÉMICO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Label Text="{Binding RiesgoTexto}"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   TextColor="{StaticResource RiesgoSinDatos}">
+
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding Nivel}"
+                                                 Value="{x:Static modelos:NivelesRiesgo.Alto}">
+                                        <Setter Property="TextColor"
+                                                Value="{StaticResource RiesgoAlto}"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding Nivel}"
+                                                 Value="{x:Static modelos:NivelesRiesgo.Medio}">
+                                        <Setter Property="TextColor"
+                                                Value="{StaticResource RiesgoMedio}"/>
+                                    </DataTrigger>
+
+                                    <DataTrigger TargetType="Label"
+                                                 Binding="{Binding Nivel}"
+                                                 Value="{x:Static modelos:NivelesRiesgo.Bajo}">
+                                        <Setter Property="TextColor"
+                                                Value="{StaticResource RiesgoBajo}"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+
+                            <Grid ColumnDefinitions="*,*"
+                                  ColumnSpacing="10">
+
+                                <Border Grid.Column="0"
+                                        BackgroundColor="#EAF5FC"
+                                        Stroke="#D0E5F2"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="12">
+
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="ASISTENCIA"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               TextColor="#2879A8"/>
+
+                                        <Label Text="{Binding AsistenciaTexto}"
+                                               FontSize="13"
+                                               TextColor="#394454"/>
+                                    </VerticalStackLayout>
+                                </Border>
+
+                                <Border Grid.Column="1"
+                                        BackgroundColor="#F0F4E9"
+                                        Stroke="#DCE7D0"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        Padding="12">
+
+                                    <VerticalStackLayout Spacing="8">
+                                        <Label Text="ENTREGAS"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               TextColor="#56833C"/>
+
+                                        <Label Text="{Binding EntregasTexto}"
+                                               FontSize="13"
+                                               TextColor="#394454"/>
+                                    </VerticalStackLayout>
+                                </Border>
+
+                            </Grid>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Contactos -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="12">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="SEGUIMIENTO DE CONTACTOS"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <Border BackgroundColor="#FFF5D9"
+                                    Stroke="#F0DDA8"
+                                    StrokeThickness="1"
+                                    StrokeShape="RoundRectangle 12"
+                                    Padding="14">
+
+                                <VerticalStackLayout Spacing="6">
+                                    <Label Text="ESTADO DEL SEGUIMIENTO"
+                                           FontSize="11"
+                                           FontAttributes="Bold"
+                                           TextColor="#956A12"
+                                           CharacterSpacing="1"/>
+
+                                    <Label Text="{Binding ContactoTexto}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           TextColor="#765D2B"/>
+                                </VerticalStackLayout>
+                            </Border>
+
+                            <Label Text="Historial de contactos"
+                                   FontSize="15"
+                                   FontAttributes="Bold"
+                                   TextColor="#394454"/>
+
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding Contactos}"
+                                Spacing="8">
+
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BackgroundColor="#F4F6F9"
+                                                Stroke="#E0E5EC"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 8"
+                                                Padding="12">
+                                            <Label Text="{Binding .}"
+                                                   FontSize="13"
+                                                   TextColor="#394454"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+
+                            <Button Text="Registrar contacto"
+                                    Command="{Binding RegistrarContactoCommand}"
+                                    BackgroundColor="#D9363E"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"
+                                    BorderColor="#991F29"
+                                    BorderWidth="1"/>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Gestión -->
+                    <Border BackgroundColor="White"
+                            Stroke="#D5DCE5"
+                            StrokeThickness="1"
+                            StrokeShape="RoundRectangle 14"
+                            Padding="18">
+
+                        <VerticalStackLayout Spacing="12">
+
+                            <HorizontalStackLayout Spacing="8"
+                                                   VerticalOptions="Center">
+                                <Image Source="pokeball.png"
+                                       WidthRequest="24"
+                                       HeightRequest="24"
+                                       Aspect="AspectFit"/>
+
+                                <Label Text="GESTIÓN DEL ALUMNO"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"
+                                       CharacterSpacing="1"
+                                       VerticalOptions="Center"/>
+                            </HorizontalStackLayout>
+
+                            <!-- Editar -->
+                            <Button Text="Editar datos del alumno"
+                                    Command="{Binding EditarCommand}"
+                                    BackgroundColor="#D9363E"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"
+                                    BorderColor="#991F29"
+                                    BorderWidth="1"/>
+
+                            <!-- Eliminar -->
+                            <Button Text="Eliminar alumno"
+                                    Command="{Binding EliminarCommand}"
+                                    BackgroundColor="#687383"
+                                    TextColor="White"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    CornerRadius="10"
+                                    HeightRequest="50"/>
+
+                            <Label Text="⚠️ Esta acción eliminará al alumno y sus datos asociados. No se puede deshacer."
+                                   FontSize="12"
+                                   TextColor="#A83232"
+                                   HorizontalTextAlignment="Center"
+                                   Margin="4,0,4,0"/>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </Grid>
+    </Grid>
 </ContentPage>
+
+

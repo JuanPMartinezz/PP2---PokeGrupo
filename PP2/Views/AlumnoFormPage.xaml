@@ -1,31 +1,277 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="RegistroAsistencia.Views.AlumnoFormPage"
-             Title="{Binding Titulo}">
+             Title="{Binding Titulo}"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="#E9EDF5">
 
-    <ScrollView>
-        <VerticalStackLayout Padding="20" Spacing="10">
+    <Grid RowDefinitions="Auto,*">
 
-            <Label Text="Apellido" />
-            <Entry Text="{Binding Apellido}" />
+        <!-- ENCABEZADO -->
+        <VerticalStackLayout Grid.Row="0" Spacing="0">
 
-            <Label Text="Nombre" />
-            <Entry Text="{Binding Nombre}" />
+            <Grid BackgroundColor="#C92532"
+                  Padding="24,12"
+                  ColumnDefinitions="65,*,Auto"
+                  ColumnSpacing="15">
 
-            <Label Text="Legajo" />
-            <Entry Text="{Binding Legajo}"
-                   IsEnabled="{Binding LegajoEditable}" />
+                <Image Grid.Column="0"
+                       Source="pokeball.png"
+                       HeightRequest="58"
+                       WidthRequest="58"
+                       Aspect="AspectFit"
+                       VerticalOptions="Center"/>
 
-            <Label Text="Comisión" />
-            <Picker ItemsSource="{Binding Comisiones}"
-                    SelectedItem="{Binding ComisionSeleccionada}" />
+                <VerticalStackLayout Grid.Column="1"
+                                     VerticalOptions="Center"
+                                     Spacing="2">
 
-            <Label Text="{Binding Mensaje}" Style="{StaticResource Mensaje}" />
+                    <Label Text="Registro de asistencia"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="White"/>
 
-            <Button Text="{Binding TextoBoton}" Command="{Binding GuardarCommand}" />
+                    <Label Text="P O K E G R U P O"
+                           FontSize="10"
+                           CharacterSpacing="2"
+                           TextColor="#FFE2E2"/>
+
+                </VerticalStackLayout>
+
+                <HorizontalStackLayout Grid.Column="2"
+                                       Spacing="12"
+                                       VerticalOptions="Center"
+                                       Margin="10,0,8,0">
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#39C9F2"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#FFD83D"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                    <Border WidthRequest="30"
+                            HeightRequest="30"
+                            BackgroundColor="#80D83C"
+                            Stroke="#252B35"
+                            StrokeThickness="2"
+                            StrokeShape="Ellipse"/>
+
+                </HorizontalStackLayout>
+
+            </Grid>
+
+            <Grid HeightRequest="8">
+                <BoxView BackgroundColor="#252B35"/>
+                <BoxView BackgroundColor="#E0444C"
+                         HeightRequest="3"
+                         VerticalOptions="End"/>
+            </Grid>
 
         </VerticalStackLayout>
-    </ScrollView>
+
+        <!-- CONTENIDO -->
+        <ScrollView Grid.Row="1">
+
+            <VerticalStackLayout Padding="20"
+                                 Spacing="18">
+
+                <!-- TITULO -->
+                <HorizontalStackLayout
+                    Spacing="10"
+                    VerticalOptions="Center">
+
+                    <Image Source="pokeball.png"
+                           WidthRequest="30"
+                           HeightRequest="30"
+                           Aspect="AspectFit"/>
+
+                    <Label Text="{Binding Titulo}"
+                           FontSize="25"
+                           FontAttributes="Bold"
+                           TextColor="#252B35"
+                           VerticalOptions="Center"/>
+
+                </HorizontalStackLayout>
+
+                <!-- DATOS PERSONALES -->
+                <Border BackgroundColor="White"
+                        Stroke="#C8D1DD"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 18"
+                        Padding="22">
+
+                    <VerticalStackLayout Spacing="18">
+
+                        <Label Text="DATOS DEL ALUMNO"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               TextColor="#536779"/>
+
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="14">
+
+                            <Border WidthRequest="58"
+                                    HeightRequest="58"
+                                    BackgroundColor="#DCE5EC"
+                                    Stroke="#252B35"
+                                    StrokeThickness="2"
+                                    StrokeShape="Ellipse">
+
+                                <Image Source="pokeball.png"
+                                       WidthRequest="40"
+                                       HeightRequest="40"
+                                       Aspect="AspectFit"/>
+
+                            </Border>
+
+                            <VerticalStackLayout 
+                                Grid.Column="1"
+                                VerticalOptions="Center"
+                                Spacing="4">
+
+                                <Label Text="Ficha de estudiante"
+                                       FontSize="16"
+                                       FontAttributes="Bold"
+                                       TextColor="#252B35"/>
+
+                                <Label Text="Completá los datos para registrar al alumno."
+                                       FontSize="13"
+                                       TextColor="#718092"
+                                       LineBreakMode="WordWrap"/>
+
+                            </VerticalStackLayout>
+
+                        </Grid>
+
+                        <BoxView HeightRequest="1"
+                                 BackgroundColor="#E0E5EC"/>
+
+                        <!-- APELLIDO -->
+                        <VerticalStackLayout Spacing="7">
+
+                            <Label Text="APELLIDO"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   CharacterSpacing="1"
+                                   TextColor="#536779"/>
+
+                            <Entry Text="{Binding Apellido}"
+                                   Placeholder="Ingresar apellido"
+                                   FontSize="16"
+                                   TextColor="#252B35"
+                                   PlaceholderColor="#9AA6B5"
+                                   BackgroundColor="#F1F4F8"
+                                   HeightRequest="52"/>
+
+                        </VerticalStackLayout>
+
+                        <!-- NOMBRE -->
+                        <VerticalStackLayout Spacing="7">
+
+                            <Label Text="NOMBRE"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   CharacterSpacing="1"
+                                   TextColor="#536779"/>
+
+                            <Entry Text="{Binding Nombre}"
+                                   Placeholder="Ingresar nombre"
+                                   FontSize="16"
+                                   TextColor="#252B35"
+                                   PlaceholderColor="#9AA6B5"
+                                   BackgroundColor="#F1F4F8"
+                                   HeightRequest="52"/>
+
+                        </VerticalStackLayout>
+
+                        <!-- LEGAJO -->
+                        <VerticalStackLayout Spacing="7">
+
+                            <Label Text="NÚMERO DE LEGAJO"
+                                   FontSize="12"
+                                   FontAttributes="Bold"
+                                   CharacterSpacing="1"
+                                   TextColor="#536779"/>
+
+                            <Entry Text="{Binding Legajo}"
+                                   IsEnabled="{Binding LegajoEditable}"
+                                   Placeholder="Ingresar número de legajo"
+                                   Keyboard="Numeric"
+                                   FontSize="16"
+                                   TextColor="#252B35"
+                                   PlaceholderColor="#9AA6B5"
+                                   BackgroundColor="#F1F4F8"
+                                   HeightRequest="52"/>
+
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <!-- COMISION -->
+                <Border BackgroundColor="#DCE5EC"
+                        Stroke="#AAB9C8"
+                        StrokeThickness="2"
+                        StrokeShape="RoundRectangle 16"
+                        Padding="20">
+
+                    <VerticalStackLayout Spacing="12">
+
+                        <Label Text="ASIGNACIÓN DE COMISIÓN"
+                               FontSize="12"
+                               FontAttributes="Bold"
+                               CharacterSpacing="1"
+                               TextColor="#536779"/>
+
+                        <Label Text="Seleccioná la comisión a la que pertenece el alumno."
+                               FontSize="13"
+                               TextColor="#647184"/>
+
+                        <Picker ItemsSource="{Binding Comisiones}"
+                                SelectedItem="{Binding ComisionSeleccionada}"
+                                Title="Elegir comisión"
+                                FontSize="16"
+                                TextColor="#252B35"
+                                TitleColor="#718092"/>
+
+                    </VerticalStackLayout>
+
+                </Border>
+
+                <!-- MENSAJE -->
+                <Label Text="{Binding Mensaje}"
+                       Style="{StaticResource Mensaje}"
+                       HorizontalTextAlignment="Center"/>
+
+                <!-- GUARDAR -->
+                <Button Text="{Binding TextoBoton}"
+                        Command="{Binding GuardarCommand}"
+                        BackgroundColor="#C92532"
+                        TextColor="White"
+                        CornerRadius="12"
+                        HeightRequest="52"
+                        FontAttributes="Bold"/>
+
+                <Label Text="POKEGRUPO · GESTIÓN ACADÉMICA"
+                       FontSize="10"
+                       CharacterSpacing="1"
+                       TextColor="#8A97A8"
+                       HorizontalTextAlignment="Center"/>
+
+            </VerticalStackLayout>
+
+        </ScrollView>
+
+    </Grid>
 
 </ContentPage>
