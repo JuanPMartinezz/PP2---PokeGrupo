@@ -773,75 +773,137 @@ public class PruebasPP2
     [Fact]
     public void Given_ComisionConAlumnosDeDistintoRiesgo_When_TutorConsultaLaComision_Then_SeMuestranAlumnosDeMayorAMenorRiesgo()
     {
-        // Given: una comisión con alumnos de distintos niveles de riesgo
 
-        Estudiante perez = Alumno("1", "Pérez", "Juan");
-        Estudiante gomez = Alumno("2", "Gómez", "Roberto");
-        Estudiante alvarez = Alumno("3", "Álvarez", "Ramiro");
+        // GIVEN: Preparación explícita de adaptadores, servicios y datos
+        
+        // 1. Datos
+        var almacen = new AlmacenEnMemoria();
+        var repoComisiones = new ComisionRepositorioEnMemoria(almacen);
+        var repoEstudiantes = new EstudianteRepositorioEnMemoria(almacen);
+        var repoAsistencias = new AsistenciaRepositorioEnMemoria(almacen);
+        var repoEntregas = new EntregaRepositorioEnMemoria(almacen);
+        var repoContactos = new ContactoRepositorioEnMemoria(almacen);
+        var repoAdministracion = new AdministracionRepositorioEnMemoria(almacen);
 
-        RegistrarAsistencia(perez, EstadoAsistencia.Ausente, 2);
-        RegistrarAsistencia(perez, EstadoAsistencia.Ausente, 1);
+        // 2. Servicios 
+        var comisionService = new ComisionService(repoComisiones, repoEstudiantes, repoAdministracion);
+        var nominaService = new NominaService(repoEstudiantes, repoComisiones);
+        var registroService = new RegistroService(repoAsistencias, repoEntregas);
+        var umbralesService = new UmbralesService(repoComisiones);
+        var riesgoService = new RiesgoService(
+            repoEstudiantes, repoAsistencias, repoEntregas, repoContactos, umbralesService);
 
-        RegistrarAsistencia(gomez, EstadoAsistencia.Ausente, 2);
-        RegistrarAsistencia(gomez, EstadoAsistencia.Presente, 1);
+        var navegacion = new NavegacionFalsa(); // simula el cambio de pantallas en memoria
 
-        RegistrarAsistencia(alvarez, EstadoAsistencia.Presente, 2);
-        RegistrarAsistencia(alvarez, EstadoAsistencia.Presente, 1);
+        const string comision = "Comisión A";
+        comisionService.Inicializar();
 
-        // When: el tutor consulta la comisión ordenada por mayor riesgo
-        ListaAlumnosViewModel lista = NuevaLista();
-        lista.OrdenIndice = (int)OrdenLista.MayorRiesgo;
+        nominaService.Agregar("Ramiro", "Álvarez", "1", comision);
+        nominaService.Agregar("Roberto", "Gómez", "2", comision);
+        nominaService.Agregar("Juan", "Pérez", "3", comision);
 
-        // Then: los alumnos se muestran de mayor a menor riesgo
+        Estudiante alvarez = nominaService.Buscar("1")!;
+        Estudiante gomez = nominaService.Buscar("2")!;
+        Estudiante perez = nominaService.Buscar("3")!;
+
+        DateTime clase1 = DateTime.Today.AddDays(-7);
+        DateTime clase2 = DateTime.Today;
+
+        registroService.GuardarAsistencia(clase1, new[]
+        {
+            new MarcaAsistencia(alvarez, Presente: false),
+            new MarcaAsistencia(gomez, Presente: true),
+            new MarcaAsistencia(perez, Presente: true)
+        });
+
+        registroService.GuardarAsistencia(clase2, new[]
+        {
+            new MarcaAsistencia(alvarez, Presente: false),
+            new MarcaAsistencia(gomez, Presente: false),
+            new MarcaAsistencia(perez, Presente: true)
+        });
+
+        // WHEN : El tutor consulta la comisión y ordena por mayor riesgo
+        var listaAlumnosVm = new ListaAlumnosViewModel(
+            comision, navegacion, riesgoService, comisionService);
+
+        listaAlumnosVm.OrdenIndice = (int)OrdenLista.MayorRiesgo;
+
+        // THEN: La lista expuesta ordena de mayor a menor riesgo
         Assert.Equal(
-            new[] { "Pérez, Juan", "Gómez, Roberto", "Álvarez, Ramiro" },
-            lista.Alumnos.Select(a => a.Nombre)
+            new[] { "Álvarez, Ramiro", "Gómez, Roberto", "Pérez, Juan" },
+            listaAlumnosVm.Alumnos.Select(a => a.Nombre)
         );
     }
 
     [Fact]
     public void Given_AlumnoConRiesgoCalculado_When_TutorConsultaSuInformacion_Then_SeMuestranLosFactoresQueJustificanElRiesgo()
     {
-        // Given: un alumno con asistencias y entregas que influyen en su riesgo
-        Estudiante ana = Alumno("101", "Gómez");
+        // GIVEN : Un alumno con el riesgo calculado 
 
-        //Carga de una asistencia y una inasistencia
-        RegistrarAsistencia(ana, EstadoAsistencia.Presente);
-        RegistrarAsistencia(ana, EstadoAsistencia.Ausente, 1);
+        // Preparación explícita de adaptadores, servicios y registros
 
-        Trabajo tp1 = CargarTrabajo("TP1");
-        Trabajo tp2 = CargarTrabajo("TP2");
+        //Datos
+        var almacen = new AlmacenEnMemoria();
+        var repoComisiones = new ComisionRepositorioEnMemoria(almacen);
+        var repoEstudiantes = new EstudianteRepositorioEnMemoria(almacen);
+        var repoAsistencias = new AsistenciaRepositorioEnMemoria(almacen);
+        var repoEntregas = new EntregaRepositorioEnMemoria(almacen);
+        var repoContactos = new ContactoRepositorioEnMemoria(almacen);
+        var repoAdministracion = new AdministracionRepositorioEnMemoria(almacen);
 
-        //Carga de un tp entregado fuera de termino y uno no entregado
-        _e.Entregas.Agregar(new Entrega
-        {
-            Estudiante = ana,
-            Trabajo = tp1,
-            Estado = EstadoEntrega.EntregadoFueraDeTermino
-        });
+        // 2. Servicios
+        var comisionService = new ComisionService(repoComisiones, repoEstudiantes, repoAdministracion);
+        var nominaService = new NominaService(repoEstudiantes, repoComisiones);
+        var registroService = new RegistroService(repoAsistencias, repoEntregas);
+        var umbralesService = new UmbralesService(repoComisiones);
+        var riesgoService = new RiesgoService(
+            repoEstudiantes, repoAsistencias, repoEntregas, repoContactos, umbralesService);
 
-        _e.Entregas.Agregar(new Entrega
-        {
-            Estudiante = ana,
-            Trabajo = tp2,
-            Estado = EstadoEntrega.NoEntregado
-        });
+        // 3. Reemplazos del viewmodel
+        var navegacion = new NavegacionFalsa();
+        var dialogos = new DialogosFalsos();
 
-        // When: el tutor consulta la ficha del alumno
-        FichaAlumnoViewModel ficha = new FichaAlumnoViewModel(
-            "101", _navegacion, _dialogos, _e.Riesgo, _e.Nomina);
+        const string comision = "Comisión A";
+        comisionService.Inicializar();
+        nominaService.Agregar("Ana", "Gómez", "101", comision);
+        Estudiante ana = nominaService.Buscar("101")!;
 
-        // Then: se muestran los factores que justifican el riesgo
+        registroService.GuardarAsistencia(
+            DateTime.Today.AddDays(-7),
+            new[] { new MarcaAsistencia(ana, Presente: true) });
+
+        registroService.GuardarAsistencia(
+            DateTime.Today,
+            new[] { new MarcaAsistencia(ana, Presente: false) });
+
+        Trabajo tp1 = repoEntregas.ObtenerOCrearTrabajo("TP1");
+        Trabajo tp2 = repoEntregas.ObtenerOCrearTrabajo("TP2");
+
+        registroService.GuardarEntregas(tp1, new[] { new MarcaEntrega(ana, EstadoEntrega.EntregadoFueraDeTermino) });
+
+        registroService.GuardarEntregas(tp2, new[] { new MarcaEntrega(ana, EstadoEntrega.NoEntregado) });
+
+        ResultadoRiesgo resultadoRiesgo = riesgoService.ObtenerResultado(ana);
+
+        // WHEN (Cuando): El tutor abre la ficha individual del estudiante
+
+        var fichaAlumnoVm = new FichaAlumnoViewModel( ana.Legajo, navegacion, dialogos, riesgoService, nominaService);
+
+        // THEN (Entonces): Se verifica cada factor observable que justifica el riesgo
+
+        Assert.Equal(resultadoRiesgo.NivelRiesgo, fichaAlumnoVm.Nivel);
+
         Assert.Equal(
             "Asistencia: 1 presentes y 1 ausencias en 2 clases dictadas",
-            ficha.AsistenciaTexto);
+            fichaAlumnoVm.AsistenciaTexto);
 
         Assert.Equal(
             "Entregas: 0 entregadas, 1 fuera de término y 1 sin entregar, de 2 trabajos",
-            ficha.EntregasTexto);
+            fichaAlumnoVm.EntregasTexto);
 
-        Assert.False(string.IsNullOrWhiteSpace(ficha.RiesgoTexto));
-        Assert.False(string.IsNullOrWhiteSpace(ficha.Nivel));
+        
+        Assert.False(string.IsNullOrWhiteSpace(fichaAlumnoVm.RiesgoTexto));
     }
 
 
